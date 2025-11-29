@@ -27,7 +27,9 @@ const scheduledRides = []; // Future bookings
 const emergencyAlerts = []; // SOS alerts
 const cities = []; // Service areas
 const notifications = []; // Push notifications
+const teamMembers = []; // Internal team management
 let userIdCounter = 1;
+let teamMemberIdCounter = 1;
 let tripIdCounter = 1;
 let vehicleTypeIdCounter = 1;
 let pricingRuleIdCounter = 1;
@@ -366,12 +368,30 @@ app.get('/api/admin/users', (req, res) => {
         email: u.email,
         firstName: u.firstName,
         lastName: u.lastName,
+        phone: u.phone,
         role: u.role,
-        createdAt: u.createdAt
+        createdAt: u.createdAt,
+        approvalStatus: u.approvalStatus
       })),
       total: users.length
     },
     message: '✅ Users retrieved! (Demo mode)'
+  });
+});
+
+// Create new user
+app.post('/api/admin/users', (req, res) => {
+  const newUser = {
+    id: userIdCounter++,
+    ...req.body,
+    createdAt: new Date(),
+    approvalStatus: req.body.approvalStatus || 'approved'
+  };
+  users.push(newUser);
+  res.status(201).json({
+    success: true,
+    data: newUser,
+    message: 'User created successfully'
   });
 });
 
@@ -1493,6 +1513,126 @@ app.get('/', (req, res) => {
     </body>
     </html>
   `);
+});
+
+// ========================================
+// TEAM MANAGEMENT ENDPOINTS
+// ========================================
+
+// Get all team members
+app.get('/api/admin/team', (req, res) => {
+  res.json({ success: true, data: { team: teamMembers, total: teamMembers.length } });
+});
+
+// Get team member by ID
+app.get('/api/admin/team/:id', (req, res) => {
+  const member = teamMembers.find(m => m.id === parseInt(req.params.id));
+  if (!member) return res.status(404).json({ success: false, message: 'Team member not found' });
+  res.json({ success: true, data: member });
+});
+
+// Add team member
+app.post('/api/admin/team', (req, res) => {
+  const member = {
+    id: teamMemberIdCounter++,
+    ...req.body,
+    createdAt: new Date(),
+    lastLogin: null
+  };
+  teamMembers.push(member);
+  res.status(201).json({ success: true, data: member, message: 'Team member added' });
+});
+
+// Update team member
+app.put('/api/admin/team/:id', (req, res) => {
+  const index = teamMembers.findIndex(m => m.id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).json({ success: false, message: 'Team member not found' });
+
+  teamMembers[index] = { ...teamMembers[index], ...req.body, updatedAt: new Date() };
+  res.json({ success: true, data: teamMembers[index], message: 'Team member updated' });
+});
+
+// Delete team member
+app.delete('/api/admin/team/:id', (req, res) => {
+  const index = teamMembers.findIndex(m => m.id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).json({ success: false, message: 'Team member not found' });
+
+  teamMembers.splice(index, 1);
+  res.json({ success: true, message: 'Team member removed' });
+});
+
+// ========================================
+// APPROVAL ENDPOINTS
+// ========================================
+
+// Get pending user approvals
+app.get('/api/admin/users/pending-approval', (req, res) => {
+  const pending = users.filter(u => u.approvalStatus === 'pending');
+  res.json({ success: true, data: { users: pending, total: pending.length } });
+});
+
+// Approve user
+app.put('/api/admin/users/:id/approve', (req, res) => {
+  const index = users.findIndex(u => u.id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).json({ success: false, message: 'User not found' });
+
+  users[index] = {
+    ...users[index],
+    approvalStatus: 'approved',
+    approved: true,
+    approvedAt: req.body.approvedAt || new Date(),
+    approvedBy: req.body.approvedBy || 'admin'
+  };
+  res.json({ success: true, data: users[index], message: 'User approved' });
+});
+
+// Reject user
+app.put('/api/admin/users/:id/reject', (req, res) => {
+  const index = users.findIndex(u => u.id === parseInt(req.params.id));
+  if (index === -1) return res.status(404).json({ success: false, message: 'User not found' });
+
+  users[index] = {
+    ...users[index],
+    approvalStatus: 'rejected',
+    rejected: true,
+    rejectedAt: req.body.rejectedAt || new Date(),
+    rejectionReason: req.body.rejectionReason || '',
+    rejectedBy: req.body.rejectedBy || 'admin'
+  };
+  res.json({ success: true, data: users[index], message: 'User rejected' });
+});
+
+// Approve driver
+app.put('/api/admin/drivers/:id/approve', (req, res) => {
+  const index = users.findIndex(u => u.id === parseInt(req.params.id) && u.role === 'driver');
+  if (index === -1) return res.status(404).json({ success: false, message: 'Driver not found' });
+
+  users[index] = {
+    ...users[index],
+    approvalStatus: 'approved',
+    approved: true,
+    approvedAt: req.body.approvedAt || new Date(),
+    approvedBy: req.body.approvedBy || 'admin',
+    verificationStatus: 'verified'
+  };
+  res.json({ success: true, data: users[index], message: 'Driver approved' });
+});
+
+// Reject driver
+app.put('/api/admin/drivers/:id/reject', (req, res) => {
+  const index = users.findIndex(u => u.id === parseInt(req.params.id) && u.role === 'driver');
+  if (index === -1) return res.status(404).json({ success: false, message: 'Driver not found' });
+
+  users[index] = {
+    ...users[index],
+    approvalStatus: 'rejected',
+    rejected: true,
+    rejectedAt: req.body.rejectedAt || new Date(),
+    rejectionReason: req.body.rejectionReason || '',
+    rejectedBy: req.body.rejectedBy || 'admin',
+    verificationStatus: 'rejected'
+  };
+  res.json({ success: true, data: users[index], message: 'Driver rejected' });
 });
 
 // 404 handler

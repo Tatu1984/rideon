@@ -14,6 +14,7 @@ export default function UsersManagementPage() {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     role: 'rider'
   })
 
@@ -54,6 +55,7 @@ export default function UsersManagementPage() {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      phone: user.phone || '',
       role: user.role
     })
     setShowModal(true)
@@ -63,20 +65,32 @@ export default function UsersManagementPage() {
     e.preventDefault()
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/users/${editingUser.id}`, {
-        method: 'PUT',
+      const url = editingUser
+        ? `http://localhost:3001/api/admin/users/${editingUser.id}`
+        : 'http://localhost:3001/api/admin/users'
+
+      const method = editingUser ? 'PUT' : 'POST'
+
+      const payload = editingUser
+        ? formData
+        : { ...formData, phone: formData.email, registrationType: 'manual', approvalStatus: 'approved' }
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       })
 
       const data = await response.json()
 
       if (data.success) {
+        alert(editingUser ? 'User updated successfully!' : 'User added successfully!')
         fetchUsers()
         closeModal()
       }
     } catch (error) {
-      console.error('Error updating user:', error)
+      console.error('Error saving user:', error)
+      alert('Failed to save user')
     }
   }
 
@@ -105,6 +119,7 @@ export default function UsersManagementPage() {
       firstName: '',
       lastName: '',
       email: '',
+      phone: '',
       role: 'rider'
     })
   }
@@ -134,6 +149,12 @@ export default function UsersManagementPage() {
               </button>
               <h1 className="text-2xl font-bold text-gray-900">Users Management</h1>
             </div>
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
+            >
+              + Add User
+            </button>
           </div>
 
           {/* Filters */}
@@ -261,12 +282,12 @@ export default function UsersManagementPage() {
         </div>
       </div>
 
-      {/* Edit Modal */}
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full">
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit User</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{editingUser ? 'Edit User' : 'Add New User'}</h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -306,6 +327,19 @@ export default function UsersManagementPage() {
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    required={!editingUser}
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="+1234567890"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                   <select
                     name="role"
@@ -324,7 +358,7 @@ export default function UsersManagementPage() {
                     type="submit"
                     className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
                   >
-                    Update User
+                    {editingUser ? 'Update User' : 'Add User'}
                   </button>
                   <button
                     type="button"
