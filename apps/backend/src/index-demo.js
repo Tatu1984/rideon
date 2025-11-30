@@ -268,6 +268,256 @@ app.post('/api/auth/login', (req, res) => {
   });
 });
 
+// ==================== DRIVER AUTH ENDPOINTS ====================
+
+// Driver Registration
+app.post('/api/auth/driver/register', (req, res) => {
+  const { email, password, firstName, lastName, phone, vehicleType, vehicleNumber, licenseNumber } = req.body;
+
+  // Check if driver exists
+  if (drivers.find(d => d.email === email)) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        code: 'DUPLICATE_EMAIL',
+        message: 'Email already registered'
+      }
+    });
+  }
+
+  // Create driver
+  const driver = {
+    id: driverId++,
+    email,
+    firstName,
+    lastName,
+    phone: phone || '+1234567890',
+    vehicleType: vehicleType || 'Economy',
+    vehicleNumber: vehicleNumber || 'ABC-1234',
+    licenseNumber: licenseNumber || 'DL123456',
+    status: 'offline',
+    isVerified: true,
+    rating: 4.8,
+    totalTrips: 0,
+    earnings: 0,
+    walletBalance: 0,
+    location: {
+      lat: 37.7749,
+      lng: -122.4194
+    },
+    createdAt: new Date()
+  };
+
+  drivers.push(driver);
+
+  // Generate fake token
+  const token = `driver_token_${driver.id}_${Date.now()}`;
+
+  res.status(201).json({
+    success: true,
+    data: {
+      driver: {
+        id: driver.id,
+        email: driver.email,
+        firstName: driver.firstName,
+        lastName: driver.lastName,
+        phone: driver.phone,
+        vehicleType: driver.vehicleType,
+        vehicleNumber: driver.vehicleNumber,
+        status: driver.status,
+        rating: driver.rating,
+        totalTrips: driver.totalTrips
+      },
+      token
+    },
+    message: '✅ Driver registered successfully! (Demo mode)'
+  });
+});
+
+// Driver Login
+app.post('/api/auth/driver/login', (req, res) => {
+  const { email, password } = req.body;
+
+  let driver = drivers.find(d => d.email === email);
+
+  // If driver doesn't exist, create demo driver automatically
+  if (!driver) {
+    driver = {
+      id: driverId++,
+      email,
+      firstName: 'Demo',
+      lastName: 'Driver',
+      phone: '+1234567890',
+      vehicleType: 'Economy',
+      vehicleNumber: 'ABC-1234',
+      licenseNumber: 'DL123456',
+      status: 'offline',
+      isVerified: true,
+      rating: 4.8,
+      totalTrips: 0,
+      earnings: 0,
+      walletBalance: 0,
+      location: {
+        lat: 37.7749,
+        lng: -122.4194
+      },
+      createdAt: new Date()
+    };
+    drivers.push(driver);
+  }
+
+  const token = `driver_token_${driver.id}_${Date.now()}`;
+
+  res.json({
+    success: true,
+    data: {
+      driver: {
+        id: driver.id,
+        email: driver.email,
+        firstName: driver.firstName,
+        lastName: driver.lastName,
+        phone: driver.phone,
+        vehicleType: driver.vehicleType,
+        vehicleNumber: driver.vehicleNumber,
+        status: driver.status,
+        rating: driver.rating,
+        totalTrips: driver.totalTrips,
+        earnings: driver.earnings,
+        walletBalance: driver.walletBalance
+      },
+      token
+    },
+    message: '✅ Driver login successful! (Demo mode - Auto-created driver)'
+  });
+});
+
+// Get Driver Profile
+app.get('/api/driver/profile', (req, res) => {
+  // In demo mode, return first driver or create one
+  let driver = drivers[0];
+  if (!driver) {
+    driver = {
+      id: driverId++,
+      email: 'demo@driver.com',
+      firstName: 'Demo',
+      lastName: 'Driver',
+      phone: '+1234567890',
+      vehicleType: 'Economy',
+      vehicleNumber: 'ABC-1234',
+      licenseNumber: 'DL123456',
+      status: 'offline',
+      isVerified: true,
+      rating: 4.8,
+      totalTrips: 0,
+      earnings: 0,
+      walletBalance: 0,
+      location: {
+        lat: 37.7749,
+        lng: -122.4194
+      },
+      createdAt: new Date()
+    };
+    drivers.push(driver);
+  }
+
+  res.json({
+    success: true,
+    data: driver
+  });
+});
+
+// Update Driver Location
+app.post('/api/driver/location', (req, res) => {
+  const { latitude, longitude } = req.body;
+
+  // Update first driver's location
+  if (drivers[0]) {
+    drivers[0].location = { lat: latitude, lng: longitude };
+    drivers[0].lastLocationUpdate = new Date();
+  }
+
+  res.json({
+    success: true,
+    message: 'Location updated'
+  });
+});
+
+// Update Driver Status
+app.patch('/api/driver/status', (req, res) => {
+  const { status } = req.body;
+
+  // Update first driver's status
+  if (drivers[0]) {
+    drivers[0].status = status;
+  }
+
+  res.json({
+    success: true,
+    data: { status },
+    message: 'Status updated'
+  });
+});
+
+// Get Driver Earnings
+app.get('/api/driver/earnings', (req, res) => {
+  const { period } = req.query;
+
+  // Demo earnings data
+  const earningsData = {
+    today: { amount: 125.50, trips: 8 },
+    week: { amount: 850.75, trips: 52 },
+    month: { amount: 3420.25, trips: 215 },
+    total: { amount: 12500.00, trips: 850 }
+  };
+
+  res.json({
+    success: true,
+    data: earningsData[period] || earningsData.total
+  });
+});
+
+// Get Trip History
+app.get('/api/driver/trips', (req, res) => {
+  // Demo trip history
+  const demoTrips = [
+    {
+      id: 1,
+      pickupAddress: '123 Main St, San Francisco',
+      dropoffAddress: '456 Market St, San Francisco',
+      distance: 5.2,
+      duration: 15,
+      fare: 18.50,
+      status: 'completed',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
+    },
+    {
+      id: 2,
+      pickupAddress: '789 Pine St, San Francisco',
+      dropoffAddress: '321 Oak Ave, San Francisco',
+      distance: 3.8,
+      duration: 12,
+      fare: 14.25,
+      status: 'completed',
+      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
+    }
+  ];
+
+  res.json({
+    success: true,
+    data: demoTrips
+  });
+});
+
+// Get Active Trip
+app.get('/api/driver/active-trip', (req, res) => {
+  res.json({
+    success: true,
+    data: null
+  });
+});
+
+// ==================== END DRIVER AUTH ENDPOINTS ====================
+
 // Demo endpoint - Fare Estimation
 app.post('/api/rider/trips/estimate', (req, res) => {
   const { pickupLocation, dropoffLocation } = req.body;
