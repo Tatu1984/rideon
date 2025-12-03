@@ -10,12 +10,152 @@ app.use(cors());
 app.use(express.json());
 
 // In-memory data storage for demo
-const users = [];
-const trips = [];
+const users = [
+  {
+    id: 1,
+    email: 'admin@rideon.com',
+    firstName: 'Admin',
+    lastName: 'User',
+    role: 'admin',
+    createdAt: new Date()
+  },
+  {
+    id: 2,
+    email: 'john@example.com',
+    firstName: 'John',
+    lastName: 'Doe',
+    phone: '+1234567890',
+    role: 'rider',
+    isVerified: true,
+    totalTrips: 45,
+    totalSpent: 892.50,
+    createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: 3,
+    email: 'sarah@example.com',
+    firstName: 'Sarah',
+    lastName: 'Smith',
+    phone: '+1234567891',
+    role: 'rider',
+    isVerified: true,
+    totalTrips: 23,
+    totalSpent: 456.75,
+    createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: 4,
+    email: 'mike@example.com',
+    firstName: 'Mike',
+    lastName: 'Johnson',
+    phone: '+1234567892',
+    role: 'rider',
+    isVerified: false,
+    totalTrips: 5,
+    totalSpent: 87.25,
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  }
+];
+
+const drivers = [
+  {
+    id: 1,
+    email: 'driver1@rideon.com',
+    firstName: 'David',
+    lastName: 'Wilson',
+    phone: '+1987654321',
+    vehicleNumber: 'ABC-123',
+    vehicleType: 'Economy',
+    status: 'online',
+    isVerified: true,
+    rating: 4.8,
+    totalTrips: 342,
+    earnings: 12450.50,
+    createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: 2,
+    email: 'driver2@rideon.com',
+    firstName: 'Emma',
+    lastName: 'Brown',
+    phone: '+1987654322',
+    vehicleNumber: 'XYZ-789',
+    vehicleType: 'Premium',
+    status: 'busy',
+    isVerified: true,
+    rating: 4.9,
+    totalTrips: 521,
+    earnings: 23890.75,
+    createdAt: new Date(Date.now() - 240 * 24 * 60 * 60 * 1000)
+  },
+  {
+    id: 3,
+    email: 'driver3@rideon.com',
+    firstName: 'James',
+    lastName: 'Davis',
+    phone: '+1987654323',
+    vehicleNumber: 'DEF-456',
+    vehicleType: 'Economy',
+    status: 'offline',
+    isVerified: true,
+    rating: 4.6,
+    totalTrips: 156,
+    earnings: 6543.20,
+    createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+  }
+];
+
+const trips = [
+  {
+    id: 1,
+    riderId: 2,
+    riderName: 'John Doe',
+    driverId: 2,
+    driverName: 'Emma Brown',
+    pickup: { lat: 40.7128, lng: -74.0060, address: '123 Main St, New York, NY' },
+    dropoff: { lat: 40.7580, lng: -73.9855, address: '456 Park Ave, New York, NY' },
+    status: 'active',
+    fare: 24.50,
+    distance: 5.2,
+    duration: 15,
+    vehicleType: 'Premium',
+    createdAt: new Date(Date.now() - 10 * 60 * 1000)
+  },
+  {
+    id: 2,
+    riderId: 3,
+    riderName: 'Sarah Smith',
+    driverId: 1,
+    driverName: 'David Wilson',
+    pickup: { lat: 40.7489, lng: -73.9680, address: '789 Broadway, New York, NY' },
+    dropoff: { lat: 40.7614, lng: -73.9776, address: '321 Central Park W, New York, NY' },
+    status: 'active',
+    fare: 18.75,
+    distance: 3.8,
+    duration: 12,
+    vehicleType: 'Economy',
+    createdAt: new Date(Date.now() - 8 * 60 * 1000)
+  },
+  {
+    id: 3,
+    riderId: 4,
+    riderName: 'Mike Johnson',
+    driverId: null,
+    driverName: null,
+    pickup: { lat: 40.7282, lng: -73.9942, address: '555 5th Ave, New York, NY' },
+    dropoff: { lat: 40.7505, lng: -73.9934, address: '777 Madison Ave, New York, NY' },
+    status: 'pending',
+    fare: 15.25,
+    distance: 2.5,
+    duration: 8,
+    vehicleType: 'Economy',
+    createdAt: new Date(Date.now() - 2 * 60 * 1000)
+  }
+];
+
 const vehicleTypes = [];
 const pricingRules = [];
 const geofenceZones = [];
-const drivers = [];
 const vehicles = []; // Individual fleet vehicles
 const documents = []; // Driver documents for KYC
 const supportTickets = []; // Support tickets
@@ -28,13 +168,13 @@ const emergencyAlerts = []; // SOS alerts
 const cities = []; // Service areas
 const notifications = []; // Push notifications
 const teamMembers = []; // Internal team management
-let userIdCounter = 1;
+let userIdCounter = 5;
 let teamMemberIdCounter = 1;
-let tripIdCounter = 1;
+let tripIdCounter = 4;
 let vehicleTypeIdCounter = 1;
 let pricingRuleIdCounter = 1;
 let zoneIdCounter = 1;
-let driverId = 1;
+let driverId = 4;
 let vehicleIdCounter = 1;
 let documentIdCounter = 1;
 let ticketIdCounter = 1;
@@ -610,21 +750,13 @@ app.post('/api/rider/trips', (req, res) => {
 
 // Demo endpoint - List Users
 app.get('/api/admin/users', (req, res) => {
+  const riders = users.filter(u => u.role === 'rider').map(u => ({
+    ...u,
+    status: 'active'
+  }));
   res.json({
     success: true,
-    data: {
-      users: users.map(u => ({
-        id: u.id,
-        email: u.email,
-        firstName: u.firstName,
-        lastName: u.lastName,
-        phone: u.phone,
-        role: u.role,
-        createdAt: u.createdAt,
-        approvalStatus: u.approvalStatus
-      })),
-      total: users.length
-    },
+    data: riders,
     message: '✅ Users retrieved! (Demo mode)'
   });
 });
@@ -634,6 +766,11 @@ app.post('/api/admin/users', (req, res) => {
   const newUser = {
     id: userIdCounter++,
     ...req.body,
+    role: req.body.role || 'rider',
+    isVerified: req.body.isVerified || false,
+    totalTrips: 0,
+    totalSpent: 0,
+    status: 'active',
     createdAt: new Date(),
     approvalStatus: req.body.approvalStatus || 'approved'
   };
@@ -647,12 +784,16 @@ app.post('/api/admin/users', (req, res) => {
 
 // Demo endpoint - List Trips
 app.get('/api/admin/trips', (req, res) => {
+  const status = req.query.status;
+  let filteredTrips = trips;
+
+  if (status) {
+    filteredTrips = trips.filter(t => t.status === status);
+  }
+
   res.json({
     success: true,
-    data: {
-      trips: trips,
-      total: trips.length
-    },
+    data: filteredTrips,
     message: '✅ Trips retrieved! (Demo mode)'
   });
 });
@@ -999,19 +1140,29 @@ app.delete('/api/admin/trips/:id', (req, res) => {
 
 // Get all drivers
 app.get('/api/admin/drivers', (req, res) => {
-  const driverUsers = users.filter(u => u.role === 'driver');
   res.json({
     success: true,
-    data: {
-      drivers: driverUsers.map(d => ({
-        ...d,
-        status: 'active',
-        vehicleType: 'Economy',
-        rating: (4.5 + Math.random() * 0.5).toFixed(1),
-        totalTrips: Math.floor(Math.random() * 500) + 50
-      })),
-      total: driverUsers.length
-    }
+    data: drivers
+  });
+});
+
+// Create new driver
+app.post('/api/admin/drivers', (req, res) => {
+  const newDriver = {
+    id: driverId++,
+    ...req.body,
+    status: req.body.status || 'offline',
+    isVerified: req.body.isVerified || false,
+    rating: 5.0,
+    totalTrips: 0,
+    earnings: 0,
+    createdAt: new Date()
+  };
+  drivers.push(newDriver);
+  res.status(201).json({
+    success: true,
+    data: newDriver,
+    message: 'Driver created successfully'
   });
 });
 

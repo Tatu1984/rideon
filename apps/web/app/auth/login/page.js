@@ -34,7 +34,7 @@ export default function Login() {
         localStorage.setItem('rideon_user', JSON.stringify(data.data.user))
 
         // Redirect
-        const redirect = searchParams.get('redirect') || '/'
+        const redirect = searchParams.get('redirect') || '/admin/dashboard'
         router.push(redirect)
       } else {
         setError(data.message || 'Login failed')

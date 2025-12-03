@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "RideOn Rider",
+    "slug": "rideon-rider",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#7C3AED"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rideon.rider",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "RideOn needs your location to show nearby drivers and provide accurate pickup locations.",
+        "NSLocationAlwaysUsageDescription": "RideOn needs your location to track your trip and provide real-time updates."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#7C3AED"
+      },
+      "package": "com.rideon.rider",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow RideOn to use your location to find nearby drivers and track your trips."
+        }
+      ]
+    ]
+  }
+}
