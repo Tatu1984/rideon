@@ -35,7 +35,9 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow RideOn to use your location to find nearby drivers and track your trips."
+          "locationAlwaysAndWhenInUsePermission": "Allow RideOn to use your location to find nearby drivers and track your trips.",
+          "isAndroidBackgroundLocationEnabled": false,
+          "isIosBackgroundLocationEnabled": false
         }
       ]
     ]

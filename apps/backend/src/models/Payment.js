@@ -1,0 +1,73 @@
+module.exports = (sequelize, DataTypes) => {
+  const Payment = sequelize.define('Payment', {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true
+    },
+    tripId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      unique: true,
+      references: {
+        model: 'trips',
+        key: 'id'
+      }
+    },
+    amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false
+    },
+    paymentMethod: {
+      type: DataTypes.ENUM('cash', 'card', 'wallet', 'upi'),
+      allowNull: false
+    },
+    status: {
+      type: DataTypes.ENUM('pending', 'processing', 'completed', 'failed', 'refunded'),
+      defaultValue: 'pending'
+    },
+    transactionId: {
+      type: DataTypes.STRING,
+      unique: true
+    },
+    paymentGateway: {
+      type: DataTypes.STRING
+    },
+    paymentGatewayResponse: {
+      type: DataTypes.JSON
+    },
+    refundAmount: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0.00
+    },
+    refundReason: {
+      type: DataTypes.TEXT
+    },
+    refundedAt: {
+      type: DataTypes.DATE
+    },
+    paidAt: {
+      type: DataTypes.DATE
+    },
+    failureReason: {
+      type: DataTypes.TEXT
+    }
+  }, {
+    tableName: 'payments',
+    timestamps: true,
+    indexes: [
+      { fields: ['tripId'] },
+      { fields: ['status'] },
+      { fields: ['transactionId'] }
+    ]
+  });
+
+  Payment.associate = (models) => {
+    Payment.belongsTo(models.Trip, {
+      foreignKey: 'tripId',
+      as: 'trip'
+    });
+  };
+
+  return Payment;
+};
