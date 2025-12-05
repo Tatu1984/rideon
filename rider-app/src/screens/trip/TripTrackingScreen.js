@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Modal } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+// Temporarily using placeholder for Expo Go compatibility
+import MapView, { Marker, PROVIDER_GOOGLE } from '../../components/MapViewPlaceholder';
 import { useTrip } from '../../contexts/TripContext';
 import { COLORS, TRIP_STATUS } from '../../config/constants';
 
