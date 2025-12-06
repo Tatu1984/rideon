@@ -23,27 +23,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false
     },
-    isRevoked: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
     revokedAt: {
       type: DataTypes.DATE
-    },
-    deviceInfo: {
-      type: DataTypes.JSON,
-      comment: 'Device type, OS, app version, etc.'
-    },
-    ipAddress: {
-      type: DataTypes.STRING
     }
   }, {
     tableName: 'refresh_tokens',
     timestamps: true,
+    underscored: true,
     indexes: [
-      { fields: ['userId'] },
+      { fields: ['user_id'] },
       { fields: ['token'] },
-      { fields: ['expiresAt'] }
+      { fields: ['expires_at'] }
     ]
   });
 

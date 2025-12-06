@@ -63,12 +63,9 @@ sequelize.authenticate()
   .then(() => {
     logger.info('Database connection established successfully');
 
-    // Sync models (only in development)
-    if (process.env.NODE_ENV === 'development') {
-      return sequelize.sync({ alter: false });
-    }
-  })
-  .then(() => {
+    // Using migrations instead of sync
+    // Models are managed via sequelize migrations
+
     server.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV}`);

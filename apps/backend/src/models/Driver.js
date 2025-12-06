@@ -80,10 +80,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'drivers',
     timestamps: true,
+    underscored: true,
     indexes: [
-      { fields: ['userId'] },
+      { fields: ['user_id'] },
       { fields: ['status'] },
-      { fields: ['licenseNumber'] }
+      { fields: ['license_number'] }
     ]
   });
 

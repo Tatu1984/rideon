@@ -1,6 +1,6 @@
 // API Configuration
-export const API_URL = 'http://10.147.19.121:3001/api';
-export const SOCKET_URL = 'http://10.147.19.121:3001';
+export const API_URL = 'http://192.168.0.158:3001/api';
+export const SOCKET_URL = 'http://192.168.0.158:3001';
 
 // Map Configuration
 export const INITIAL_REGION = {

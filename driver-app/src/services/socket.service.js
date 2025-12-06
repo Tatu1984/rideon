@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const SOCKET_URL = 'http://10.147.19.121:3001';
+const SOCKET_URL = 'http://192.168.0.158:3001';
 
 class SocketService {
   constructor() {
