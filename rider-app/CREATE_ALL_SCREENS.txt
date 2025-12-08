@@ -1,0 +1,14 @@
+Creating all 40+ screens for RideOn Rider App
+
+Main Screens (5): Home, Wallet, Offers, Trips, Profile
+Booking Screens (4): BookingScreen, VehicleSelection, ScheduleRide, FareBreakdown
+Trip Screens (4): TripTracking, TripDetails, RateTrip, LostItem
+Payment Screens (4): PaymentMethods, AddCard, TransactionHistory, SplitFare
+Account Screens (5): EditProfile, EmergencyContacts, FavoriteDrivers, Preferences, KYC
+Safety Screens (4): SafetyToolkit, ShareTrip, RideCheck, ReportSafety
+Support Screens (4): Support, Tickets, FAQ, ChatSupport
+Rewards Screens (3): Rewards, Referral, Membership
+Settings Screens (4): Settings, NotificationSettings, Accessibility, Privacy
+Engagement Screens (1): RideStats
+
+Total: 38 screens to create

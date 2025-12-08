@@ -35,25 +35,36 @@ export default function ProfileScreen({ navigation }) {
     {
       title: 'Account',
       items: [
-        { label: 'Edit Profile', icon: '✏️', onPress: () => {} },
-        { label: 'Vehicle Information', icon: '🚗', onPress: () => {} },
-        { label: 'Documents', icon: '📄', onPress: () => {} },
+        { label: 'Documents', icon: '📄', onPress: () => navigation.navigate('Documents') },
+        { label: 'Vehicle Information', icon: '🚗', onPress: () => navigation.navigate('Vehicle') },
+        { label: 'Bank Details', icon: '💳', onPress: () => navigation.navigate('BankDetails') },
+        { label: 'Performance & Compliance', icon: '📊', onPress: () => navigation.navigate('Performance') },
+      ],
+    },
+    {
+      title: 'Earnings',
+      items: [
+        { label: 'Wallet', icon: '💰', onPress: () => navigation.navigate('Wallet') },
+        { label: 'Incentives & Offers', icon: '🎁', onPress: () => navigation.navigate('Incentives') },
+        { label: 'Payout History', icon: '📜', onPress: () => navigation.navigate('PayoutHistory') },
+        { label: 'Referral Program', icon: '👥', onPress: () => navigation.navigate('Referral') },
+      ],
+    },
+    {
+      title: 'Safety & Support',
+      items: [
+        { label: 'Safety Toolkit', icon: '🛡️', onPress: () => navigation.navigate('SafetyToolkit') },
+        { label: 'Report Incident', icon: '⚠️', onPress: () => navigation.navigate('IncidentReport') },
+        { label: 'Support Center', icon: '💬', onPress: () => navigation.navigate('Support') },
+        { label: 'FAQs', icon: '❓', onPress: () => navigation.navigate('FAQ') },
       ],
     },
     {
       title: 'Settings',
       items: [
-        { label: 'Notifications', icon: '🔔', onPress: () => {} },
-        { label: 'Privacy', icon: '🔒', onPress: () => {} },
-        { label: 'Language', icon: '🌐', onPress: () => {} },
-      ],
-    },
-    {
-      title: 'Support',
-      items: [
-        { label: 'Help Center', icon: '❓', onPress: () => {} },
-        { label: 'Contact Support', icon: '💬', onPress: () => {} },
-        { label: 'Terms & Conditions', icon: '📋', onPress: () => {} },
+        { label: 'App Settings', icon: '⚙️', onPress: () => navigation.navigate('Settings') },
+        { label: 'Privacy', icon: '🔒', onPress: () => navigation.navigate('Settings') },
+        { label: 'Language', icon: '🌐', onPress: () => navigation.navigate('Settings') },
       ],
     },
   ];
