@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "name": "rideon-backend",
+  "builds": [
+    {
+      "src": "src/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "src/index.js"
+    },
+    {
+      "src": "/health",
+      "dest": "src/index.js"
+    },
+    {
+      "src": "/socket.io/(.*)",
+      "dest": "src/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "src/index.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

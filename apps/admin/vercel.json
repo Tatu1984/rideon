@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "name": "rideon-admin",
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@rideon_api_url",
+    "NEXT_PUBLIC_SOCKET_URL": "@rideon_socket_url"
+  }
+}
