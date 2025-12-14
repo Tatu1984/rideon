@@ -6,6 +6,8 @@ const tripRoutes = require('./trip');
 const adminRoutes = require('./admin');
 const paymentRoutes = require('./payment');
 const geocodingRoutes = require('./geocoding');
+const scheduledRidesRoutes = require('./scheduledRides');
+const splitFareRoutes = require('./splitFare');
 
 const router = express.Router();
 
@@ -29,6 +31,8 @@ router.use(`${API_VERSION}/trips`, tripRoutes);
 router.use(`${API_VERSION}/admin`, adminRoutes);
 router.use(`${API_VERSION}/payments`, paymentRoutes);
 router.use(`${API_VERSION}/geocoding`, geocodingRoutes);
+router.use(`${API_VERSION}/scheduled-rides`, scheduledRidesRoutes);
+router.use(`${API_VERSION}/split-fare`, splitFareRoutes);
 
 // For backward compatibility, also mount without version prefix
 router.use('/auth', authRoutes);
@@ -38,5 +42,7 @@ router.use('/trips', tripRoutes);
 router.use('/admin', adminRoutes);
 router.use('/payments', paymentRoutes);
 router.use('/geocoding', geocodingRoutes);
+router.use('/scheduled-rides', scheduledRidesRoutes);
+router.use('/split-fare', splitFareRoutes);
 
 module.exports = router;
