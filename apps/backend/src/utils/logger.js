@@ -1,5 +1,4 @@
 const winston = require('winston');
-const path = require('path');
 
 // Define log format
 const logFormat = winston.format.combine(
@@ -9,46 +8,30 @@ const logFormat = winston.format.combine(
   winston.format.json()
 );
 
+// Create transports array
+const transports = [
+  new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.simple(),
+      winston.format.printf(({ level, message, timestamp, ...meta }) => {
+        let msg = `${timestamp} [${level}]: ${message}`;
+        if (Object.keys(meta).length > 0 && meta.service !== 'rideon-api') {
+          msg += ` ${JSON.stringify(meta)}`;
+        }
+        return msg;
+      })
+    )
+  })
+];
+
 // Create logger
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: logFormat,
   defaultMeta: { service: 'rideon-api' },
-  transports: [
-    // Write all logs with level 'error' and below to error.log
-    new winston.transports.File({
-      filename: path.join(__dirname, '../../logs/error.log'),
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
-    }),
-    // Write all logs to combined.log
-    new winston.transports.File({
-      filename: path.join(__dirname, '../../logs/combined.log'),
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
-    })
-  ]
+  transports
 });
-
-// If not in production, also log to console
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple(),
-        winston.format.printf(({ level, message, timestamp, ...meta }) => {
-          let msg = `${timestamp} [${level}]: ${message}`;
-          if (Object.keys(meta).length > 0) {
-            msg += ` ${JSON.stringify(meta)}`;
-          }
-          return msg;
-        })
-      )
-    })
-  );
-}
 
 // Create a stream object for Morgan
 logger.stream = {

@@ -1,15 +1,39 @@
 const { Sequelize } = require('sequelize');
-const config = require('../config/database');
+require('dotenv').config();
 
-const env = process.env.NODE_ENV || 'development';
-const dbConfig = config[env];
+let sequelize;
 
-const sequelize = new Sequelize(
-  dbConfig.database,
-  dbConfig.username,
-  dbConfig.password,
-  dbConfig
-);
+// Use DATABASE_URL if available (for Neon DB, Vercel, etc.)
+if (process.env.DATABASE_URL) {
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
+  });
+} else {
+  // Fallback to individual env vars
+  const config = require('../config/database');
+  const env = process.env.NODE_ENV || 'development';
+  const dbConfig = config[env];
+
+  sequelize = new Sequelize(
+    dbConfig.database,
+    dbConfig.username,
+    dbConfig.password,
+    dbConfig
+  );
+}
 
 const db = {};
 

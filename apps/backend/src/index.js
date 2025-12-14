@@ -1,12 +1,10 @@
 const express = require('express');
-const http = require('http');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const { sequelize } = require('./models');
 const routes = require('./routes');
-const { initializeSocket } = require('./socket');
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 
@@ -14,16 +12,13 @@ const logger = require('./utils/logger');
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app);
-
-// Initialize Socket.IO
-const io = initializeSocket(server);
-app.set('io', io);
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(cors({
-  origin: process.env.CORS_ORIGIN.split(',') || true,
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
   credentials: true
 }));
 app.use(morgan('combined', { stream: logger.stream }));
@@ -36,6 +31,19 @@ app.get('/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
+  });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'RideOn API is running',
+    version: '2.0.0',
+    endpoints: {
+      health: '/health',
+      api: '/api/v1'
+    }
   });
 });
 
@@ -56,34 +64,40 @@ app.use((req, res) => {
 // Error Handler
 app.use(errorHandler);
 
-// Database Connection
-const PORT = process.env.PORT || 3001;
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const http = require('http');
+  const { initializeSocket } = require('./socket');
 
-sequelize.authenticate()
-  .then(() => {
-    logger.info('Database connection established successfully');
+  const server = http.createServer(app);
+  const io = initializeSocket(server);
+  app.set('io', io);
 
-    // Using migrations instead of sync
-    // Models are managed via sequelize migrations
+  const PORT = process.env.PORT || 3001;
 
-    server.listen(PORT, () => {
-      logger.info(`Server is running on port ${PORT}`);
-      logger.info(`Environment: ${process.env.NODE_ENV}`);
+  sequelize.authenticate()
+    .then(() => {
+      logger.info('Database connection established successfully');
+      server.listen(PORT, () => {
+        logger.info(`Server is running on port ${PORT}`);
+        logger.info(`Environment: ${process.env.NODE_ENV}`);
+      });
+    })
+    .catch(err => {
+      logger.error('Unable to connect to the database:', err);
+      process.exit(1);
     });
-  })
-  .catch(err => {
-    logger.error('Unable to connect to the database:', err);
-    process.exit(1);
-  });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
-    logger.info('HTTP server closed');
-    sequelize.close();
-    process.exit(0);
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    logger.info('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+      logger.info('HTTP server closed');
+      sequelize.close();
+      process.exit(0);
+    });
   });
-});
+}
 
-module.exports = { app, server, io };
+// Export for Vercel serverless
+module.exports = app;
