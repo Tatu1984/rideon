@@ -1,13 +1,6 @@
 {
   "version": 2,
-  "name": "rideon-web",
   "framework": "nextjs",
   "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@rideon_api_url",
-    "NEXT_PUBLIC_SOCKET_URL": "@rideon_socket_url",
-    "NEXT_PUBLIC_MAPS_API_KEY": "@maps_api_key",
-    "NEXT_PUBLIC_STRIPE_KEY": "@stripe_publishable_key"
-  }
+  "outputDirectory": ".next"
 }
