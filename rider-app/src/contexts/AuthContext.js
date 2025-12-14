@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
         setUser(response.data.data || response.data);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      //console.error('Auth check failed:', error);
       await AsyncStorage.removeItem('token');
     } finally {
       setLoading(false);
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (data) => {
     try {
-      console.log('🔵 Rider Register:', data.email);
+      console.log('🔵 Rider Register:', data);
       const response = await authAPI.register(data);
       console.log('🟢 Response:', response.data);
 
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
       console.log('✅ Registration successful');
       return { success: true };
     } catch (error) {
-      console.error('🔴 Registration error:', error);
+      console.error('🔴 Registration error:', error.message);
       return {
         success: false,
         error: error.response?.data?.message || error.message || 'Registration failed',

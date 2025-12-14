@@ -1,6 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { tripAPI } from '../services/api.service';
 import socketService from '../services/socket.service';
+import ErrorModal from '../components/ErrorModal';
+
 
 const TripContext = createContext({});
 
@@ -8,6 +10,7 @@ export const TripProvider = ({ children }) => {
   const [activeTrip, setActiveTrip] = useState(null);
   const [tripHistory, setTripHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     initializeSocket();
@@ -22,7 +25,11 @@ export const TripProvider = ({ children }) => {
       socketService.off('trip:completed');
     };
   }, []);
-
+    const handleError = (error) => {
+    const errorMessage = error.response?.data?.message || 'An error occurred. Please try again.';
+    setError(errorMessage);
+    return { success: false, error: errorMessage };
+  };
   const initializeSocket = async () => {
     await socketService.connect();
 
@@ -70,7 +77,8 @@ export const TripProvider = ({ children }) => {
       const trip = response.data.data || response.data;
       setActiveTrip(trip);
     } catch (error) {
-      console.error('Error loading active trip:', error);
+      handleError(error);
+      // console.error('Error loading active trip:', error);
     }
   };
 
@@ -80,23 +88,21 @@ export const TripProvider = ({ children }) => {
       const trips = response.data.data || response.data;
       setTripHistory(trips);
     } catch (error) {
-      console.error('Error loading trip history:', error);
+      handleError(error);
+      //console.error('Error loading trip history:', error);
     }
   };
 
   const requestTrip = async (tripData) => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await tripAPI.createTrip(tripData);
       const trip = response.data.data || response.data;
       setActiveTrip(trip);
       socketService.requestTrip(trip);
       return { success: true, trip };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Failed to request trip',
-      };
+      return handleError(error);
     } finally {
       setLoading(false);
     }
@@ -109,6 +115,7 @@ export const TripProvider = ({ children }) => {
       setActiveTrip(null);
       return { success: true };
     } catch (error) {
+      handleError(error);
       return {
         success: false,
         error: error.response?.data?.message || 'Failed to cancel trip',
@@ -122,6 +129,7 @@ export const TripProvider = ({ children }) => {
       await loadTripHistory();
       return { success: true };
     } catch (error) {
+      handleError(error);
       return {
         success: false,
         error: error.response?.data?.message || 'Failed to rate trip',
@@ -137,6 +145,7 @@ export const TripProvider = ({ children }) => {
         estimate: response.data.data || response.data,
       };
     } catch (error) {
+      handleError(error);
       return {
         success: false,
         error: error.response?.data?.message || 'Failed to get estimate',
@@ -155,9 +164,12 @@ export const TripProvider = ({ children }) => {
         rateTrip,
         getEstimate,
         loadTripHistory,
+        error,
+        clearError: () => setError(null),
       }}
     >
       {children}
+      {error && <ErrorModal visible={!!error} message={error} onClose={() => setError(null)} />}
     </TripContext.Provider>
   );
 };

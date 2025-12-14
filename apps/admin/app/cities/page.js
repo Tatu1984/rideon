@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function CitiesPage() {
   const router = useRouter()
@@ -18,8 +19,7 @@ export default function CitiesPage() {
 
   const fetchCities = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/cities')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/cities')
       if (data.success) setCities(data.data.cities || [])
     } catch (error) {
       console.error('Error:', error)
@@ -31,12 +31,7 @@ export default function CitiesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch('http://localhost:3001/api/admin/cities', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-      const data = await response.json()
+      const {data} = await api.post('/api/admin/cities', formData)
       if (data.success) {
         alert('City added!')
         setShowModal(false)
@@ -51,8 +46,7 @@ export default function CitiesPage() {
   const deleteCity = async (id) => {
     if (!confirm('Delete this city?')) return
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/cities/${id}`, { method: 'DELETE' })
-      const data = await response.json()
+      const {data} = await api.delete(`/api/admin/cities/${id}`)
       if (data.success) {
         alert('City deleted!')
         fetchCities()

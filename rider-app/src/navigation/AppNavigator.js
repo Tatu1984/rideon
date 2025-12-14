@@ -148,7 +148,7 @@ function MainTabs() {
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
-
+  console.log(user)
   if (loading) {
     return null;
   }

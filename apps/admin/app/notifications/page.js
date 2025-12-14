@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function NotificationsPage() {
   const router = useRouter()
@@ -26,8 +27,7 @@ export default function NotificationsPage() {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/notifications')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/notifications')
       if (data.success) {
         setNotifications(data.data.notifications || [])
       }
@@ -46,13 +46,7 @@ export default function NotificationsPage() {
         userId: formData.targetAudience === 'specific' && formData.userId ? parseInt(formData.userId) : null,
         scheduledTime: formData.scheduled && formData.scheduledTime ? new Date(formData.scheduledTime) : null
       }
-
-      const response = await fetch('http://localhost:3001/api/admin/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
+      const response = await api.post('/api/admin/notifications', {payload})
       const data = await response.json()
       if (data.success) {
         alert('Notification sent!')
@@ -77,10 +71,7 @@ export default function NotificationsPage() {
   const deleteNotification = async (id) => {
     if (!confirm('Delete this notification?')) return
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/notifications/${id}`, {
-        method: 'DELETE'
-      })
-      const data = await response.json()
+      const {data} = await api.delete(`/api/admin/notifications/${id}`)
       if (data.success) {
         alert('Notification deleted!')
         fetchNotifications()

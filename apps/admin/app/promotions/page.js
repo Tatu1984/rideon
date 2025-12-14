@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function PromotionsPage() {
   const router = useRouter()
@@ -35,7 +36,7 @@ export default function PromotionsPage() {
 
   const fetchPromotions = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/promotions')
+      const response = await api.get('/api/admin/promotions')
       const data = await response.json()
       if (data.success) {
         setPromotions(data.data.promotions || [])
@@ -59,14 +60,11 @@ export default function PromotionsPage() {
     }
 
     try {
-      const url = editingPromo ? `http://localhost:3001/api/admin/promotions/${editingPromo.id}` : 'http://localhost:3001/api/admin/promotions'
+      const url = editingPromo ? `/api/admin/promotions/${editingPromo.id}` : '/api/admin/promotions'
       const method = editingPromo ? 'PUT' : 'POST'
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      const {data} = await api[method](url, {
+        payload
       })
-      const data = await response.json()
       if (data.success) {
         alert(editingPromo ? 'Promotion updated!' : 'Promotion created!')
         setShowModal(false)
@@ -82,8 +80,7 @@ export default function PromotionsPage() {
   const handleDelete = async (id) => {
     if (!confirm('Delete this promotion?')) return
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/promotions/${id}`, { method: 'DELETE' })
-      const data = await response.json()
+      const {data} = await api.delete(`/api/admin/promotions/${id}`)
       if (data.success) {
         alert('Promotion deleted!')
         fetchPromotions()

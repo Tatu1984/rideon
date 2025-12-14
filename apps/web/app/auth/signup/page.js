@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import api from '../../services/api'
 
 export default function Signup() {
   const router = useRouter()
@@ -37,22 +38,14 @@ export default function Signup() {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data } = await api.post('/api/auth/register', {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
           password: formData.password,
           phone: formData.phone,
           role: formData.role,
-        }),
-      })
-
-      const data = await response.json()
+        });
 
       if (data.success) {
         // Store token and user info

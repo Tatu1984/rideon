@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function DriversManagementPage() {
   const router = useRouter()
@@ -27,8 +28,7 @@ export default function DriversManagementPage() {
 
   const fetchDrivers = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/drivers')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/drivers')
       if (data.success) {
         setDrivers(data.data.drivers || data.data || [])
       }
@@ -41,8 +41,7 @@ export default function DriversManagementPage() {
 
   const fetchVehicleTypes = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/vehicle-types')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/vehicle-types')
       if (data.success) {
         setVehicleTypes(data.data.vehicleTypes || [])
       }
@@ -53,12 +52,7 @@ export default function DriversManagementPage() {
 
   const handleApprove = async (driverId) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/drivers/${driverId}/approve`, {
-        method: 'POST'
-      })
-
-      const data = await response.json()
-
+      const {data} = await api.post(`/api/admin/drivers/${driverId}/approve`)
       if (data.success) {
         alert('Driver approved successfully!')
         fetchDrivers()

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import api from '../../services/api'
 
 // Dynamically import map component to avoid SSR issues
 const ZoneMap = dynamic(() => import('./ZoneMap'), { ssr: false })
@@ -36,8 +37,7 @@ export default function GeofencingPage() {
 
   const fetchZones = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/zones')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/zones')
       if (data.success) {
         setZones(data.data.zones || [])
       }
@@ -78,18 +78,12 @@ export default function GeofencingPage() {
 
     try {
       const url = editingZone
-        ? `http://localhost:3001/api/admin/zones/${editingZone.id}`
-        : 'http://localhost:3001/api/admin/zones'
+        ? `/api/admin/zones/${editingZone.id}`
+        : '/api/admin/zones'
 
-      const response = await fetch(url, {
-        method: editingZone ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
+      const {data} = await api[editingZone ? 'put' : 'post'](url, payload)
 
-      const data = await response.json()
-
-      if (data.success) {
+      if (data.data.success) {
         fetchZones()
         closeModal()
       }
@@ -115,9 +109,7 @@ export default function GeofencingPage() {
     if (!confirm('Are you sure you want to delete this zone?')) return
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/zones/${id}`, {
-        method: 'DELETE'
-      })
+      const response = await api.delete(`/api/admin/zones/${id}`)
 
       const data = await response.json()
 

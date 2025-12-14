@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import api from '../../services/api'
 
 export default function AnalyticsPage() {
   const router = useRouter()
@@ -19,12 +20,11 @@ export default function AnalyticsPage() {
   const fetchAnalytics = async () => {
     try {
       const [overviewRes, revenueRes] = await Promise.all([
-        fetch('http://localhost:3001/api/admin/analytics/overview'),
-        fetch('http://localhost:3001/api/admin/analytics/revenue')
+        api.get('/api/admin/analytics/overview'),
+        api.get('/api/admin/analytics/revenue')
       ])
-      const [overviewData, revData] = await Promise.all([overviewRes.json(), revenueRes.json()])
-      if (overviewData.success) setOverview(overviewData.data)
-      if (revData.success) setRevenueData(revData.data)
+      if (overviewRes.success) setOverview(overviewRes?.data?.data)
+      if (revenueRes.success) setRevenueData(revenueRes?.data?.data)
     } catch (error) {
       console.error('Error:', error)
     } finally {

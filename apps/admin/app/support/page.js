@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function SupportTicketsPage() {
   const router = useRouter()
@@ -50,8 +51,7 @@ export default function SupportTicketsPage() {
 
   const fetchTickets = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/tickets')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/tickets')
       if (data.success) {
         setTickets(data.data.tickets || [])
       }
@@ -89,13 +89,7 @@ export default function SupportTicketsPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/api/admin/tickets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      const data = await response.json()
+      const {data} = await api.post('/api/admin/tickets', payload)
 
       if (data.success) {
         alert('Ticket created successfully!')
@@ -111,14 +105,7 @@ export default function SupportTicketsPage() {
 
   const handleUpdateStatus = async (ticketId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/tickets/${ticketId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      })
-
-      const data = await response.json()
-
+      const {data} = await api.put(`/api/admin/tickets/${ticketId}`,{ status: newStatus })
       if (data.success) {
         alert(`Ticket ${newStatus}!`)
         fetchTickets()
@@ -136,17 +123,10 @@ export default function SupportTicketsPage() {
     if (!replyMessage.trim() || !selectedTicket) return
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/tickets/${selectedTicket.id}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const {data} = await api.post(`/api/admin/tickets/${selectedTicket.id}/messages`,{
           message: replyMessage,
           senderName: 'Admin Support'
         })
-      })
-
-      const data = await response.json()
-
       if (data.success) {
         setReplyMessage('')
         fetchTicketDetails(selectedTicket.id)
@@ -164,8 +144,7 @@ export default function SupportTicketsPage() {
 
   const fetchTicketDetails = async (ticketId) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/tickets/${ticketId}`)
-      const data = await response.json()
+      const {data} = await api.get(`/api/admin/tickets/${ticketId}`)
       if (data.success) {
         setSelectedTicket(data.data)
       }
@@ -178,12 +157,7 @@ export default function SupportTicketsPage() {
     if (!confirm('Are you sure you want to delete this ticket?')) return
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/tickets/${ticketId}`, {
-        method: 'DELETE'
-      })
-
-      const data = await response.json()
-
+      const {data} = await api.delete(`/api/admin/tickets/${ticketId}`)
       if (data.success) {
         alert('Ticket deleted successfully!')
         fetchTickets()

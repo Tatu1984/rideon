@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function AdminLogin() {
   const router = useRouter()
@@ -16,15 +17,13 @@ export default function AdminLogin() {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const {data} = await api.post('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       })
-
-      const data = await response.json()
 
       if (data.success && data.data.user.role === 'admin') {
         // Store token and user info

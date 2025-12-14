@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function WalletPage() {
   const router = useRouter()
@@ -28,10 +29,10 @@ export default function WalletPage() {
 
   const fetchData = async () => {
     try {
-      const [usersRes, driversRes, payoutsRes] = await Promise.all([
-        fetch('http://localhost:3001/api/admin/users'),
-        fetch('http://localhost:3001/api/admin/drivers'),
-        fetch('http://localhost:3001/api/admin/payouts')
+      const [{data:usersRes}, {data:driversRes}, {data:payoutsRes}] = await Promise.all([
+        api.get('/api/admin/users'),
+        api.get('/api/admin/drivers'),
+        api.get('/api/admin/payouts')
       ])
       const [usersData, driversData, payoutsData] = await Promise.all([
         usersRes.json(), driversRes.json(), payoutsRes.json()
@@ -50,12 +51,7 @@ export default function WalletPage() {
     if (!selectedUser || !amount) return
     const endpoint = transactionType === 'credit' ? 'credit' : 'debit'
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/wallet/rider/${selectedUser.id}/${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: parseFloat(amount), description })
-      })
-      const data = await response.json()
+      const {data} = await api.post(`/api/admin/wallet/rider/${selectedUser.id}/${endpoint}`, { amount: parseFloat(amount), description })
       if (data.success) {
         alert('Transaction completed!')
         setShowModal(false)
@@ -72,12 +68,7 @@ export default function WalletPage() {
     const amountInput = prompt('Enter payout amount:')
     if (!amountInput) return
     try {
-      const response = await fetch('http://localhost:3001/api/admin/payouts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ driverId, amount: parseFloat(amountInput), method: 'bank_transfer' })
-      })
-      const data = await response.json()
+      const {data} = await api.post('/api/admin/payouts',{ driverId, amount: parseFloat(amountInput), method: 'bank_transfer' })
       if (data.success) {
         alert('Payout initiated!')
         fetchData()
@@ -89,10 +80,7 @@ export default function WalletPage() {
 
   const processPayout = async (payoutId) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/payouts/${payoutId}/process`, {
-        method: 'PUT'
-      })
-      const data = await response.json()
+      const {data} = await api.put(`/api/admin/payouts/${payoutId}/process`)
       if (data.success) {
         alert('Payout processed!')
         fetchData()

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import api from '../../services/api'
 
 export default function Login() {
   const router = useRouter()
@@ -11,28 +12,18 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
-
-      const data = await response.json()
-
+      const { data } = await api.post('/api/auth/login', { email, password });
       if (data.success) {
         // Store token and user info
         localStorage.setItem('rideon_token', data.data.accessToken)
         localStorage.setItem('rideon_user', JSON.stringify(data.data.user))
-
+        console.log(searchParams.get('redirect'))
         // Redirect
         const redirect = searchParams.get('redirect') || '/admin/dashboard'
         router.push(redirect)

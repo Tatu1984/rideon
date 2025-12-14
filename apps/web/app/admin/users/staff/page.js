@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import api from '../../../services/api'
 
 export default function StaffManagement() {
   const [staff, setStaff] = useState([])
@@ -13,8 +14,7 @@ export default function StaffManagement() {
 
   const loadStaff = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/team')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/team')
       if (data.success) {
         setStaff(Array.isArray(data.data) ? data.data : [])
       }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function ApprovalsPage() {
   const router = useRouter()
@@ -20,17 +21,14 @@ export default function ApprovalsPage() {
 
   const fetchPendingApprovals = async () => {
     try {
-      const driversRes = await fetch('http://localhost:3001/api/admin/drivers/pending-approval')
-      const driversData = await driversRes.json()
+      const driversRes = await api.get('/api/admin/drivers/pending-approval')
+      const usersRes = await api.get('/api/admin/users/pending-approval')
 
-      const usersRes = await fetch('http://localhost:3001/api/admin/users/pending-approval')
-      const usersData = await usersRes.json()
-
-      if (driversData.success) {
-        setPendingDrivers(driversData.data.drivers || [])
+      if (driversRes.success) {
+        setPendingDrivers(driversRes?.data?.data?.drivers || [])
       }
-      if (usersData.success) {
-        setPendingUsers(usersData.data.users || [])
+      if (usersRes.success) {
+        setPendingUsers(usersRes?.data?.data?.users || [])
       }
     } catch (error) {
       console.error('Error:', error)
@@ -47,16 +45,13 @@ export default function ApprovalsPage() {
   const approveApplicant = async (id, type) => {
     try {
       const endpoint = type === 'driver'
-        ? `http://localhost:3001/api/admin/drivers/${id}/approve`
-        : `http://localhost:3001/api/admin/users/${id}/approve`
+        ? `/api/admin/drivers/${id}/approve`
+        : `/api/admin/users/${id}/approve`
 
-      const response = await fetch(endpoint, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approved: true, approvedAt: new Date() })
+      const {data} = await api.put(endpoint, {
+        approved: true,
+        approvedAt: new Date()
       })
-
-      const data = await response.json()
       if (data.success) {
         alert(`${type === 'driver' ? 'Driver' : 'User'} approved successfully!`)
         setShowDetailModal(false)
@@ -74,16 +69,10 @@ export default function ApprovalsPage() {
 
     try {
       const endpoint = type === 'driver'
-        ? `http://localhost:3001/api/admin/drivers/${id}/reject`
-        : `http://localhost:3001/api/admin/users/${id}/reject`
+        ? `/api/admin/drivers/${id}/reject`
+        : `/api/admin/users/${id}/reject`
 
-      const response = await fetch(endpoint, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rejected: true, rejectionReason: reason, rejectedAt: new Date() })
-      })
-
-      const data = await response.json()
+      const {data} = await api.put(endpoint,{ rejected: true, rejectionReason: reason, rejectedAt: new Date() });
       if (data.success) {
         alert(`${type === 'driver' ? 'Driver' : 'User'} rejected`)
         setShowDetailModal(false)

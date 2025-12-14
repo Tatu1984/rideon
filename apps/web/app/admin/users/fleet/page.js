@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import api from '../../../services/api'
 
 export default function FleetManagement() {
   const [fleetOwners, setFleetOwners] = useState([])
@@ -13,8 +14,7 @@ export default function FleetManagement() {
 
   const loadFleetOwners = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/fleet')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/fleet')
       if (data.success) {
         setFleetOwners(Array.isArray(data.data) ? data.data : [])
       }

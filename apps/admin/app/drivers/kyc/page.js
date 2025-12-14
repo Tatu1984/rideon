@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../../services/api'
 
 export default function DriverKYCPage() {
   const router = useRouter()
@@ -42,8 +43,7 @@ export default function DriverKYCPage() {
 
   const fetchPendingDrivers = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/drivers')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/drivers')
       if (data.success) {
         // In real app, would fetch from /pending-approval endpoint
         const driversData = data.data.drivers || []
@@ -51,8 +51,7 @@ export default function DriverKYCPage() {
         // Fetch documents for each driver
         const driversWithDocs = await Promise.all(
           driversData.map(async (driver) => {
-            const docsRes = await fetch(`http://localhost:3001/api/admin/drivers/${driver.id}/documents`)
-            const docsData = await docsRes.json()
+            const {data: docsData} = await api.get(`/api/admin/drivers/${driver.id}/documents`)
             const docs = docsData.success ? docsData.data.documents : []
 
             return {
@@ -77,8 +76,7 @@ export default function DriverKYCPage() {
 
   const fetchDriverDocuments = async (driverId) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/drivers/${driverId}/documents`)
-      const data = await response.json()
+      const {data} = await api.get(`/api/admin/drivers/${driverId}/documents`)
       if (data.success) {
         setDriverDocuments(data.data.documents || [])
       }
@@ -106,14 +104,7 @@ export default function DriverKYCPage() {
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/drivers/${selectedDriver.id}/documents`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      const data = await response.json()
-
+      const {data} = await api.post(`/api/admin/drivers/${selectedDriver.id}/documents`, payload)
       if (data.success) {
         alert('Document uploaded successfully!')
         setShowUploadModal(false)
@@ -129,14 +120,7 @@ export default function DriverKYCPage() {
 
   const handleVerifyDocument = async (documentId, status, notes = '') => {
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/documents/${documentId}/verify`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, notes })
-      })
-
-      const data = await response.json()
-
+      const {data} = await api.put(`/api/admin/documents/${documentId}/verify`,{ status, notes })
       if (data.success) {
         alert(`Document ${status} successfully!`)
         await fetchDriverDocuments(selectedDriver.id)
@@ -152,12 +136,7 @@ export default function DriverKYCPage() {
     if (!confirm('Are you sure you want to delete this document?')) return
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/documents/${documentId}`, {
-        method: 'DELETE'
-      })
-
-      const data = await response.json()
-
+      const {data} = await api.delete(`/api/admin/documents/${documentId}`)
       if (data.success) {
         alert('Document deleted successfully!')
         await fetchDriverDocuments(selectedDriver.id)

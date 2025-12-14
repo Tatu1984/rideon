@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function TeamManagementPage() {
   const router = useRouter()
@@ -56,8 +57,7 @@ export default function TeamManagementPage() {
 
   const fetchTeamMembers = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/team')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/team')
       if (data.success) {
         setTeamMembers(data.data.team || [])
       }
@@ -72,16 +72,12 @@ export default function TeamManagementPage() {
     e.preventDefault()
     try {
       const url = editingMember
-        ? `http://localhost:3001/api/admin/team/${editingMember.id}`
-        : 'http://localhost:3001/api/admin/team'
+        ? `/api/admin/team/${editingMember.id}`
+        : '/api/admin/team'
 
       const method = editingMember ? 'PUT' : 'POST'
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
+      const response = await api[method](url, formData)
 
       const data = await response.json()
       if (data.success) {
@@ -124,10 +120,7 @@ export default function TeamManagementPage() {
   const deleteMember = async (id) => {
     if (!confirm('Remove this team member?')) return
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/team/${id}`, {
-        method: 'DELETE'
-      })
-      const data = await response.json()
+      const {data} = await api.delete(`/api/admin/team/${id}`)
       if (data.success) {
         alert('Team member removed!')
         fetchTeamMembers()

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
+import api from '../../../services/api'
 
 export default function RidersManagement() {
   const [riders, setRiders] = useState([])
@@ -15,8 +16,7 @@ export default function RidersManagement() {
 
   const loadRiders = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/users')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/users')
       if (data.success) {
         setRiders(Array.isArray(data.data) ? data.data : [])
       }

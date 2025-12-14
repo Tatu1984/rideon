@@ -12,7 +12,7 @@ export default function SafetyToolkitScreen({ navigation, route }) {
     alert('SOS ACTIVATED!\n\n• Emergency services notified\n• Your emergency contacts alerted\n• Trip details shared with authorities\n• Live location being tracked');
   };
 
-  const handleShare Trip = () => {
+  const handleShareTrip = () => {
     navigation.navigate('ShareTrip', { tripId });
   };
 

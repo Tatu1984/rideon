@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import api from '../services/api'
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -78,14 +79,12 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const usersRes = await fetch('http://localhost:3001/api/admin/users')
-      const usersData = await usersRes.json()
+      const {data:usersRes} = await api.get('/api/admin/users')
 
-      const tripsRes = await fetch('http://localhost:3001/api/admin/trips')
-      const tripsData = await tripsRes.json()
+      const {data:tripsRes} = await api.get('/api/admin/trips')
 
-      if (usersData.success) {
-        const usersList = usersData.data?.users || usersData.data || []
+      if (usersRes.success) {
+        const usersList = usersRes.data?.users || usersRes.data || []
         setUsers(usersList)
         const riders = usersList.filter(u => u.role === 'rider').length
         const drivers = usersList.filter(u => u.role === 'driver').length
@@ -100,8 +99,8 @@ export default function AdminDashboard() {
         }))
       }
 
-      if (tripsData.success) {
-        const tripsList = tripsData.data?.trips || tripsData.data || []
+      if (tripsRes.success) {
+        const tripsList = tripsRes.data?.trips || tripsRes.data || []
         setTrips(tripsList)
         const active = tripsList.filter(t => t.status === 'in_progress').length
         const completed = tripsList.filter(t => t.status === 'completed').length

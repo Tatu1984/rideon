@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function ReferralsPage() {
   const router = useRouter()
@@ -16,8 +17,7 @@ export default function ReferralsPage() {
 
   const fetchReferrals = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/referrals')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/referrals')
       if (data.success) setReferrals(data.data.referrals || [])
     } catch (error) {
       console.error('Error:', error)

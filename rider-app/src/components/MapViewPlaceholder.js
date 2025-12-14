@@ -1,75 +1,98 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import MapView, { Marker } from 'react-native-maps';
+import { StyleSheet, View, Text } from 'react-native';
+import * as Location from 'expo-location';
 
-// Placeholder for MapView when using Expo Go
-// react-native-maps requires native build and doesn't work in Expo Go
-export default function MapViewPlaceholder({ children, style, ...props }) {
+export default function MapViewPlaceholder() {
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      // Request location permissions
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      // Get current location
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    })();
+  }, []);
+
+  if (errorMsg) {
+    console.log(errorMsg);
+    return <View style={styles.container}><Text>{errorMsg}</Text></View>;
+  }
+
+  if (!location) {
+    return <View style={styles.container}><Text>Loading map...</Text></View>;
+  }
+
   return (
-    <View style={[styles.container, style]}>
-      <View style={styles.placeholder}>
-        <Text style={styles.title}>📍 Map View</Text>
-        <Text style={styles.subtitle}>
-          Map functionality requires a custom development build
-        </Text>
-        <Text style={styles.info}>
-          Using Expo Go - maps are disabled
-        </Text>
-      </View>
-      {children}
+    <View style={styles.container}>
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
+        customMapStyle={[
+  {
+    "elementType": "geometry",
+    "stylers": [{"color": "#ffffff"}]  // White background
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [{"visibility": "on"}]  // Make sure roads are visible
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry.stroke",
+    "stylers": [{"color": "#000000"}]  // Black road borders
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry.fill",
+    "stylers": [{"color": "#f0f0f0"}]  // Light gray road fill
+  }
+]}
+        showsUserLocation={true}
+        showsMyLocationButton={true}
+      >
+<Marker coordinate={{
+    latitude: location.coords.latitude,
+    longitude: location.coords.longitude,
+  }} title="Pickup">
+  <View style={styles.markerContainer}>
+    <Text style={styles.markerText}>📍</Text>
+  </View>
+</Marker>
+      </MapView>
     </View>
   );
 }
-
-export function Marker({ coordinate, title, description, children }) {
-  return (
-    <View style={styles.marker}>
-      <Text style={styles.markerText}>📍</Text>
-      {children}
-    </View>
-  );
-}
-
-export const PROVIDER_GOOGLE = 'google';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E8F5E9',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  placeholder: {
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    maxWidth: 300,
+  map: {
+    width: '100%',
+    height: '100%',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  info: {
-    fontSize: 12,
-    color: '#999',
-    textAlign: 'center',
-  },
-  marker: {
-    position: 'absolute',
-  },
-  markerText: {
-    fontSize: 30,
-  },
+  markerContainer: {
+},
+markerText: {
+  fontSize: 30,
+},
+dropoffMarker: {
+  // You can add different styling for drop-off if needed
+  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+}
 });

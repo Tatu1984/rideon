@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function TripsManagementPage() {
   const router = useRouter()
@@ -25,8 +26,7 @@ export default function TripsManagementPage() {
 
   const fetchTrips = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/trips')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/trips')
       if (data.success) {
         setTrips(data.data.trips || data.data || [])
       }
@@ -39,14 +39,7 @@ export default function TripsManagementPage() {
 
   const handleUpdateStatus = async (tripId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/trips/${tripId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      })
-
-      const data = await response.json()
-
+      const {data} = await api.put(`/api/admin/trips/${tripId}`, { status: newStatus })
       if (data.success) {
         fetchTrips()
       }
@@ -59,12 +52,7 @@ export default function TripsManagementPage() {
     if (!confirm('Are you sure you want to delete this trip?')) return
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/trips/${id}`, {
-        method: 'DELETE'
-      })
-
-      const data = await response.json()
-
+      const {data} = await api.delete(`/api/admin/trips/${id}`)
       if (data.success) {
         fetchTrips()
       }

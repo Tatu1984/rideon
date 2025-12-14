@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../services/api'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -32,8 +33,8 @@ export default function Dashboard() {
 
   const loadStats = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/users')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/users')
+      
       setStats({
         totalUsers: data.data?.length || 0,
         totalDrivers: 0,

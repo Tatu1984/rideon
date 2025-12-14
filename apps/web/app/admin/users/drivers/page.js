@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useMemo } from 'react'
+import api from '../../../services/api'
 
 export default function DriversManagement() {
   const [drivers, setDrivers] = useState([])
@@ -17,10 +18,9 @@ export default function DriversManagement() {
 
   const loadDrivers = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/drivers')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/drivers')
       if (data.success) {
-        setDrivers(Array.isArray(data.data) ? data.data : [])
+        setDrivers(Array.isArray(response.data) ? response.data : [])
       }
     } catch (error) {
       console.error('Error loading drivers:', error)

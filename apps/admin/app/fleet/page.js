@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function FleetManagementPage() {
   const router = useRouter()
@@ -40,8 +41,7 @@ export default function FleetManagementPage() {
 
   const fetchVehicles = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/fleet')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/fleet')
       if (data.success) {
         setVehicles(data.data.vehicles || [])
       }
@@ -54,8 +54,7 @@ export default function FleetManagementPage() {
 
   const fetchVehicleTypes = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/vehicle-types')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/vehicle-types')
       if (data.success) {
         setVehicleTypes(data.data.vehicleTypes || [])
       }
@@ -66,8 +65,7 @@ export default function FleetManagementPage() {
 
   const fetchDrivers = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/drivers')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/drivers')
       if (data.success) {
         setDrivers(data.data.drivers || [])
       }
@@ -102,19 +100,12 @@ export default function FleetManagementPage() {
 
     try {
       const url = editingVehicle
-        ? `http://localhost:3001/api/admin/fleet/${editingVehicle.id}`
-        : 'http://localhost:3001/api/admin/fleet'
+        ? `/api/admin/fleet/${editingVehicle.id}`
+        : '/api/admin/fleet'
 
       const method = editingVehicle ? 'PUT' : 'POST'
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      const data = await response.json()
-
+      const {data} = await api[method](url, {payload})
       if (data.success) {
         alert(editingVehicle ? 'Vehicle updated successfully!' : 'Vehicle added successfully!')
         setShowModal(false)
@@ -149,11 +140,7 @@ export default function FleetManagementPage() {
     if (!confirm('Are you sure you want to delete this vehicle?')) return
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/fleet/${id}`, {
-        method: 'DELETE'
-      })
-
-      const data = await response.json()
+      const {data} = await api.delete(`/api/admin/fleet/${id}`)
 
       if (data.success) {
         alert('Vehicle deleted successfully!')

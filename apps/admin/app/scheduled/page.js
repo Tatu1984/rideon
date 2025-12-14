@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function ScheduledRidesPage() {
   const router = useRouter()
@@ -16,8 +17,7 @@ export default function ScheduledRidesPage() {
 
   const fetchScheduledRides = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/scheduled-rides')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/scheduled-rides')
       if (data.success) setRides(data.data.rides || [])
     } catch (error) {
       console.error('Error:', error)
@@ -29,8 +29,7 @@ export default function ScheduledRidesPage() {
   const cancelRide = async (id) => {
     if (!confirm('Cancel this scheduled ride?')) return
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/scheduled-rides/${id}`, { method: 'DELETE' })
-      const data = await response.json()
+      const {data} = await api.delete(`/api/admin/scheduled-rides/${id}`)
       if (data.success) {
         alert('Ride cancelled!')
         fetchScheduledRides()

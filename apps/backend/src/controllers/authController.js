@@ -8,7 +8,7 @@ const authService = require('../services/authService');
 exports.register = async (req, res) => {
   try {
     const { email, password, firstName, lastName, phone, role } = req.body;
-
+    console.log('Registration attempt with data:', { email, firstName, lastName, role });
     // Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
@@ -35,7 +35,7 @@ exports.register = async (req, res) => {
       isVerified: true, // Auto-verify for demo
       isActive: true
     });
-
+    console.log("Created user:", user.toJSON());
     // Create role-specific profile
     if (role === 'rider') {
       await Rider.create({
@@ -81,7 +81,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    console.log(email,password);
     // Find user by email
     const user = await User.findOne({ where: { email } });
 

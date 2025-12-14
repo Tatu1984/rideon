@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function VehicleTypesPage() {
   const router = useRouter()
@@ -33,7 +34,7 @@ export default function VehicleTypesPage() {
 
   const fetchVehicleTypes = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/vehicle-types')
+      const response = await api.get('/api/admin/vehicle-types')
       const data = await response.json()
       if (data.success) {
         setVehicleTypes(data.data.vehicleTypes || [])
@@ -67,17 +68,10 @@ export default function VehicleTypesPage() {
 
     try {
       const url = editingVehicle
-        ? `http://localhost:3001/api/admin/vehicle-types/${editingVehicle.id}`
-        : 'http://localhost:3001/api/admin/vehicle-types'
+        ? `/api/admin/vehicle-types/${editingVehicle.id}`
+        : '/api/admin/vehicle-types'
 
-      const response = await fetch(url, {
-        method: editingVehicle ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      const data = await response.json()
-
+      const {data} = await api[editingVehicle ? 'put' : 'post'](url, payload)
       if (data.success) {
         fetchVehicleTypes()
         closeModal()
@@ -105,12 +99,7 @@ export default function VehicleTypesPage() {
     if (!confirm('Are you sure you want to delete this vehicle type?')) return
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/vehicle-types/${id}`, {
-        method: 'DELETE'
-      })
-
-      const data = await response.json()
-
+      const {data} = await api.delete(`/api/admin/vehicle-types/${id}`)
       if (data.success) {
         fetchVehicleTypes()
       }

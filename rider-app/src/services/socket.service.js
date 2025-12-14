@@ -1,6 +1,21 @@
 import io from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SOCKET_URL } from '../config/constants';
+import Constants from "expo-constants";
+
+const inProduction = process.env.NODE_ENV === "production";
+const inExpo = Constants.expoConfig && Constants.expoConfig.hostUri;
+const inBrowser = typeof document !== "undefined";
+const apiDomain = inProduction
+  ? "rideon.example.com"
+  : inExpo
+  ? `${Constants.expoConfig.hostUri.split(`:`).shift()}:3001`
+  : inBrowser
+  ? `${document.location.hostname}:3001`
+  : "localhost:3001";
+
+const protocol = inProduction ? "https" : "http";
+
+const SOCKET_URL = `${protocol}://${apiDomain}`;
 
 class SocketService {
   constructor() {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function UsersManagementPage() {
   const router = useRouter()
@@ -32,8 +33,7 @@ export default function UsersManagementPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/users')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/users')
       if (data.success) {
         setUsers(data.data.users || data.data || [])
       }
@@ -66,8 +66,8 @@ export default function UsersManagementPage() {
 
     try {
       const url = editingUser
-        ? `http://localhost:3001/api/admin/users/${editingUser.id}`
-        : 'http://localhost:3001/api/admin/users'
+        ? `/api/admin/users/${editingUser.id}`
+        : '/api/admin/users'
 
       const method = editingUser ? 'PUT' : 'POST'
 
@@ -75,13 +75,7 @@ export default function UsersManagementPage() {
         ? formData
         : { ...formData, phone: formData.email, registrationType: 'manual', approvalStatus: 'approved' }
 
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      const data = await response.json()
+      const {data} = await api[method](url, payload)
 
       if (data.success) {
         alert(editingUser ? 'User updated successfully!' : 'User added successfully!')
@@ -98,12 +92,7 @@ export default function UsersManagementPage() {
     if (!confirm('Are you sure you want to delete this user?')) return
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/users/${id}`, {
-        method: 'DELETE'
-      })
-
-      const data = await response.json()
-
+      const {data} = await api.delete(`/api/admin/users/${id}`)
       if (data.success) {
         fetchUsers()
       }

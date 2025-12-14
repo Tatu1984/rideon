@@ -23,7 +23,7 @@ app.set('io', io);
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN.split(','),
+  origin: process.env.CORS_ORIGIN.split(',') || true,
   credentials: true
 }));
 app.use(morgan('combined', { stream: logger.stream }));

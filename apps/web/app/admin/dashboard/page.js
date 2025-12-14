@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import api from '../../services/api'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -31,19 +32,16 @@ export default function AdminDashboard() {
   const loadDashboardData = async () => {
     try {
       // Load users
-      const usersRes = await fetch('http://localhost:3001/api/admin/users')
-      const usersData = await usersRes.json()
-
+      const usersRes = await api.get('/api/admin/users')
       // Load drivers
-      const driversRes = await fetch('http://localhost:3001/api/admin/drivers')
-      const driversData = await driversRes.json()
+      const driversRes = await api.get('/api/admin/drivers')
 
       setStats({
-        totalUsers: usersData.data?.length || 0,
-        totalDrivers: driversData.data?.length || 0,
+        totalUsers: usersRes?.data?.data?.length || 0,
+        totalDrivers: driversRes?.data?.data?.length || 0,
         totalTrips: 0,
         activeTrips: 0,
-        onlineDrivers: driversData.data?.filter(d => d.status === 'online').length || 0,
+        onlineDrivers: driversRes?.data?.data?.filter(d => d.status === 'online').length || 0,
         todayRevenue: 0,
         pendingSupport: 0,
         activeSurgeZones: 0

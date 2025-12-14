@@ -1,10 +1,24 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from "expo-constants";
 
-const API_URL = 'http://192.168.0.158:3001/api';
+const inProduction = process.env.NODE_ENV === "production";
+const inExpo = Constants.expoConfig && Constants.expoConfig.hostUri;
+const inBrowser = typeof document !== "undefined";
+const apiDomain = inProduction
+  ? "rideon.example.com"
+  : inExpo
+  ? `${Constants.expoConfig.hostUri.split(`:`).shift()}:3001/api`
+  : inBrowser
+  ? `${document.location.hostname}:3001/api`
+  : "localhost:3001/api";
+
+const protocol = inProduction ? "https" : "http";
+
+const apiUrl = `${protocol}://${apiDomain}`;
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: apiUrl,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

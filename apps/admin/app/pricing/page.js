@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function PricingManagementPage() {
   const router = useRouter()
@@ -37,8 +38,7 @@ export default function PricingManagementPage() {
 
   const fetchPricingRules = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/pricing')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/pricing')
       if (data.success) {
         setPricingRules(data.data.pricingRules || [])
       }
@@ -90,16 +90,10 @@ export default function PricingManagementPage() {
 
     try {
       const url = editingRule
-        ? `http://localhost:3001/api/admin/pricing/${editingRule.id}`
-        : 'http://localhost:3001/api/admin/pricing'
+        ? `/api/admin/pricing/${editingRule.id}`
+        : '/api/admin/pricing'
 
-      const response = await fetch(url, {
-        method: editingRule ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      const data = await response.json()
+      const {data} = await api[editingRule ? 'PUT' : 'POST'](url, {payload})
 
       if (data.success) {
         fetchPricingRules()
@@ -132,11 +126,7 @@ export default function PricingManagementPage() {
     if (!confirm('Are you sure you want to delete this pricing rule?')) return
 
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/pricing/${id}`, {
-        method: 'DELETE'
-      })
-
-      const data = await response.json()
+      const {data} = await api.delete(`/api/admin/pricing/${id}`)
 
       if (data.success) {
         fetchPricingRules()

@@ -42,7 +42,9 @@ export default function RegisterScreen({ navigation }) {
       email: formData.email,
       phone: formData.phone,
       password: formData.password,
+      role:'rider'
     });
+    console.log(result)
     setLoading(false);
 
     if (!result.success) {

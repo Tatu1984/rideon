@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function EmergencyPage() {
   const router = useRouter()
@@ -16,8 +17,7 @@ export default function EmergencyPage() {
 
   const fetchAlerts = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/admin/emergency-alerts')
-      const data = await response.json()
+      const {data} = await api.get('/api/admin/emergency-alerts')
       if (data.success) setAlerts(data.data.alerts || [])
     } catch (error) {
       console.error('Error:', error)
@@ -28,12 +28,8 @@ export default function EmergencyPage() {
 
   const resolveAlert = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3001/api/admin/emergency-alerts/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'resolved', resolvedAt: new Date() })
-      })
-      const data = await response.json()
+      const {data} = await api.put(`/api/admin/emergency-alerts/${id}`, {
+        status: 'resolved', resolvedAt: new Date() })
       if (data.success) {
         alert('Alert resolved!')
         fetchAlerts()
