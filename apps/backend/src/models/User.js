@@ -34,11 +34,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'rider'
     },
-    totalSpent: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-      defaultValue: 0.00
-    },
     isVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false

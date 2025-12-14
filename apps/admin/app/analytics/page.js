@@ -19,12 +19,12 @@ export default function AnalyticsPage() {
 
   const fetchAnalytics = async () => {
     try {
-      const [overviewRes, revenueRes] = await Promise.all([
+      const [{data:overviewRes}, {data:revenueRes}] = await Promise.all([
         api.get('/api/admin/analytics/overview'),
         api.get('/api/admin/analytics/revenue')
       ])
-      if (overviewRes.success) setOverview(overviewRes?.data?.data)
-      if (revenueRes.success) setRevenueData(revenueRes?.data?.data)
+      if (overviewRes?.success) setOverview(overviewRes?.data)
+      if (revenueRes?.success) setRevenueData(revenueRes?.data)
     } catch (error) {
       console.error('Error:', error)
     } finally {

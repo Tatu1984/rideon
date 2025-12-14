@@ -41,11 +41,6 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: true
       },
-      total_spent:{
-      type: Sequelize.DECIMAL(10, 2),
-      allowNull: false,
-      defaultValue: 0.00
-      },
       last_login_at: {
         type: Sequelize.DATE
       },
