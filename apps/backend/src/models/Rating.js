@@ -67,23 +67,23 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'ratings',
     timestamps: true,
     indexes: [
-      { fields: ['tripId'] },
-      { fields: ['riderId'] },
-      { fields: ['driverId'] }
+      { fields: ['trip_id'] },
+      { fields: ['rider_id'] },
+      { fields: ['driver_id'] }
     ]
   });
 
   Rating.associate = (models) => {
     Rating.belongsTo(models.Trip, {
-      foreignKey: 'tripId',
+      foreignKey: 'trip_id',
       as: 'trip'
     });
     Rating.belongsTo(models.Rider, {
-      foreignKey: 'riderId',
+      foreignKey: 'rider_id',
       as: 'rider'
     });
     Rating.belongsTo(models.Driver, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'driver'
     });
   };

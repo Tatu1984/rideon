@@ -73,19 +73,19 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'vehicles',
     timestamps: true,
     indexes: [
-      { fields: ['driverId'] },
-      { fields: ['licensePlate'] },
-      { fields: ['vehicleType'] }
+      { fields: ['driver_id'] },
+      { fields: ['license_plate'] },
+      { fields: ['vehicle_type'] }
     ]
   });
 
   Vehicle.associate = (models) => {
     Vehicle.belongsTo(models.Driver, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'driver'
     });
     Vehicle.hasMany(models.Trip, {
-      foreignKey: 'vehicleId',
+      foreignKey: 'vehicle_id',
       as: 'trips'
     });
   };

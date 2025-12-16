@@ -41,23 +41,23 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     updatedAt: false,
     indexes: [
-      { fields: ['promoCodeId'] },
-      { fields: ['userId'] },
-      { fields: ['tripId'] }
+      { fields: ['promo_code_id'] },
+      { fields: ['user_id'] },
+      { fields: ['trip_id'] }
     ]
   });
 
   PromoCodeUsage.associate = (models) => {
     PromoCodeUsage.belongsTo(models.PromoCode, {
-      foreignKey: 'promoCodeId',
-      as: 'promoCode'
+      foreignKey: 'promo_code_id',
+      as: 'promo_code'
     });
     PromoCodeUsage.belongsTo(models.User, {
-      foreignKey: 'userId',
+      foreignKey: 'user_id',
       as: 'user'
     });
     PromoCodeUsage.belongsTo(models.Trip, {
-      foreignKey: 'tripId',
+      foreignKey: 'trip_id',
       as: 'trip'
     });
   };

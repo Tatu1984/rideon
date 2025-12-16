@@ -41,15 +41,15 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     updatedAt: false,
     indexes: [
-      { fields: ['tripId'] },
+      { fields: ['trip_id'] },
       { fields: ['status'] },
-      { fields: ['createdAt'] }
+      { fields: ['created_at'] }
     ]
   });
 
   TripStatusHistory.associate = (models) => {
     TripStatusHistory.belongsTo(models.Trip, {
-      foreignKey: 'tripId',
+      foreignKey: 'trip_id',
       as: 'trip'
     });
   };

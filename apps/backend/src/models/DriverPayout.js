@@ -81,19 +81,19 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'driver_payouts',
     timestamps: true,
     indexes: [
-      { fields: ['driverId'] },
+      { fields: ['driver_id'] },
       { fields: ['status'] },
-      { fields: ['periodStart', 'periodEnd'] }
+      { fields: ['period_start', 'period_end'] }
     ]
   });
 
   DriverPayout.associate = (models) => {
     DriverPayout.belongsTo(models.Driver, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'driver'
     });
     DriverPayout.belongsTo(models.User, {
-      foreignKey: 'processedBy',
+      foreignKey: 'processed_by',
       as: 'processor'
     });
   };

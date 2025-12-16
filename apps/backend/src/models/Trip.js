@@ -160,8 +160,8 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'trips',
     timestamps: true,
     indexes: [
-      { fields: ['riderId'] },
-      { fields: ['driverId'] },
+      { fields: ['rider_id'] },
+      { fields: ['driver_id'] },
       { fields: ['status'] },
       { fields: ['requestedAt'] },
       { fields: ['completedAt'] }
@@ -170,27 +170,27 @@ module.exports = (sequelize, DataTypes) => {
 
   Trip.associate = (models) => {
     Trip.belongsTo(models.Rider, {
-      foreignKey: 'riderId',
+      foreignKey: 'rider_id',
       as: 'rider'
     });
     Trip.belongsTo(models.Driver, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'driver'
     });
     Trip.belongsTo(models.Vehicle, {
-      foreignKey: 'vehicleId',
+      foreignKey: 'vehicle_id',
       as: 'vehicle'
     });
     Trip.belongsTo(models.PromoCode, {
-      foreignKey: 'promoCodeId',
-      as: 'promoCode'
+      foreignKey: 'promo_code_id',
+      as: 'promo_code'
     });
     Trip.hasMany(models.TripStatusHistory, {
-      foreignKey: 'tripId',
+      foreignKey: 'trip_id',
       as: 'statusHistory'
     });
     Trip.hasOne(models.Payment, {
-      foreignKey: 'tripId',
+      foreignKey: 'trip_id',
       as: 'payment'
     });
     Trip.hasOne(models.Rating, {

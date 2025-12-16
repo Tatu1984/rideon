@@ -61,19 +61,19 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'driver_documents',
     timestamps: true,
     indexes: [
-      { fields: ['driverId'] },
-      { fields: ['documentType'] },
+      { fields: ['driver_id'] },
+      { fields: ['document_type'] },
       { fields: ['status'] }
     ]
   });
 
   DriverDocument.associate = (models) => {
     DriverDocument.belongsTo(models.Driver, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'driver'
     });
     DriverDocument.belongsTo(models.User, {
-      foreignKey: 'verifiedBy',
+      foreignKey: 'verified_by',
       as: 'verifier'
     });
   };

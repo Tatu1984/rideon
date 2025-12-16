@@ -64,18 +64,18 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     indexes: [
       { fields: ['code'] },
-      { fields: ['isActive'] },
-      { fields: ['validFrom', 'validTo'] }
+      { fields: ['is_active'] },
+      { fields: ['valid_from', 'valid_to'] }
     ]
   });
 
   PromoCode.associate = (models) => {
     PromoCode.hasMany(models.PromoCodeUsage, {
-      foreignKey: 'promoCodeId',
+      foreignKey: 'promo_code_id',
       as: 'usages'
     });
     PromoCode.hasMany(models.Trip, {
-      foreignKey: 'promoCodeId',
+      foreignKey: 'promo_code_id',
       as: 'trips'
     });
   };

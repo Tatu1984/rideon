@@ -65,19 +65,19 @@ module.exports = (sequelize, DataTypes) => {
 
   User.associate = (models) => {
     User.hasOne(models.Rider, {
-      foreignKey: 'userId',
+      foreignKey: 'user_id',
       as: 'riderProfile'
     });
     User.hasOne(models.Driver, {
-      foreignKey: 'userId',
+      foreignKey: 'user_id',
       as: 'driverProfile'
     });
     User.hasMany(models.RefreshToken, {
-      foreignKey: 'userId',
+      foreignKey: 'user_id',
       as: 'refreshTokens'
     });
     User.hasMany(models.Notification, {
-      foreignKey: 'userId',
+      foreignKey: 'user_id',
       as: 'notifications'
     });
   };

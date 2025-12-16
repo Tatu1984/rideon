@@ -38,13 +38,13 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     indexes: [
       { fields: ['city'] },
-      { fields: ['isActive'] }
+      { fields: ['is_active'] }
     ]
   });
 
   Zone.associate = (models) => {
     Zone.hasMany(models.PricingRule, {
-      foreignKey: 'zoneId',
+      foreignKey: 'zone_id',
       as: 'pricingRules'
     });
   };

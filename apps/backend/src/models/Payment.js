@@ -56,15 +56,15 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'payments',
     timestamps: true,
     indexes: [
-      { fields: ['tripId'] },
+      { fields: ['trip_id'] },
       { fields: ['status'] },
-      { fields: ['transactionId'] }
+      { fields: ['transaction_id'] }
     ]
   });
 
   Payment.associate = (models) => {
     Payment.belongsTo(models.Trip, {
-      foreignKey: 'tripId',
+      foreignKey: 'trip_id',
       as: 'trip'
     });
   };

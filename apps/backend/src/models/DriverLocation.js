@@ -43,14 +43,14 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     updatedAt: false,
     indexes: [
-      { fields: ['driverId'] },
-      { fields: ['recordedAt'] }
+      { fields: ['driver_id'] },
+      { fields: ['recorded_at'] }
     ]
   });
 
   DriverLocation.associate = (models) => {
     DriverLocation.belongsTo(models.Driver, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'driver'
     });
   };

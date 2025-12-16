@@ -59,16 +59,16 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'notifications',
     timestamps: true,
     indexes: [
-      { fields: ['userId'] },
+      { fields: ['user_id'] },
       { fields: ['type'] },
-      { fields: ['isRead'] },
-      { fields: ['sentAt'] }
+      { fields: ['is_read'] },
+      { fields: ['sent_at'] }
     ]
   });
 
   Notification.associate = (models) => {
     Notification.belongsTo(models.User, {
-      foreignKey: 'userId',
+      foreignKey: 'user_id',
       as: 'user'
     });
   };

@@ -70,15 +70,15 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'pricing_rules',
     timestamps: true,
     indexes: [
-      { fields: ['zoneId'] },
-      { fields: ['vehicleType'] },
-      { fields: ['isActive'] }
+      { fields: ['zone_id'] },
+      { fields: ['vehicle_type'] },
+      { fields: ['is_active'] }
     ]
   });
 
   PricingRule.associate = (models) => {
     PricingRule.belongsTo(models.Zone, {
-      foreignKey: 'zoneId',
+      foreignKey: 'zone_id',
       as: 'zone'
     });
   };

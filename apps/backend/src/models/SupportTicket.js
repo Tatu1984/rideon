@@ -74,8 +74,8 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'support_tickets',
     timestamps: true,
     indexes: [
-      { fields: ['userId'] },
-      { fields: ['tripId'] },
+      { fields: ['user_id'] },
+      { fields: ['trip_id'] },
       { fields: ['status'] },
       { fields: ['priority'] },
       { fields: ['category'] }
@@ -84,15 +84,15 @@ module.exports = (sequelize, DataTypes) => {
 
   SupportTicket.associate = (models) => {
     SupportTicket.belongsTo(models.User, {
-      foreignKey: 'userId',
+      foreignKey: 'user_id',
       as: 'user'
     });
     SupportTicket.belongsTo(models.Trip, {
-      foreignKey: 'tripId',
+      foreignKey: 'trip_id',
       as: 'trip'
     });
     SupportTicket.belongsTo(models.User, {
-      foreignKey: 'assignedTo',
+      foreignKey: 'assigned_to',
       as: 'assignee'
     });
   };
