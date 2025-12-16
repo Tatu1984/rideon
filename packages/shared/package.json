@@ -1,0 +1,16 @@
+{
+  "name": "@rideon/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities and constants for RideOn platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "rideon",
+    "shared",
+    "utilities"
+  ],
+  "author": "RideOn Team",
+  "license": "MIT"
+}

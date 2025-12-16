@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "name": "rideon-platform",
+  "settings": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build"
+  }
+}

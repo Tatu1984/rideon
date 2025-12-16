@@ -100,4 +100,8 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Export for Vercel serverless
+<<<<<<< HEAD
 module.exports = app;
+=======
+module.exports = app;
+>>>>>>> a1fa6be106185dd55792d0662f12c29c4f1dd3d4

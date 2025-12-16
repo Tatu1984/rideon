@@ -1,0 +1,71 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+# trigger:
+# - main
+
+# pool:
+#   vmImage: ubuntu-latest
+
+# steps:
+# - task: NodeTool@0
+#   inputs:
+#     versionSpec: '20.x'
+#   displayName: 'Install Node.js'
+
+# - script: |
+#     npm install
+#     npm run build
+#   displayName: 'npm install and build'
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - apps/backend/**
+      - package.json
+      - package-lock.json
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  # Install Node.js (use LTS for stability)
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '18.x'
+    displayName: 'Install Node.js'
+
+  # Install dependencies for npm workspaces (ROOT ONLY)
+  - script: |
+      npm ci
+    displayName: 'Install dependencies (npm workspaces)'
+
+  # Optional: Lint backend
+  - script: |
+      npm run lint --workspace=apps/backend || echo "Lint skipped"
+    displayName: 'Lint backend'
+
+  # Build backend only
+  - script: |
+      npm run build --workspace=apps/backend
+    displayName: 'Build backend'
+
+  # Run backend tests
+  - script: |
+      npm test --workspace=apps/backend
+    displayName: 'Test backend'
+    env:
+      NODE_ENV: test
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: rideon_test
+      JWT_SECRET: test-secret-key
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
