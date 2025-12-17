@@ -1,40 +1,43 @@
 // Test endpoint to debug login flow
 module.exports = async (req, res) => {
+  // Set CORS immediately
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
   // Wrap EVERYTHING in try/catch from the start
   try {
+    // Access body FIRST, before any other requires that might interfere
+    const body = req.body;
+    const { email, password } = body || {};
+
     require('pg');
 
     const path = require('path');
     const backendDir = path.join(__dirname, '..');
 
     const results = {
-      version: 'v2-login-test',
+      version: 'v3-login-test-body-first',
       method: req.method,
       url: req.url,
       contentType: req.headers['content-type'],
       body: {
-        exists: !!req.body,
-        type: typeof req.body,
-        value: req.body
+        exists: !!body,
+        type: typeof body,
+        value: body
       }
     };
-
-    // Set CORS
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') {
-      res.status(200).end();
-      return;
-    }
 
     if (req.method !== 'POST') {
       return res.json({ ...results, error: 'Use POST method' });
     }
 
     // Step 1: Test body access
-    const { email, password } = req.body || {};
     results.receivedEmail = email;
     results.receivedPassword = password ? '***' : 'undefined';
     results.step1 = 'Body accessed OK';
@@ -103,7 +106,7 @@ module.exports = async (req, res) => {
   } catch (e) {
     // Catch any error anywhere in the function
     res.status(500).json({
-      version: 'v2-login-test',
+      version: 'v3-login-test-body-first',
       error: e.message,
       stack: e.stack ? e.stack.split('\n').slice(0, 5) : null,
       name: e.name
