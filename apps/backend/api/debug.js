@@ -4,7 +4,7 @@ require('pg');
 
 module.exports = async (req, res) => {
   const results = {
-    debugVersion: 'v4-2025-12-17T07:00',
+    debugVersion: 'v5-body-parse-fix',
     timestamp: new Date().toISOString(),
     env: {
       NODE_ENV: process.env.NODE_ENV,
