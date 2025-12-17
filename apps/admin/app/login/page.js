@@ -7,7 +7,7 @@ import api from '../../services/api'
 export default function AdminLogin() {
   const router = useRouter()
   const [email, setEmail] = useState('admin@rideon.com')
-  const [password, setPassword] = useState('admin123')
+  const [password, setPassword] = useState('password123')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -17,26 +17,43 @@ export default function AdminLogin() {
     setError('')
 
     try {
-      const {data} = await api.post('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
+      const response = await api.post('/api/auth/login', { email, password })
+      console.log('Login response:', response) // Debug logging
 
-      if (data.success && data.data.user.role === 'admin') {
-        // Store token and user info
-        localStorage.setItem('rideon_admin_token', data.data.accessToken)
-        localStorage.setItem('rideon_admin_user', JSON.stringify(data.data.user))
-
-        // Redirect to dashboard
-        router.push('/')
-      } else if (data.success && data.data.user.role !== 'admin') {
-        setError('Access denied. Admin credentials required.')
-      } else {
-        setError(data.message || 'Login failed')
+      // Check if we got a successful response from the API wrapper
+      if (!response.success) {
+        setError(response.error || 'Login failed')
+        return
       }
+
+      // Check if backend returned success
+      const backendData = response.data
+      if (!backendData?.success) {
+        setError(backendData?.error?.message || backendData?.message || 'Invalid credentials')
+        return
+      }
+
+      // Get user data
+      const userData = backendData.data
+      const user = userData?.user
+
+      if (!user) {
+        setError('Invalid response from server')
+        return
+      }
+
+      // Check if user is admin
+      if (user.role !== 'admin') {
+        setError('Access denied. Admin credentials required.')
+        return
+      }
+
+      // Store token and user info
+      localStorage.setItem('rideon_admin_token', userData.accessToken)
+      localStorage.setItem('rideon_admin_user', JSON.stringify(user))
+
+      // Redirect to dashboard
+      router.push('/')
     } catch (error) {
       setError('Failed to login. Please try again.')
       console.error('Login error:', error)
@@ -117,10 +134,10 @@ export default function AdminLogin() {
 
           {/* Demo Credentials */}
           <div className="mt-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
-            <p className="text-xs font-semibold text-purple-900 mb-2">🔑 Demo Admin Credentials:</p>
+            <p className="text-xs font-semibold text-purple-900 mb-2">Demo Admin Credentials:</p>
             <div className="text-xs text-purple-800 space-y-1 font-mono">
               <p>Email: admin@rideon.com</p>
-              <p>Password: admin123</p>
+              <p>Password: password123</p>
             </div>
             <p className="text-xs text-purple-600 mt-2">
               ⚠️ For demo purposes only. Change in production.
