@@ -59,9 +59,12 @@ const config = {
         rejectUnauthorized: false
       }
     },
+    connection: {
+        options: `project=${process.env.NEON_PROJECT_ID}`
+    },
     pool: {
-      max: 30,
-      min: 10,
+      max: 5,
+      min: 0,
       acquire: 30000,
       idle: 10000
     }
