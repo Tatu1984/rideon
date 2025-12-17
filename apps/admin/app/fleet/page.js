@@ -191,13 +191,8 @@ export default function FleetManagementPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <button onClick={() => router.push('/')} className="text-purple-600 hover:text-purple-700">
-              ← Back to Dashboard
-            </button>
-            <h1 className="text-2xl font-bold text-gray-900">Fleet Management</h1>
-          </div>
+        <div className="px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900">Fleet Management</h1>
           <button
             onClick={() => {
               setEditingVehicle(null)
@@ -212,7 +207,7 @@ export default function FleetManagementPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
           <div className="text-center py-12">
             <div className="text-gray-500">Loading vehicles...</div>

@@ -93,15 +93,12 @@ export default function WalletPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center space-x-4">
-            <button onClick={() => router.push('/')} className="text-purple-600 hover:text-purple-700">← Back</button>
-            <h1 className="text-2xl font-bold text-gray-900">Wallet & Payouts</h1>
-          </div>
+        <div className="px-4 sm:px-6 lg:px-8 py-4">
+          <h1 className="text-2xl font-bold text-gray-900">Wallet & Payouts</h1>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex space-x-4 mb-6">
           <button onClick={() => setActiveTab('riders')}
             className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'riders' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700'}`}>

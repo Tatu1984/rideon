@@ -45,7 +45,6 @@ export default function AdminDashboard() {
   const [selectedTrip, setSelectedTrip] = useState(null)
   const [revenueData, setRevenueData] = useState([])
   const [loading, setLoading] = useState(true)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [viewMode, setViewMode] = useState('live') // 'live' or 'analytics'
 
   useEffect(() => {
@@ -213,102 +212,47 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
-      {/* Fixed Sidebar */}
-      <aside className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-40 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
-          {!sidebarCollapsed && (
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-xl">R</span>
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-gray-900">RideOn</h1>
-                <p className="text-xs text-gray-500">Admin Panel</p>
-              </div>
-            </div>
-          )}
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
-          >
-            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sidebarCollapsed ? "M13 5l7 7-7 7M5 5l7 7-7 7" : "M11 19l-7-7 7-7M19 19l-7-7 7-7"} />
-            </svg>
-          </button>
+    <div className="min-h-screen bg-gray-100">
+      {/* Top Bar */}
+      <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-30">
+        {/* Quick Stats */}
+        <div className="flex items-center space-x-6">
+          <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+          <div className="h-6 w-px bg-gray-200"></div>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-gray-700">{activeTrips.length} Active Trips</span>
+          </div>
+          <div className="h-6 w-px bg-gray-200"></div>
+          <div className="text-sm text-gray-600">
+            <span className="font-medium text-green-600">{onlineDrivers.filter(d => d.status === 'available').length}</span> drivers online
+          </div>
+          <div className="h-6 w-px bg-gray-200"></div>
+          <div className="text-sm text-gray-600">
+            Revenue: <span className="font-medium text-purple-600">${stats.totalRevenue.toFixed(2)}</span>
+          </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="p-2 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]">
-          {menuItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => item.onClick ? item.onClick() : router.push(item.path)}
-              className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition ${
-                item.active
-                  ? 'bg-purple-50 text-purple-700'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-              title={sidebarCollapsed ? item.name : ''}
-            >
-              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {getIcon(item.icon)}
-              </svg>
-              {!sidebarCollapsed && <span className="text-sm font-medium">{item.name}</span>}
-            </button>
-          ))}
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-        {/* Top Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-30">
-          {/* Quick Stats */}
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-gray-700">{activeTrips.length} Active Trips</span>
-            </div>
-            <div className="h-6 w-px bg-gray-200"></div>
-            <div className="text-sm text-gray-600">
-              <span className="font-medium text-green-600">{onlineDrivers.filter(d => d.status === 'available').length}</span> drivers online
-            </div>
-            <div className="h-6 w-px bg-gray-200"></div>
-            <div className="text-sm text-gray-600">
-              Revenue: <span className="font-medium text-purple-600">${stats.totalRevenue.toFixed(2)}</span>
-            </div>
+        {/* User Menu */}
+        <div className="flex items-center space-x-4">
+          <button className="relative p-2 text-gray-400 hover:text-gray-600 transition">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            {stats.openTickets > 0 && (
+              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+                {stats.openTickets}
+              </span>
+            )}
+          </button>
+          <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+            <span className="text-purple-600 font-medium text-sm">A</span>
           </div>
+        </div>
+      </header>
 
-          {/* User Menu */}
-          <div className="flex items-center space-x-4">
-            <button className="relative p-2 text-gray-400 hover:text-gray-600 transition">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              {stats.openTickets > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                  {stats.openTickets}
-                </span>
-              )}
-            </button>
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                <span className="text-purple-600 font-medium text-sm">A</span>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Dashboard Content */}
-        <main className="p-6">
+      {/* Dashboard Content */}
+      <main className="p-6">
           {/* KPI Cards Row */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
@@ -408,7 +352,6 @@ export default function AdminDashboard() {
             </div>
           </div>
         </main>
-      </div>
 
       {/* Add Leaflet CSS */}
       <style jsx global>{`

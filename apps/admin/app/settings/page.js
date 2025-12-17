@@ -84,13 +84,8 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <button onClick={() => router.push('/')} className="text-purple-600 hover:text-purple-700">
-              ← Back to Dashboard
-            </button>
-            <h1 className="text-2xl font-bold text-gray-900">System Settings</h1>
-          </div>
+        <div className="px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900">System Settings</h1>
           <button
             onClick={handleSaveSettings}
             disabled={saving || loading}
@@ -102,7 +97,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           {/* Company Information */}
           <div className="bg-white rounded-lg shadow p-6">
