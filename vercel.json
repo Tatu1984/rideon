@@ -1,9 +1,13 @@
 {
   "version": 2,
+  "installCommand": "cd apps/backend && npm install",
   "builds": [
     {
       "src": "apps/backend/api/**/*.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["apps/backend/**"]
+      }
     }
   ],
   "routes": [

@@ -4,6 +4,7 @@ require('pg');
 
 module.exports = async (req, res) => {
   const results = {
+    debugVersion: 'v4-2025-12-17T07:00',
     timestamp: new Date().toISOString(),
     env: {
       NODE_ENV: process.env.NODE_ENV,
@@ -83,7 +84,7 @@ module.exports = async (req, res) => {
         results.tests.routes[routeFile] = `BAD EXPORT - type: ${typeof route}`;
       }
     } catch (e) {
-      results.tests.routes[routeFile] = `FAILED: ${e.message}`;
+      results.tests.routes[routeFile] = `FAILED: ${e.message} | Stack: ${e.stack ? e.stack.split('\n')[1] : 'N/A'}`;
     }
   }
 
@@ -98,7 +99,7 @@ module.exports = async (req, res) => {
     const routes = require('../src/routes');
     results.tests.routesIndex = 'OK';
   } catch (e) {
-    results.tests.routesIndex = `FAILED: ${e.message}`;
+    results.tests.routesIndex = `FAILED: ${e.message} | Stack: ${e.stack ? e.stack.split('\n').slice(0, 5).join(' >>> ') : 'N/A'}`;
   }
 
   // Test 8: Can we require the error handler?
