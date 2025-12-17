@@ -6,19 +6,21 @@
 const express = require('express');
 const router = express.Router();
 const settingsController = require('../controllers/settingsController');
-const { authenticate, authorize } = require('../middleware/auth');
+const auth = require('../middleware/auth');
+const roleCheck = require('../middleware/roleCheck');
 
 // Public route - get public settings (no auth required)
 router.get('/public', settingsController.getPublicSettings);
 
-// Protected routes - require authentication
-router.use(authenticate);
+// Protected routes - require authentication and admin role
+router.use(auth);
+router.use(roleCheck(['admin']));
 
 // Admin-only routes
-router.get('/', authorize('admin'), settingsController.getAllSettings);
-router.get('/category/:category', authorize('admin'), settingsController.getSettingsByCategory);
-router.put('/', authorize('admin'), settingsController.updateSettings);
-router.put('/:key', authorize('admin'), settingsController.updateSetting);
-router.delete('/:key', authorize('admin'), settingsController.deleteSetting);
+router.get('/', settingsController.getAllSettings);
+router.get('/category/:category', settingsController.getSettingsByCategory);
+router.put('/', settingsController.updateSettings);
+router.put('/:key', settingsController.updateSetting);
+router.delete('/:key', settingsController.deleteSetting);
 
 module.exports = router;
