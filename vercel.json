@@ -10,18 +10,18 @@
       }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/test",
-      "dest": "apps/backend/api/test.js"
+      "source": "/test",
+      "destination": "/apps/backend/api/test.js"
     },
     {
-      "src": "/debug",
-      "dest": "apps/backend/api/debug.js"
+      "source": "/debug",
+      "destination": "/apps/backend/api/debug.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "apps/backend/api/index.js"
+      "source": "/(.*)",
+      "destination": "/apps/backend/api/index.js"
     }
   ],
   "headers": [
