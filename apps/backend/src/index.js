@@ -33,15 +33,23 @@ app.options('*', cors());
 app.use(cookieParser());
 app.use(morgan('combined', { stream: logger.stream }));
 
-// Custom body parser that handles Vercel's pre-parsed body
-app.use((req, res, next) => {
-  // If body is already parsed by Vercel (as object), skip express.json()
-  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
-    return next();
-  }
-  // Otherwise use express.json()
-  express.json()(req, res, next);
-});
+// Check if running in Vercel serverless environment
+const isVercel = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
+
+// Body parsing middleware - Vercel pre-parses JSON bodies
+if (isVercel) {
+  // In Vercel, body is already parsed, just ensure it's an object
+  app.use((req, res, next) => {
+    // Body should already be parsed by Vercel
+    if (!req.body) {
+      req.body = {};
+    }
+    next();
+  });
+} else {
+  // In local dev, use express.json() normally
+  app.use(express.json());
+}
 app.use(express.urlencoded({ extended: true }));
 
 // Security middleware
