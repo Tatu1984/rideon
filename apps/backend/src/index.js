@@ -32,7 +32,16 @@ app.use(cors({
 app.options('*', cors());
 app.use(cookieParser());
 app.use(morgan('combined', { stream: logger.stream }));
-app.use(express.json());
+
+// Custom body parser that handles Vercel's pre-parsed body
+app.use((req, res, next) => {
+  // If body is already parsed by Vercel (as object), skip express.json()
+  if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+    return next();
+  }
+  // Otherwise use express.json()
+  express.json()(req, res, next);
+});
 app.use(express.urlencoded({ extended: true }));
 
 // Security middleware
