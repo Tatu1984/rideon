@@ -50,14 +50,20 @@ function initializeSocket(server) {
       const driver = await Driver.findOne({ where: { userId: socket.user.id } });
       if (driver) {
         socket.join(`driver:${driver.id}`);
+        // Also join by userId for matching service notifications
+        socket.join(`driver:${socket.user.id}`);
         socket.driverId = driver.id;
 
         // Notify that driver is online
-        socket.broadcast.emit('driver:online', {
+        const onlineData = {
           driverId: driver.id,
           latitude: driver.currentLatitude,
-          longitude: driver.currentLongitude
-        });
+          longitude: driver.currentLongitude,
+          timestamp: new Date()
+        };
+        socket.broadcast.emit('driver:online', onlineData);
+        // Also notify admin room
+        io.to('admin').emit('driver:online', onlineData);
       }
     }
 
@@ -69,6 +75,20 @@ function initializeSocket(server) {
         socket.riderId = rider.id;
       }
     }
+
+    // If admin, automatically join admin room
+    if (socket.user.role === 'admin') {
+      socket.join('admin');
+      console.log(`Admin ${socket.user.id} joined admin room`);
+    }
+
+    // Allow explicit admin room join (for admin users)
+    socket.on('admin:join', () => {
+      if (socket.user.role === 'admin') {
+        socket.join('admin');
+        console.log(`Admin ${socket.user.id} joined admin room`);
+      }
+    });
 
     // Driver location update
     socket.on('driver:location-update', async (data) => {
@@ -140,12 +160,17 @@ function initializeSocket(server) {
     socket.on('trip:status-update', (data) => {
       const { tripId, status } = data;
 
-      // Broadcast status update to all users in trip room
-      io.to(`trip:${tripId}`).emit('trip:status-updated', {
+      const statusData = {
         tripId,
         status,
         timestamp: new Date()
-      });
+      };
+
+      // Broadcast status update to all users in trip room
+      io.to(`trip:${tripId}`).emit('trip:status-updated', statusData);
+
+      // Also notify admin room for dashboard updates
+      io.to('admin').emit('trip:status-updated', statusData);
     });
 
     // Send message (chat between driver and rider)
@@ -206,10 +231,13 @@ function initializeSocket(server) {
 
       // If driver disconnects, broadcast offline status
       if (socket.user.role === 'driver' && socket.driverId) {
-        socket.broadcast.emit('driver:offline', {
+        const offlineData = {
           driverId: socket.driverId,
           timestamp: new Date()
-        });
+        };
+        socket.broadcast.emit('driver:offline', offlineData);
+        // Also notify admin room
+        io.to('admin').emit('driver:offline', offlineData);
       }
     });
 

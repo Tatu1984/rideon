@@ -76,6 +76,9 @@ module.exports = (sequelize, DataTypes) => {
     availableBalance: {
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0.00
+    },
+    stripeAccountId: {
+      type: DataTypes.STRING
     }
   }, {
     tableName: 'drivers',

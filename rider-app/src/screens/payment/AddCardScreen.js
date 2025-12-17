@@ -1,82 +1,55 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Switch } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { CardField, useStripe, useConfirmSetupIntent } from '@stripe/stripe-react-native';
+import PaymentService from '../../services/payment.service';
 
 export default function AddCardScreen({ navigation }) {
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardHolder, setCardHolder] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [saveCard, setSaveCard] = useState(true);
-  const [setAsDefault, setSetAsDefault] = useState(false);
+  const { createPaymentMethod } = useStripe();
+  const { confirmSetupIntent } = useConfirmSetupIntent();
 
-  const formatCardNumber = (text) => {
-    // Remove non-digits
-    const cleaned = text.replace(/\D/g, '');
-    // Add space every 4 digits
-    const formatted = cleaned.match(/.{1,4}/g)?.join(' ') || cleaned;
-    return formatted.slice(0, 19); // Max 16 digits + 3 spaces
-  };
+  const [cardComplete, setCardComplete] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [setAsDefault, setSetAsDefault] = useState(true);
 
-  const formatExpiry = (text) => {
-    // Remove non-digits
-    const cleaned = text.replace(/\D/g, '');
-    // Add slash after 2 digits
-    if (cleaned.length >= 2) {
-      return cleaned.slice(0, 2) + '/' + cleaned.slice(2, 4);
-    }
-    return cleaned;
-  };
-
-  const handleCardNumberChange = (text) => {
-    setCardNumber(formatCardNumber(text));
-  };
-
-  const handleExpiryChange = (text) => {
-    setExpiryDate(formatExpiry(text));
-  };
-
-  const handleCvvChange = (text) => {
-    setCvv(text.replace(/\D/g, '').slice(0, 4));
-  };
-
-  const detectCardType = () => {
-    const number = cardNumber.replace(/\s/g, '');
-    if (number.startsWith('4')) return 'visa';
-    if (number.startsWith('5')) return 'mastercard';
-    if (number.startsWith('3')) return 'amex';
-    return 'unknown';
-  };
-
-  const handleSaveCard = () => {
-    if (!cardNumber || !cardHolder || !expiryDate || !cvv) {
-      alert('Please fill in all fields');
+  const handleAddCard = async () => {
+    if (!cardComplete) {
+      Alert.alert('Error', 'Please complete the card details');
       return;
     }
 
-    // Validate card number (basic check)
-    if (cardNumber.replace(/\s/g, '').length < 13) {
-      alert('Please enter a valid card number');
-      return;
-    }
+    setLoading(true);
 
-    // Validate expiry
-    if (expiryDate.length !== 5) {
-      alert('Please enter a valid expiry date (MM/YY)');
-      return;
-    }
+    try {
+      // Create a payment method with Stripe
+      const { paymentMethod, error } = await createPaymentMethod({
+        paymentMethodType: 'Card',
+      });
 
-    // Validate CVV
-    if (cvv.length < 3) {
-      alert('Please enter a valid CVV');
-      return;
-    }
+      if (error) {
+        Alert.alert('Error', error.message);
+        setLoading(false);
+        return;
+      }
 
-    alert('Card added successfully!');
-    navigation.goBack();
+      // Save the payment method to our backend
+      await PaymentService.savePaymentMethod(paymentMethod.id, setAsDefault);
+
+      Alert.alert(
+        'Success',
+        'Card added successfully!',
+        [{ text: 'OK', onPress: () => navigation.goBack() }]
+      );
+    } catch (error) {
+      console.error('Error adding card:', error);
+      Alert.alert(
+        'Error',
+        error.response?.data?.error?.message || 'Failed to add card. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const cardType = detectCardType();
 
   return (
     <View style={styles.container}>
@@ -90,124 +63,42 @@ export default function AddCardScreen({ navigation }) {
       </View>
 
       <ScrollView style={styles.content}>
-        {/* Card Preview */}
-        <View style={styles.cardPreview}>
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardBrand}>
-                {cardType === 'visa' ? 'VISA' : cardType === 'mastercard' ? 'MASTERCARD' : cardType === 'amex' ? 'AMEX' : ''}
-              </Text>
-              <Ionicons name="card" size={32} color="#FFFFFF" opacity={0.8} />
-            </View>
-            <Text style={styles.cardNumberPreview}>
-              {cardNumber || '•••• •••• •••• ••••'}
-            </Text>
-            <View style={styles.cardFooter}>
-              <View>
-                <Text style={styles.cardLabel}>Card Holder</Text>
-                <Text style={styles.cardValue}>
-                  {cardHolder || 'YOUR NAME'}
-                </Text>
-              </View>
-              <View>
-                <Text style={styles.cardLabel}>Expires</Text>
-                <Text style={styles.cardValue}>
-                  {expiryDate || 'MM/YY'}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
+        {/* Card Input Section */}
+        <View style={styles.cardSection}>
+          <Text style={styles.sectionTitle}>Card Details</Text>
+          <Text style={styles.sectionSubtitle}>
+            Enter your card information securely
+          </Text>
 
-        {/* Card Form */}
-        <View style={styles.formSection}>
-          <Text style={styles.formLabel}>Card Number</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="1234 5678 9012 3456"
-            value={cardNumber}
-            onChangeText={handleCardNumberChange}
-            keyboardType="number-pad"
-            maxLength={19}
-          />
-        </View>
-
-        <View style={styles.formSection}>
-          <Text style={styles.formLabel}>Card Holder Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="John Doe"
-            value={cardHolder}
-            onChangeText={setCardHolder}
-            autoCapitalize="words"
-          />
-        </View>
-
-        <View style={styles.formRow}>
-          <View style={[styles.formSection, { flex: 1 }]}>
-            <Text style={styles.formLabel}>Expiry Date</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="MM/YY"
-              value={expiryDate}
-              onChangeText={handleExpiryChange}
-              keyboardType="number-pad"
-              maxLength={5}
+          <View style={styles.cardFieldContainer}>
+            <CardField
+              postalCodeEnabled={true}
+              placeholders={{
+                number: '4242 4242 4242 4242',
+              }}
+              cardStyle={styles.cardFieldStyle}
+              style={styles.cardField}
+              onCardChange={(cardDetails) => {
+                setCardComplete(cardDetails.complete);
+              }}
             />
           </View>
-
-          <View style={[styles.formSection, { flex: 1 }]}>
-            <Text style={styles.formLabel}>CVV</Text>
-            <View style={styles.cvvContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="123"
-                value={cvv}
-                onChangeText={handleCvvChange}
-                keyboardType="number-pad"
-                secureTextEntry
-                maxLength={4}
-              />
-              <TouchableOpacity style={styles.cvvInfo}>
-                <Ionicons name="information-circle-outline" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
-          </View>
         </View>
 
-        {/* Options */}
-        <View style={styles.optionsCard}>
-          <View style={styles.optionRow}>
-            <View style={styles.optionLeft}>
-              <Ionicons name="save-outline" size={20} color="#7C3AED" />
-              <Text style={styles.optionText}>Save this card</Text>
-            </View>
-            <Switch
-              value={saveCard}
-              onValueChange={setSaveCard}
-              trackColor={{ false: '#E5E7EB', true: '#C4B5FD' }}
-              thumbColor={saveCard ? '#7C3AED' : '#9CA3AF'}
+        {/* Set as Default Option */}
+        <TouchableOpacity
+          style={styles.optionRow}
+          onPress={() => setSetAsDefault(!setAsDefault)}
+        >
+          <View style={styles.optionLeft}>
+            <Ionicons
+              name={setAsDefault ? "checkmark-circle" : "ellipse-outline"}
+              size={24}
+              color={setAsDefault ? "#7C3AED" : "#9CA3AF"}
             />
+            <Text style={styles.optionText}>Set as default payment method</Text>
           </View>
-
-          {saveCard && (
-            <>
-              <View style={styles.divider} />
-              <View style={styles.optionRow}>
-                <View style={styles.optionLeft}>
-                  <Ionicons name="checkmark-circle-outline" size={20} color="#7C3AED" />
-                  <Text style={styles.optionText}>Set as default payment</Text>
-                </View>
-                <Switch
-                  value={setAsDefault}
-                  onValueChange={setSetAsDefault}
-                  trackColor={{ false: '#E5E7EB', true: '#C4B5FD' }}
-                  thumbColor={setAsDefault ? '#7C3AED' : '#9CA3AF'}
-                />
-              </View>
-            </>
-          )}
-        </View>
+        </TouchableOpacity>
 
         {/* Security Info */}
         <View style={styles.securityCard}>
@@ -215,10 +106,16 @@ export default function AddCardScreen({ navigation }) {
           <View style={styles.securityInfo}>
             <Text style={styles.securityTitle}>Your card is secure</Text>
             <Text style={styles.securityText}>
-              We use bank-level encryption to protect your payment information.
-              Your CVV is never stored.
+              Your payment details are encrypted and securely processed by Stripe.
+              We never store your full card number.
             </Text>
           </View>
+        </View>
+
+        {/* Stripe Badge */}
+        <View style={styles.stripeBadge}>
+          <Ionicons name="lock-closed" size={16} color="#6B7280" />
+          <Text style={styles.stripeBadgeText}>Powered by Stripe</Text>
         </View>
 
         {/* Accepted Cards */}
@@ -246,12 +143,16 @@ export default function AddCardScreen({ navigation }) {
         <TouchableOpacity
           style={[
             styles.submitButton,
-            (!cardNumber || !cardHolder || !expiryDate || !cvv) && styles.submitButtonDisabled,
+            (!cardComplete || loading) && styles.submitButtonDisabled,
           ]}
-          onPress={handleSaveCard}
-          disabled={!cardNumber || !cardHolder || !expiryDate || !cvv}
+          onPress={handleAddCard}
+          disabled={!cardComplete || loading}
         >
-          <Text style={styles.submitButtonText}>Add Card</Text>
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.submitButtonText}>Add Card</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -289,109 +190,58 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
-  cardPreview: {
-    padding: 16,
-  },
-  card: {
-    backgroundColor: '#7C3AED',
+  cardSection: {
+    backgroundColor: '#FFFFFF',
+    margin: 16,
+    padding: 20,
     borderRadius: 16,
-    padding: 24,
-    height: 200,
-    justifyContent: 'space-between',
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cardBrand: {
+  sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FFFFFF',
-    letterSpacing: 2,
-  },
-  cardNumberPreview: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    letterSpacing: 2,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  cardLabel: {
-    fontSize: 10,
-    color: '#E9D5FF',
+    color: '#1F2937',
     marginBottom: 4,
-    textTransform: 'uppercase',
   },
-  cardValue: {
+  sectionSubtitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  formSection: {
-    marginHorizontal: 16,
+    color: '#6B7280',
     marginBottom: 20,
   },
-  formRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginHorizontal: 16,
-    marginBottom: 20,
-  },
-  formLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 15,
-    color: '#1F2937',
+  cardFieldContainer: {
     borderWidth: 1,
     borderColor: '#E5E7EB',
+    borderRadius: 12,
+    overflow: 'hidden',
   },
-  cvvContainer: {
-    position: 'relative',
+  cardField: {
+    width: '100%',
+    height: 50,
   },
-  cvvInfo: {
-    position: 'absolute',
-    right: 12,
-    top: 16,
-  },
-  optionsCard: {
+  cardFieldStyle: {
     backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 16,
-    borderRadius: 16,
+    textColor: '#1F2937',
+    fontSize: 16,
+    placeholderColor: '#9CA3AF',
   },
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 12,
   },
   optionLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
     gap: 12,
   },
   optionText: {
     fontSize: 15,
     fontWeight: '500',
     color: '#1F2937',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#E5E7EB',
-    marginVertical: 12,
   },
   securityCard: {
     flexDirection: 'row',
@@ -415,6 +265,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#047857',
     lineHeight: 18,
+  },
+  stripeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginVertical: 16,
+  },
+  stripeBadgeText: {
+    fontSize: 12,
+    color: '#6B7280',
   },
   acceptedCards: {
     marginHorizontal: 16,

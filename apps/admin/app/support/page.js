@@ -51,9 +51,10 @@ export default function SupportTicketsPage() {
 
   const fetchTickets = async () => {
     try {
-      const {data} = await api.get('/api/admin/tickets')
-      if (data.success) {
-        setTickets(data.data.tickets || [])
+      const response = await api.admin.getSupportTickets()
+      if (response.success) {
+        const ticketsList = response.data?.data?.tickets || response.data?.tickets || []
+        setTickets(Array.isArray(ticketsList) ? ticketsList : [])
       }
     } catch (error) {
       console.error('Error fetching tickets:', error)
@@ -105,13 +106,15 @@ export default function SupportTicketsPage() {
 
   const handleUpdateStatus = async (ticketId, newStatus) => {
     try {
-      const {data} = await api.put(`/api/admin/tickets/${ticketId}`,{ status: newStatus })
-      if (data.success) {
+      const response = await api.admin.updateSupportTicket(ticketId, { status: newStatus })
+      if (response.success) {
         alert(`Ticket ${newStatus}!`)
         fetchTickets()
         if (selectedTicket && selectedTicket.id === ticketId) {
           fetchTicketDetails(ticketId)
         }
+      } else {
+        alert(response.error || 'Error updating ticket')
       }
     } catch (error) {
       console.error('Error updating ticket:', error)

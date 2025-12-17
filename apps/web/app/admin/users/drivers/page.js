@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import api from '../../../services/api'
+import { useToast } from '@/components/ui/Toast'
 
 export default function DriversManagement() {
+  const toast = useToast()
   const [drivers, setDrivers] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -18,9 +20,9 @@ export default function DriversManagement() {
 
   const loadDrivers = async () => {
     try {
-      const {data} = await api.get('/api/admin/drivers')
-      if (data.success) {
-        setDrivers(Array.isArray(response.data) ? response.data : [])
+      const response = await api.get('/api/admin/drivers')
+      if (response.data?.success) {
+        setDrivers(Array.isArray(response.data.data) ? response.data.data : [])
       }
     } catch (error) {
       console.error('Error loading drivers:', error)
@@ -193,7 +195,7 @@ export default function DriversManagement() {
 
       {/* Add Driver Modal */}
       {showAddModal && (
-        <AddDriverModal onClose={() => setShowAddModal(false)} onSuccess={loadDrivers} />
+        <AddDriverModal onClose={() => setShowAddModal(false)} onSuccess={loadDrivers} toast={toast} />
       )}
     </div>
   )
@@ -239,7 +241,7 @@ function StatBox({ title, value, icon, color }) {
   )
 }
 
-function AddDriverModal({ onClose, onSuccess }) {
+function AddDriverModal({ onClose, onSuccess, toast }) {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -295,7 +297,7 @@ function AddDriverModal({ onClose, onSuccess }) {
 
       const data = await response.json()
       if (data.success) {
-        alert('Driver added successfully with all documents!')
+        toast.success('Driver added successfully with all documents!')
         onSuccess()
         onClose()
       } else {

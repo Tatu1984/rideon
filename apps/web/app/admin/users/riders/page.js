@@ -2,8 +2,10 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import api from '../../../services/api'
+import { useToast } from '@/components/ui/Toast'
 
 export default function RidersManagement() {
+  const toast = useToast()
   const [riders, setRiders] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -161,7 +163,7 @@ export default function RidersManagement() {
 
       {/* Add Rider Modal */}
       {showAddModal && (
-        <AddRiderModal onClose={() => setShowAddModal(false)} onSuccess={loadRiders} />
+        <AddRiderModal onClose={() => setShowAddModal(false)} onSuccess={loadRiders} toast={toast} />
       )}
     </div>
   )
@@ -190,7 +192,7 @@ function StatBox({ title, value, icon, color }) {
   )
 }
 
-function AddRiderModal({ onClose, onSuccess }) {
+function AddRiderModal({ onClose, onSuccess, toast }) {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -215,7 +217,7 @@ function AddRiderModal({ onClose, onSuccess }) {
 
       const data = await response.json()
       if (data.success) {
-        alert('Rider added successfully!')
+        toast.success('Rider added successfully!')
         onSuccess()
         onClose()
       } else {

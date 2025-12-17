@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { tripAPI } from '../services/api.service';
 import socketService from '../services/socket.service';
 import ErrorModal from '../components/ErrorModal';
@@ -11,6 +11,9 @@ export const TripProvider = ({ children }) => {
   const [tripHistory, setTripHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [driverLocation, setDriverLocation] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [socketConnected, setSocketConnected] = useState(false);
 
   useEffect(() => {
     initializeSocket();
@@ -18,56 +21,103 @@ export const TripProvider = ({ children }) => {
     loadTripHistory();
 
     return () => {
-      socketService.off('trip:updated');
-      socketService.off('driver:location');
-      socketService.off('driver:arrived');
-      socketService.off('trip:started');
-      socketService.off('trip:completed');
+      cleanupSocketListeners();
     };
   }, []);
-    const handleError = (error) => {
+
+  // Re-join trip room when activeTrip changes
+  useEffect(() => {
+    if (activeTrip?.id) {
+      socketService.joinTrip(activeTrip.id);
+    }
+  }, [activeTrip?.id]);
+
+  const cleanupSocketListeners = () => {
+    socketService.off('trip:updated');
+    socketService.off('trip:driver-location');
+    socketService.off('trip:accepted');
+    socketService.off('trip:status-updated');
+    socketService.off('trip:message-received');
+    socketService.off('trip:emergency-alert');
+    socketService.off('trip:cancelled');
+  };
+
+  const handleError = (error) => {
     const errorMessage = error.response?.data?.message || 'An error occurred. Please try again.';
     setError(errorMessage);
     return { success: false, error: errorMessage };
   };
+
   const initializeSocket = async () => {
     await socketService.connect();
+    setSocketConnected(socketService.isConnected());
 
+    // General trip update
     socketService.on('trip:updated', (trip) => {
-      console.log('Trip updated:', trip);
+      console.log('📍 Trip updated:', trip);
       setActiveTrip(trip);
     });
 
-    socketService.on('driver:location', (location) => {
-      if (activeTrip) {
-        setActiveTrip((prev) => ({
+    // Driver location updates
+    socketService.on('trip:driver-location', (location) => {
+      console.log('🚗 Driver location:', location);
+      setDriverLocation(location);
+      setActiveTrip((prev) => prev ? ({
+        ...prev,
+        driverLocation: location,
+      }) : prev);
+    });
+
+    // Trip accepted by driver
+    socketService.on('trip:accepted', (data) => {
+      console.log('✅ Trip accepted:', data);
+      setActiveTrip((prev) => prev ? ({
+        ...prev,
+        status: 'accepted',
+        driverId: data.driverId,
+      }) : prev);
+    });
+
+    // Status updates (arrived, in_progress, completed)
+    socketService.on('trip:status-updated', (data) => {
+      console.log('🔄 Trip status updated:', data);
+      if (data.status === 'completed') {
+        setActiveTrip(null);
+        setDriverLocation(null);
+        setMessages([]);
+        loadTripHistory();
+      } else {
+        setActiveTrip((prev) => prev ? ({
           ...prev,
-          driverLocation: location,
-        }));
+          status: data.status,
+        }) : prev);
       }
     });
 
-    socketService.on('driver:arrived', () => {
-      if (activeTrip) {
-        setActiveTrip((prev) => ({
-          ...prev,
-          status: 'arrived',
-        }));
+    // Chat messages from driver
+    socketService.on('trip:message-received', (data) => {
+      console.log('💬 Message received:', data);
+      if (data.senderRole !== 'rider') {
+        setMessages((prev) => [...prev, {
+          id: Date.now(),
+          message: data.message,
+          sender: data.senderRole,
+          timestamp: data.timestamp,
+        }]);
       }
     });
 
-    socketService.on('trip:started', () => {
-      if (activeTrip) {
-        setActiveTrip((prev) => ({
-          ...prev,
-          status: 'started',
-        }));
-      }
+    // Emergency alerts
+    socketService.on('trip:emergency-alert', (data) => {
+      console.log('🚨 Emergency alert:', data);
     });
 
-    socketService.on('trip:completed', (trip) => {
+    // Trip cancelled by driver
+    socketService.on('trip:cancelled', (data) => {
+      console.log('❌ Trip cancelled:', data);
       setActiveTrip(null);
-      loadTripHistory();
+      setDriverLocation(null);
+      setMessages([]);
     });
   };
 
@@ -153,17 +203,40 @@ export const TripProvider = ({ children }) => {
     }
   };
 
+  const sendMessage = useCallback((message) => {
+    if (activeTrip?.id) {
+      socketService.sendMessage(activeTrip.id, message);
+      setMessages((prev) => [...prev, {
+        id: Date.now(),
+        message,
+        sender: 'rider',
+        timestamp: new Date().toISOString(),
+      }]);
+    }
+  }, [activeTrip?.id]);
+
+  const triggerSOS = useCallback((location) => {
+    if (activeTrip?.id) {
+      socketService.triggerSOS(activeTrip.id, location);
+    }
+  }, [activeTrip?.id]);
+
   return (
     <TripContext.Provider
       value={{
         activeTrip,
         tripHistory,
         loading,
+        driverLocation,
+        messages,
+        socketConnected,
         requestTrip,
         cancelTrip,
         rateTrip,
         getEstimate,
         loadTripHistory,
+        sendMessage,
+        triggerSOS,
         error,
         clearError: () => setError(null),
       }}

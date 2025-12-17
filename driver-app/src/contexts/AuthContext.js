@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authAPI } from '../services/api.service';
+import SecureStorageService from '../services/secureStorage.service';
 
 const AuthContext = createContext({});
 
@@ -14,14 +14,16 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await SecureStorageService.getAccessToken();
       if (token) {
         const response = await authAPI.getProfile();
-        setUser(response.data.data);
+        const userData = response.data.data || response.data;
+        setUser(userData);
+        await SecureStorageService.setUserData(userData);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      await AsyncStorage.removeItem('token');
+      await SecureStorageService.clearTokens();
     } finally {
       setLoading(false);
     }
@@ -33,19 +35,23 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login(email, password);
       console.log('🟢 LOGIN RESPONSE:', JSON.stringify(response.data, null, 2));
 
-      const { token, driver } = response.data.data;
-      console.log('🟢 TOKEN:', token);
-      console.log('🟢 DRIVER:', JSON.stringify(driver, null, 2));
+      const data = response.data.data || response.data;
+      const accessToken = data.token || data.accessToken;
+      const refreshToken = data.refreshToken;
+      const driver = data.driver || data.user;
 
-      await AsyncStorage.setItem('token', token);
+      // Store tokens securely
+      await SecureStorageService.setTokens(accessToken, refreshToken);
+      if (driver?.id) {
+        await SecureStorageService.setUserId(driver.id);
+      }
+      await SecureStorageService.setUserData(driver);
       setUser(driver);
 
       console.log('✅ LOGIN SUCCESS');
       return { success: true };
     } catch (error) {
       console.error('🔴 LOGIN ERROR:', error);
-      console.error('🔴 ERROR RESPONSE:', error.response?.data);
-      console.error('🔴 ERROR MESSAGE:', error.message);
       return {
         success: false,
         error: error.response?.data?.message || error.message || 'Login failed'
@@ -56,9 +62,17 @@ export const AuthProvider = ({ children }) => {
   const register = async (data) => {
     try {
       const response = await authAPI.register(data);
-      const { token, driver } = response.data.data;
+      const responseData = response.data.data || response.data;
+      const accessToken = responseData.token || responseData.accessToken;
+      const refreshToken = responseData.refreshToken;
+      const driver = responseData.driver || responseData.user;
 
-      await AsyncStorage.setItem('token', token);
+      // Store tokens securely
+      await SecureStorageService.setTokens(accessToken, refreshToken);
+      if (driver?.id) {
+        await SecureStorageService.setUserId(driver.id);
+      }
+      await SecureStorageService.setUserData(driver);
       setUser(driver);
 
       return { success: true };
@@ -71,7 +85,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('token');
+    await SecureStorageService.clearAll();
     setUser(null);
   };
 

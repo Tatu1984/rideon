@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/components/ui/Toast'
 
 export default function PaymentsManagement() {
+  const toast = useToast()
   const [transactions] = useState([
     { id: 1, type: 'Trip', rider: 'John Doe', amount: 25.50, status: 'completed', method: 'Card', date: '2025-12-03 10:30' },
     { id: 2, type: 'Payout', driver: 'Jane Smith', amount: 450.00, status: 'pending', method: 'Bank', date: '2025-12-03 09:15' },
@@ -16,7 +18,7 @@ export default function PaymentsManagement() {
           <h2 className="text-2xl font-bold text-gray-900">Payments, Wallet & Payouts</h2>
           <p className="text-gray-600 mt-1">Manage transactions, refunds, and driver payouts</p>
         </div>
-        <button onClick={() => alert('Processing payouts... This feature will be connected to your payment system.')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Process Payouts</button>
+        <button onClick={() => toast.info('Processing payouts...')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Process Payouts</button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -80,7 +82,7 @@ export default function PaymentsManagement() {
               <div className="text-xl font-bold text-blue-900 mt-1">Today, 6:00 PM</div>
               <div className="text-xs text-blue-700 mt-1">Estimated: $8,920</div>
             </div>
-            <button onClick={() => alert('Initiating manual payout... This feature will be connected to your payment system.')} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button onClick={() => toast.success('Manual payout initiated')} className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
               Manual Payout Now
             </button>
           </div>

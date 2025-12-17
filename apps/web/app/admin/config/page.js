@@ -1,6 +1,9 @@
 'use client'
 
+import { useToast } from '@/components/ui/Toast'
+
 export default function SystemConfiguration() {
+  const toast = useToast()
   return (
     <div className="space-y-6">
       <div>
@@ -71,7 +74,7 @@ export default function SystemConfiguration() {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-gray-900">Save Configuration</h3>
-          <button onClick={() => alert('Configuration saved successfully! All changes have been applied to the platform.')} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button onClick={() => toast.success('Configuration saved successfully!')} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             Save All Changes
           </button>
         </div>

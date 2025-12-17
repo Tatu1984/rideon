@@ -1,6 +1,7 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
+<<<<<<< HEAD
 // Initialize Sequelize with the connection string
 const sequelize = new Sequelize(config.url, {
   dialect: 'postgres',
@@ -18,6 +19,41 @@ const db = {
   sequelize,
   Sequelize
 };
+=======
+let sequelize;
+
+// Use DATABASE_URL if available (for Neon DB, Vercel, etc.)
+if (process.env.DATABASE_URL) {
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
+  });
+} else {
+  // Fallback to individual env vars
+  const config = require('../config/database');
+  const env = process.env.NODE_ENV || 'development';
+  const dbConfig = config[env];
+
+  sequelize = new Sequelize(
+    dbConfig.database,
+    dbConfig.username,
+    dbConfig.password,
+    dbConfig
+  );
+}
+>>>>>>> origin/main
 
 // Import all models
 db.User = require('./User')(sequelize, Sequelize.DataTypes);
@@ -37,7 +73,10 @@ db.Notification = require('./Notification')(sequelize, Sequelize.DataTypes);
 db.DriverLocation = require('./DriverLocation')(sequelize, Sequelize.DataTypes);
 db.RefreshToken = require('./RefreshToken')(sequelize, Sequelize.DataTypes);
 db.SupportTicket = require('./SupportTicket')(sequelize, Sequelize.DataTypes);
+db.SupportMessage = require('./SupportMessage')(sequelize, Sequelize.DataTypes);
 db.DriverPayout = require('./DriverPayout')(sequelize, Sequelize.DataTypes);
+db.DriverReferral = require('./DriverReferral')(sequelize, Sequelize.DataTypes);
+db.SystemSettings = require('./SystemSettings')(sequelize, Sequelize.DataTypes);
 
 // Set up associations after all models are loaded
 Object.keys(db).forEach(modelName => {

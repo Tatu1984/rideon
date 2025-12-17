@@ -1,8 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/components/ui/Toast'
+import { useConfirm } from '@/components/ui/ConfirmModal'
 
 export default function SupportManagement() {
+  const toast = useToast()
+  const confirm = useConfirm()
   const [tickets] = useState([
     { id: 1, subject: 'Driver not found', user: 'John Doe', type: 'rider', priority: 'high', status: 'open', created: '10 mins ago' },
     { id: 2, subject: 'Payment issue', user: 'Jane Smith', type: 'driver', priority: 'medium', status: 'in-progress', created: '1 hour ago' },
@@ -16,7 +20,7 @@ export default function SupportManagement() {
           <h2 className="text-2xl font-bold text-gray-900">Support & Issue Management</h2>
           <p className="text-gray-600 mt-1">Handle support tickets, lost items, and emergency assistance</p>
         </div>
-        <button onClick={() => alert('Opening Emergency Queue - This will show all active emergency alerts and SOS requests.')} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+        <button onClick={() => toast.warning('Opening Emergency Queue...')} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
           🚨 Emergency Queue
         </button>
       </div>
@@ -96,7 +100,15 @@ export default function SupportManagement() {
                 <span className="text-xs text-red-700">3 mins ago</span>
               </div>
               <p className="text-sm text-red-800">Trip #5432 - Rider: Sarah Johnson</p>
-              <button onClick={() => alert('Handling Emergency for Trip #5432 - Contacting rider and driver, alerting authorities if needed.')} className="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
+              <button onClick={async () => {
+                const confirmed = await confirm({
+                  title: 'Handle Emergency',
+                  message: 'This will contact the rider and driver, and alert authorities if needed. Proceed?',
+                  type: 'danger',
+                  confirmText: 'Handle Now'
+                })
+                if (confirmed) toast.success('Emergency response initiated for Trip #5432')
+              }} className="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
                 Handle Emergency
               </button>
             </div>

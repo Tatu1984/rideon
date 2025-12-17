@@ -1,9 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import api from '../../services/api'
+import { useSocket } from '@/components/providers/SocketProvider'
 
 export default function AdminDashboard() {
+  const { isConnected, joinAdminRoom, subscribe } = useSocket()
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalDrivers: 0,
@@ -20,14 +22,66 @@ export default function AdminDashboard() {
     api: 'healthy',
     database: 'healthy',
     payments: 'healthy',
-    maps: 'healthy'
+    maps: 'healthy',
+    socket: isConnected ? 'healthy' : 'degraded'
   })
+
+  // Update socket health status
+  useEffect(() => {
+    setSystemHealth(prev => ({
+      ...prev,
+      socket: isConnected ? 'healthy' : 'degraded'
+    }))
+  }, [isConnected])
 
   useEffect(() => {
     loadDashboardData()
-    const interval = setInterval(loadDashboardData, 30000) // Refresh every 30s
+    // Poll less frequently when socket is connected
+    const interval = setInterval(loadDashboardData, isConnected ? 60000 : 30000)
     return () => clearInterval(interval)
-  }, [])
+  }, [isConnected])
+
+  // Socket event handlers for real-time updates
+  useEffect(() => {
+    if (!isConnected) return
+
+    joinAdminRoom()
+
+    // Listen for driver status changes
+    const unsubOnline = subscribe('driver:online', () => {
+      setStats(prev => ({ ...prev, onlineDrivers: prev.onlineDrivers + 1 }))
+    })
+
+    const unsubOffline = subscribe('driver:offline', () => {
+      setStats(prev => ({ ...prev, onlineDrivers: Math.max(0, prev.onlineDrivers - 1) }))
+    })
+
+    // Listen for new trips
+    const unsubNewTrip = subscribe('trip:new-request', (data) => {
+      setRecentTrips(prev => [{
+        id: data.tripId,
+        rider: data.riderName || 'New Rider',
+        route: `${data.pickupAddress || 'Pickup'} → ${data.dropoffAddress || 'Dropoff'}`
+      }, ...prev.slice(0, 4)])
+      setStats(prev => ({ ...prev, totalTrips: prev.totalTrips + 1 }))
+    })
+
+    // Listen for trip status updates
+    const unsubStatus = subscribe('trip:status-updated', (data) => {
+      if (data.status === 'in_progress') {
+        setStats(prev => ({ ...prev, activeTrips: prev.activeTrips + 1 }))
+      } else if (data.status === 'completed' || data.status === 'cancelled') {
+        setStats(prev => ({ ...prev, activeTrips: Math.max(0, prev.activeTrips - 1) }))
+      }
+    })
+
+    return () => {
+      unsubOnline()
+      unsubOffline()
+      unsubNewTrip()
+      unsubStatus()
+    }
+  }, [isConnected, joinAdminRoom, subscribe])
 
   const loadDashboardData = async () => {
     try {
@@ -119,6 +173,7 @@ export default function AdminDashboard() {
             <HealthItem name="Database" status={systemHealth.database} />
             <HealthItem name="Payment Gateway" status={systemHealth.payments} />
             <HealthItem name="Maps Service" status={systemHealth.maps} />
+            <HealthItem name="Socket Server" status={systemHealth.socket} />
           </div>
         </div>
       </div>
@@ -213,14 +268,20 @@ function TripItem({ trip }) {
 }
 
 function HealthItem({ name, status }) {
-  const isHealthy = status === 'healthy'
+  const statusConfig = {
+    healthy: { color: 'bg-green-500', textColor: 'text-green-600', label: 'Healthy' },
+    degraded: { color: 'bg-yellow-500', textColor: 'text-yellow-600', label: 'Degraded' },
+    down: { color: 'bg-red-500', textColor: 'text-red-600', label: 'Down' }
+  }
+  const config = statusConfig[status] || statusConfig.down
+
   return (
     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
       <span className="text-sm font-medium text-gray-700">{name}</span>
       <div className="flex items-center space-x-2">
-        <span className={`w-2 h-2 rounded-full ${isHealthy ? 'bg-green-500' : 'bg-red-500'}`}></span>
-        <span className={`text-xs font-medium ${isHealthy ? 'text-green-600' : 'text-red-600'}`}>
-          {isHealthy ? 'Healthy' : 'Down'}
+        <span className={`w-2 h-2 rounded-full ${config.color}`}></span>
+        <span className={`text-xs font-medium ${config.textColor}`}>
+          {config.label}
         </span>
       </div>
     </div>

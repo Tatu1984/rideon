@@ -1,8 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { useToast } from '@/components/ui/Toast'
+import { useConfirm } from '@/components/ui/ConfirmModal'
+import { useSocket } from '@/components/providers/SocketProvider'
 
 export default function WarRoom() {
+  const toast = useToast()
+  const confirm = useConfirm()
+  const { isConnected, joinAdminRoom, subscribe, emit } = useSocket()
   const [liveStats, setLiveStats] = useState({
     activeTrips: 0,
     onlineDrivers: 0,
@@ -11,19 +17,103 @@ export default function WarRoom() {
     emergencies: 0,
     avgETA: '5m'
   })
+  const [incidents, setIncidents] = useState([])
+  const [onlineDriversList, setOnlineDriversList] = useState([])
 
-  useEffect(() => {
-    // Real-time updates every 3 seconds
-    const interval = setInterval(() => {
+  // Load initial stats
+  const loadStats = useCallback(async () => {
+    try {
+      const [tripsRes, driversRes] = await Promise.all([
+        fetch('http://localhost:3001/api/admin/trips?status=active'),
+        fetch('http://localhost:3001/api/admin/drivers')
+      ])
+      const tripsData = await tripsRes.json()
+      const driversData = await driversRes.json()
+
+      const onlineDrivers = driversData?.data?.filter(d => d.status === 'online') || []
+
       setLiveStats(prev => ({
         ...prev,
-        activeTrips: Math.floor(Math.random() * 50) + 20,
-        onlineDrivers: Math.floor(Math.random() * 200) + 150,
-        waitingRiders: Math.floor(Math.random() * 30) + 5,
+        activeTrips: tripsData?.data?.length || 0,
+        onlineDrivers: onlineDrivers.length,
+        waitingRiders: 0, // Would come from pending trip requests
       }))
-    }, 3000)
-    return () => clearInterval(interval)
+      setOnlineDriversList(onlineDrivers)
+    } catch (error) {
+      console.error('Error loading stats:', error)
+    }
   }, [])
+
+  useEffect(() => {
+    loadStats()
+
+    // Fallback polling when not connected
+    if (!isConnected) {
+      const interval = setInterval(loadStats, 5000)
+      return () => clearInterval(interval)
+    }
+  }, [isConnected, loadStats])
+
+  // Socket event handlers
+  useEffect(() => {
+    if (!isConnected) return
+
+    // Join admin room
+    joinAdminRoom()
+
+    // Listen for driver online/offline
+    const unsubOnline = subscribe('driver:online', (data) => {
+      setLiveStats(prev => ({ ...prev, onlineDrivers: prev.onlineDrivers + 1 }))
+      setOnlineDriversList(prev => [...prev, { id: data.driverId, lat: data.latitude, lng: data.longitude }])
+    })
+
+    const unsubOffline = subscribe('driver:offline', (data) => {
+      setLiveStats(prev => ({ ...prev, onlineDrivers: Math.max(0, prev.onlineDrivers - 1) }))
+      setOnlineDriversList(prev => prev.filter(d => d.id !== data.driverId))
+    })
+
+    // Listen for new trip requests
+    const unsubNewTrip = subscribe('trip:new-request', () => {
+      setLiveStats(prev => ({ ...prev, waitingRiders: prev.waitingRiders + 1 }))
+    })
+
+    // Listen for trip accepted
+    const unsubAccepted = subscribe('trip:accepted', () => {
+      setLiveStats(prev => ({
+        ...prev,
+        activeTrips: prev.activeTrips + 1,
+        waitingRiders: Math.max(0, prev.waitingRiders - 1)
+      }))
+    })
+
+    // Listen for trip completed
+    const unsubStatus = subscribe('trip:status-updated', (data) => {
+      if (data.status === 'completed' || data.status === 'cancelled') {
+        setLiveStats(prev => ({ ...prev, activeTrips: Math.max(0, prev.activeTrips - 1) }))
+      }
+    })
+
+    // Listen for emergency alerts
+    const unsubEmergency = subscribe('trip:emergency-alert', (data) => {
+      setLiveStats(prev => ({ ...prev, emergencies: prev.emergencies + 1 }))
+      setIncidents(prev => [{
+        severity: 'high',
+        title: `SOS Alert - Trip #${data.tripId}`,
+        description: data.message || 'Emergency button activated',
+        time: 'Just now'
+      }, ...prev.slice(0, 9)])
+      toast.error(`EMERGENCY: Trip #${data.tripId}`)
+    })
+
+    return () => {
+      unsubOnline()
+      unsubOffline()
+      unsubNewTrip()
+      unsubAccepted()
+      unsubStatus()
+      unsubEmergency()
+    }
+  }, [isConnected, joinAdminRoom, subscribe, toast])
 
   return (
     <div className="space-y-6">
@@ -33,11 +123,21 @@ export default function WarRoom() {
           <p className="text-gray-600 mt-1">Real-time monitoring and manual controls</p>
         </div>
         <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2 px-3 py-2 bg-green-100 rounded-lg">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            <span className="text-sm font-medium text-green-900">System Online</span>
+          <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg ${isConnected ? 'bg-green-100' : 'bg-yellow-100'}`}>
+            <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></span>
+            <span className={`text-sm font-medium ${isConnected ? 'text-green-900' : 'text-yellow-900'}`}>
+              {isConnected ? 'Live Connected' : 'Polling Mode'}
+            </span>
           </div>
-          <button onClick={() => alert('Emergency Override Activated - This will trigger emergency protocols and notify all stakeholders.')} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+          <button onClick={async () => {
+            const confirmed = await confirm({
+              title: 'Emergency Override',
+              message: 'This will trigger emergency protocols and notify all stakeholders. Are you sure?',
+              type: 'danger',
+              confirmText: 'Activate'
+            })
+            if (confirmed) toast.warning('Emergency Override Activated')
+          }} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
             Emergency Override
           </button>
         </div>
@@ -102,10 +202,10 @@ export default function WarRoom() {
                 </div>
               </div>
               <div className="flex space-x-2">
-                <button onClick={() => alert('Surge pricing applied! The selected zone will now have increased pricing.')} className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                <button onClick={() => toast.success('Surge pricing applied!')} className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
                   Apply Surge
                 </button>
-                <button onClick={() => alert('Surge pricing cleared. Zone returned to normal pricing.')} className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                <button onClick={() => toast.info('Surge pricing cleared')} className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
                   Clear
                 </button>
               </div>
@@ -185,7 +285,7 @@ function LiveStatCard({ title, value, icon, color }) {
   )
 }
 
-function ActionButton({ label, icon, color }) {
+function ActionButton({ label, icon, color, toast }) {
   const colors = {
     blue: 'bg-blue-600 hover:bg-blue-700',
     green: 'bg-green-600 hover:bg-green-700',
@@ -193,7 +293,10 @@ function ActionButton({ label, icon, color }) {
     gray: 'bg-gray-600 hover:bg-gray-700',
   }
   return (
-    <button onClick={() => alert(`${label} - This action will be executed immediately and affect the entire system.`)} className={`w-full px-4 py-3 ${colors[color]} text-white rounded-lg transition flex items-center justify-between`}>
+    <button onClick={() => {
+      // In production, these would execute actual system commands
+      console.log(`Executing: ${label}`)
+    }} className={`w-full px-4 py-3 ${colors[color]} text-white rounded-lg transition flex items-center justify-between`}>
       <span className="font-medium">{label}</span>
       <span className="text-xl">{icon}</span>
     </button>

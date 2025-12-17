@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import api from '../../services/api'
 
 export default function SettingsPage() {
   const router = useRouter()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const [settings, setSettings] = useState({
     companyName: 'RideOn',
     supportEmail: 'support@rideon.com',
@@ -24,12 +27,31 @@ export default function SettingsPage() {
 
   useEffect(() => {
     checkAuth()
+    fetchSettings()
   }, [])
 
   const checkAuth = () => {
     const token = localStorage.getItem('rideon_admin_token')
     if (!token) {
       router.push('/login')
+    }
+  }
+
+  const fetchSettings = async () => {
+    try {
+      const { success, data } = await api.get('/api/settings')
+      if (success && data.settings) {
+        // Flatten the categorized settings into our state format
+        const flatSettings = {}
+        Object.values(data.settings).forEach(categorySettings => {
+          Object.assign(flatSettings, categorySettings)
+        })
+        setSettings(prev => ({ ...prev, ...flatSettings }))
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -41,10 +63,21 @@ export default function SettingsPage() {
     }))
   }
 
-  const handleSaveSettings = () => {
-    // In real app, this would save to backend
-    alert('Settings saved successfully!')
-    console.log('Saved settings:', settings)
+  const handleSaveSettings = async () => {
+    setSaving(true)
+    try {
+      const { success, error } = await api.put('/api/settings', { settings })
+      if (success) {
+        alert('Settings saved successfully!')
+      } else {
+        alert('Failed to save settings: ' + (error || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      alert('Failed to save settings')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -60,9 +93,10 @@ export default function SettingsPage() {
           </div>
           <button
             onClick={handleSaveSettings}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
+            disabled={saving || loading}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save Settings
+            {saving ? 'Saving...' : 'Save Settings'}
           </button>
         </div>
       </div>

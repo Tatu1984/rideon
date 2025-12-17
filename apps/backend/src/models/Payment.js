@@ -23,12 +23,18 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     status: {
-      type: DataTypes.ENUM('pending', 'processing', 'completed', 'failed', 'refunded'),
+      type: DataTypes.ENUM('pending', 'processing', 'completed', 'failed', 'refunded', 'disputed'),
       defaultValue: 'pending'
     },
     transactionId: {
       type: DataTypes.STRING,
       unique: true
+    },
+    stripeChargeId: {
+      type: DataTypes.STRING
+    },
+    disputeReason: {
+      type: DataTypes.TEXT
     },
     paymentGateway: {
       type: DataTypes.STRING

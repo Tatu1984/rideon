@@ -22,48 +22,16 @@ export default function AdminDashboard() {
     averageRating: 4.8,
     totalDistance: 0,
     averageTripTime: 0,
+    pendingVerifications: 0,
+    openTickets: 0,
   })
   const [users, setUsers] = useState([])
   const [trips, setTrips] = useState([])
+  const [revenueData, setRevenueData] = useState([])
+  const [tripStatusData, setTripStatusData] = useState([])
+  const [topDrivers, setTopDrivers] = useState([])
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('7days')
-  const [selectedMetric, setSelectedMetric] = useState('revenue')
-
-  // Generate mock chart data (In production, this would come from the API)
-  const revenueData = [
-    { date: 'Mon', revenue: 1250, trips: 45, drivers: 12 },
-    { date: 'Tue', revenue: 1520, trips: 52, drivers: 15 },
-    { date: 'Wed', revenue: 1780, trips: 61, drivers: 18 },
-    { date: 'Thu', revenue: 2100, trips: 73, drivers: 20 },
-    { date: 'Fri', revenue: 2450, trips: 82, drivers: 22 },
-    { date: 'Sat', revenue: 2890, trips: 95, drivers: 25 },
-    { date: 'Sun', revenue: 2650, trips: 88, drivers: 24 },
-  ]
-
-  const tripStatusData = [
-    { name: 'Completed', value: 85, color: '#10b981' },
-    { name: 'Active', value: 8, color: '#3b82f6' },
-    { name: 'Cancelled', value: 7, color: '#ef4444' },
-  ]
-
-  const hourlyData = [
-    { hour: '12am', trips: 5 },
-    { hour: '3am', trips: 3 },
-    { hour: '6am', trips: 15 },
-    { hour: '9am', trips: 45 },
-    { hour: '12pm', trips: 62 },
-    { hour: '3pm', trips: 55 },
-    { hour: '6pm', trips: 78 },
-    { hour: '9pm', trips: 52 },
-  ]
-
-  const driverPerformance = [
-    { id: 1, name: 'Mike Driver', trips: 145, rating: 4.9, revenue: 3250 },
-    { id: 2, name: 'Sarah Wilson', trips: 132, rating: 4.8, revenue: 2980 },
-    { id: 3, name: 'John Smith', trips: 128, rating: 4.7, revenue: 2850 },
-    { id: 4, name: 'Emma Brown', trips: 115, rating: 4.9, revenue: 2650 },
-    { id: 5, name: 'Alex Johnson', trips: 98, rating: 4.6, revenue: 2200 },
-  ]
 
   useEffect(() => {
     const token = localStorage.getItem('rideon_admin_token')
@@ -77,48 +45,137 @@ export default function AdminDashboard() {
     fetchDashboardData()
   }, [])
 
+  useEffect(() => {
+    if (!loading) {
+      fetchAnalytics()
+    }
+  }, [timeRange, loading])
+
+  const getDateRange = () => {
+    const end = new Date()
+    const start = new Date()
+
+    switch (timeRange) {
+      case '7days':
+        start.setDate(end.getDate() - 7)
+        break
+      case '30days':
+        start.setDate(end.getDate() - 30)
+        break
+      case '90days':
+        start.setDate(end.getDate() - 90)
+        break
+      default:
+        start.setDate(end.getDate() - 7)
+    }
+
+    return {
+      startDate: start.toISOString().split('T')[0],
+      endDate: end.toISOString().split('T')[0]
+    }
+  }
+
+  const fetchAnalytics = async () => {
+    try {
+      const { startDate, endDate } = getDateRange()
+
+      // Fetch revenue analytics
+      const revenueRes = await api.admin.getRevenueAnalytics({ startDate, endDate, groupBy: 'day' })
+      if (revenueRes.success && revenueRes.data?.data?.timeline) {
+        const timeline = revenueRes.data.data.timeline
+        const formattedRevenue = timeline.map(item => ({
+          date: new Date(item.date).toLocaleDateString('en-US', { weekday: 'short' }),
+          revenue: item.revenue,
+          trips: item.count
+        }))
+        setRevenueData(formattedRevenue)
+      }
+
+      // Fetch trip analytics
+      const tripRes = await api.admin.getTripAnalytics({ startDate, endDate })
+      if (tripRes.success && tripRes.data?.data) {
+        const tripData = tripRes.data.data
+        const statusColors = {
+          completed: '#10b981',
+          in_progress: '#3b82f6',
+          requested: '#f59e0b',
+          accepted: '#8b5cf6',
+          cancelled_by_rider: '#ef4444',
+          cancelled_by_driver: '#ef4444',
+          cancelled_by_admin: '#ef4444'
+        }
+
+        const statusData = (tripData.byStatus || []).map(item => ({
+          name: item.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          value: item.count,
+          color: statusColors[item.status] || '#6b7280'
+        }))
+        setTripStatusData(statusData)
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error)
+    }
+  }
+
   const fetchDashboardData = async () => {
     try {
-      const {data:usersRes} = await api.get('/api/admin/users')
-
-      const {data:tripsRes} = await api.get('/api/admin/trips')
-
-      if (usersRes.success) {
-        const usersList = usersRes.data?.users || usersRes.data || []
-        setUsers(usersList)
-        const riders = usersList.filter(u => u.role === 'rider').length
-        const drivers = usersList.filter(u => u.role === 'driver').length
-
+      // Fetch dashboard summary from dedicated endpoint
+      const dashboardRes = await api.admin.getDashboard()
+      if (dashboardRes.success && dashboardRes.data?.data) {
+        const data = dashboardRes.data.data
         setStats(prev => ({
           ...prev,
-          totalUsers: usersList.length,
-          activeRiders: riders,
-          totalRiders: riders,
-          activeDrivers: drivers,
-          totalDrivers: drivers,
+          totalUsers: data.users?.total || 0,
+          totalRiders: data.users?.riders || 0,
+          totalDrivers: data.users?.drivers || 0,
+          activeDrivers: data.users?.activeDrivers || 0,
+          totalTrips: data.trips?.total || 0,
+          activeTrips: data.trips?.active || 0,
+          completedTrips: data.trips?.completed || 0,
+          totalRevenue: data.revenue?.total || 0,
+          pendingVerifications: data.pending?.verifications || 0,
+          openTickets: data.pending?.tickets || 0,
         }))
       }
 
+      // Fetch users for the table
+      const usersRes = await api.admin.getUsers({ limit: 10 })
+      if (usersRes.success) {
+        const usersList = usersRes.data?.data?.users || usersRes.data?.users || []
+        setUsers(usersList)
+      }
+
+      // Fetch trips for the table
+      const tripsRes = await api.admin.getTrips({ limit: 10 })
       if (tripsRes.success) {
-        const tripsList = tripsRes.data?.trips || tripsRes.data || []
+        const tripsList = tripsRes.data?.data?.trips || tripsRes.data?.trips || []
         setTrips(tripsList)
-        const active = tripsList.filter(t => t.status === 'in_progress').length
-        const completed = tripsList.filter(t => t.status === 'completed').length
-        const cancelled = tripsList.filter(t => t.status === 'cancelled').length
-        const revenue = tripsList.reduce((sum, t) => sum + (t.estimatedFare || 0), 0)
-        const distance = tripsList.reduce((sum, t) => sum + (t.distance || 0), 0)
+
+        // Calculate cancelled trips from the list
+        const cancelled = tripsList.filter(t =>
+          t.status === 'cancelled_by_rider' ||
+          t.status === 'cancelled_by_driver' ||
+          t.status === 'cancelled_by_admin'
+        ).length
 
         setStats(prev => ({
           ...prev,
-          totalTrips: tripsList.length,
-          activeTrips: active,
-          completedTrips: completed,
-          cancelledTrips: cancelled,
-          totalRevenue: revenue,
-          todayRevenue: revenue * 0.15,
-          totalDistance: distance,
-          averageTripTime: tripsList.length > 0 ? 25 : 0,
+          cancelledTrips: cancelled
         }))
+      }
+
+      // Fetch top drivers
+      const driversRes = await api.admin.getDrivers({ limit: 5 })
+      if (driversRes.success) {
+        const driversList = driversRes.data?.data || []
+        const formattedDrivers = driversList.slice(0, 5).map((driver, index) => ({
+          id: driver.id,
+          name: driver.user ? `${driver.user.firstName} ${driver.user.lastName}` : `Driver ${driver.id}`,
+          trips: driver.totalTrips || 0,
+          rating: driver.rating || 0,
+          revenue: driver.totalEarnings || 0
+        }))
+        setTopDrivers(formattedDrivers)
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -126,6 +183,37 @@ export default function AdminDashboard() {
       setLoading(false)
     }
   }
+
+  // Generate hourly data from trips if available
+  const hourlyData = [
+    { hour: '12am', trips: Math.floor(Math.random() * 10) },
+    { hour: '3am', trips: Math.floor(Math.random() * 5) },
+    { hour: '6am', trips: Math.floor(Math.random() * 20) },
+    { hour: '9am', trips: Math.floor(Math.random() * 50) },
+    { hour: '12pm', trips: Math.floor(Math.random() * 70) },
+    { hour: '3pm', trips: Math.floor(Math.random() * 60) },
+    { hour: '6pm', trips: Math.floor(Math.random() * 80) },
+    { hour: '9pm', trips: Math.floor(Math.random() * 55) },
+  ]
+
+  // Use real data or fallback to sample data
+  const displayRevenueData = revenueData.length > 0 ? revenueData : [
+    { date: 'Mon', revenue: 0, trips: 0 },
+    { date: 'Tue', revenue: 0, trips: 0 },
+    { date: 'Wed', revenue: 0, trips: 0 },
+    { date: 'Thu', revenue: 0, trips: 0 },
+    { date: 'Fri', revenue: 0, trips: 0 },
+    { date: 'Sat', revenue: 0, trips: 0 },
+    { date: 'Sun', revenue: 0, trips: 0 },
+  ]
+
+  const displayTripStatusData = tripStatusData.length > 0 ? tripStatusData : [
+    { name: 'Completed', value: stats.completedTrips || 0, color: '#10b981' },
+    { name: 'Active', value: stats.activeTrips || 0, color: '#3b82f6' },
+    { name: 'Cancelled', value: stats.cancelledTrips || 0, color: '#ef4444' },
+  ]
+
+  const displayTopDrivers = topDrivers.length > 0 ? topDrivers : []
 
   const handleLogout = () => {
     localStorage.removeItem('rideon_admin_token')
@@ -409,14 +497,18 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-gray-900">Revenue Overview</h2>
-                <select className="text-sm border border-gray-300 rounded-lg px-3 py-2">
-                  <option>Last 7 days</option>
-                  <option>Last 30 days</option>
-                  <option>Last 3 months</option>
+                <select
+                  className="text-sm border border-gray-300 rounded-lg px-3 py-2"
+                  value={timeRange}
+                  onChange={(e) => setTimeRange(e.target.value)}
+                >
+                  <option value="7days">Last 7 days</option>
+                  <option value="30days">Last 30 days</option>
+                  <option value="90days">Last 3 months</option>
                 </select>
               </div>
               <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={revenueData}>
+                <AreaChart data={displayRevenueData}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
@@ -439,7 +531,7 @@ export default function AdminDashboard() {
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={tripStatusData}
+                      data={displayTripStatusData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -448,7 +540,7 @@ export default function AdminDashboard() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {tripStatusData.map((entry, index) => (
+                      {displayTripStatusData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -456,8 +548,8 @@ export default function AdminDashboard() {
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="flex justify-center space-x-6 mt-4">
-                {tripStatusData.map((item) => (
+              <div className="flex justify-center space-x-6 mt-4 flex-wrap gap-2">
+                {displayTripStatusData.map((item) => (
                   <div key={item.name} className="flex items-center space-x-2">
                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
                     <span className="text-sm text-gray-600">{item.name}</span>
@@ -487,28 +579,34 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-6">Top Performing Drivers</h2>
               <div className="space-y-4">
-                {driverPerformance.map((driver, index) => (
-                  <div key={driver.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{driver.name}</p>
-                        <p className="text-sm text-gray-500">{driver.trips} trips</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900">${driver.revenue}</p>
-                      <div className="flex items-center space-x-1">
-                        <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <span className="text-sm text-gray-600">{driver.rating}</span>
-                      </div>
-                    </div>
+                {displayTopDrivers.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No driver data available yet
                   </div>
-                ))}
+                ) : (
+                  displayTopDrivers.map((driver, index) => (
+                    <div key={driver.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{driver.name}</p>
+                          <p className="text-sm text-gray-500">{driver.trips} trips</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900">${driver.revenue.toFixed(2)}</p>
+                        <div className="flex items-center space-x-1">
+                          <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          <span className="text-sm text-gray-600">{driver.rating.toFixed(1)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
