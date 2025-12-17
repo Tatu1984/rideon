@@ -65,10 +65,16 @@ module.exports = {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
+    protocol: 'postgres',
     logging: console.log,
     define: {
-      timestamps: true,
       underscored: true
+    },
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
     },
     pool: {
       max: 20,
@@ -102,9 +108,9 @@ module.exports = {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     dialect: 'postgres',
+    protocol: 'postgres',
     logging: false,
     define: {
-      timestamps: true,
       underscored: true
     },
     pool: {
@@ -120,5 +126,32 @@ module.exports = {
         rejectUnauthorized: true
       }
     }
+  },
+  production: {
+    url: process.env.DATABASE_URL,
+    dialect: 'postgres',
+    protocol: 'postgres',
+    logging: false,
+    define: {
+      underscored: true
+    },
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    connection: {
+        options: `project=${process.env.NEON_PROJECT_ID}`
+    },
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
   }
 };
+
+const env = process.env.NODE_ENV || 'development';
+module.exports = config[env];

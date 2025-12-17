@@ -8,6 +8,19 @@ const PRODUCTION_API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://rideon-ap
 const inProduction = process.env.NODE_ENV === "production";
 const inExpo = Constants.expoConfig && Constants.expoConfig.hostUri;
 const inBrowser = typeof document !== "undefined";
+<<<<<<< HEAD
+const apiDomain = inProduction
+  ? "https://rideon-backend.vercel.app/api"
+  : inExpo
+  ? `${Constants.expoConfig.hostUri.split(`:`).shift()}:3001/api`
+  : inBrowser
+  ? `${document.location.hostname}:3001/api`
+  : "localhost:3001/api";
+
+const protocol = inProduction ? "https" : "http";
+const apiUrl = `https://rideon-backend.vercel.app/api`;
+console.log(apiUrl,process.env.NODE_ENV)
+=======
 
 // Get API URL based on environment
 const getApiUrl = () => {
@@ -36,6 +49,7 @@ const getApiUrl = () => {
 
 const apiUrl = getApiUrl();
 console.log(apiUrl)
+>>>>>>> origin/main
 const api = axios.create({
   baseURL: apiUrl,
   timeout: 10000,
