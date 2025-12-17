@@ -70,15 +70,38 @@ module.exports = async (req, res) => {
     results.tests.models = `FAILED: ${e.message}`;
   }
 
-  // Test 6: Can we require the routes?
-  try {
-    const routes = require('../src/routes');
-    results.tests.routes = 'OK';
-  } catch (e) {
-    results.tests.routes = `FAILED: ${e.message}`;
+  // Test 6: Check each route file individually
+  const routeFiles = ['auth', 'rider', 'driver', 'trip', 'admin', 'payment', 'geocoding', 'scheduledRides', 'splitFare', 'settings'];
+  results.tests.routes = {};
+
+  for (const routeFile of routeFiles) {
+    try {
+      const route = require(`../src/routes/${routeFile}`);
+      if (typeof route === 'function' || (route && typeof route.use === 'function')) {
+        results.tests.routes[routeFile] = 'OK';
+      } else {
+        results.tests.routes[routeFile] = `BAD EXPORT - type: ${typeof route}`;
+      }
+    } catch (e) {
+      results.tests.routes[routeFile] = `FAILED: ${e.message}`;
+    }
   }
 
-  // Test 7: Can we require the error handler?
+  // Test 7: Can we require the main routes index?
+  try {
+    // Clear cache first
+    Object.keys(require.cache).forEach(key => {
+      if (key.includes('/routes/')) {
+        delete require.cache[key];
+      }
+    });
+    const routes = require('../src/routes');
+    results.tests.routesIndex = 'OK';
+  } catch (e) {
+    results.tests.routesIndex = `FAILED: ${e.message}`;
+  }
+
+  // Test 8: Can we require the error handler?
   try {
     const errorHandler = require('../src/middleware/errorHandler');
     results.tests.errorHandler = 'OK';
@@ -86,8 +109,14 @@ module.exports = async (req, res) => {
     results.tests.errorHandler = `FAILED: ${e.message}`;
   }
 
-  // Test 8: Can we create the full Express app?
+  // Test 9: Can we create the full Express app?
   try {
+    // Clear all route-related cache
+    Object.keys(require.cache).forEach(key => {
+      if (key.includes('/routes/') || key.includes('/src/index')) {
+        delete require.cache[key];
+      }
+    });
     const app = require('../src/index');
     results.tests.fullApp = 'OK';
   } catch (e) {
