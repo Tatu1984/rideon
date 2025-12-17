@@ -7,11 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     ticketId: {
       type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: 'SupportTickets',
-        key: 'id'
-      }
+      allowNull: false
     },
     senderId: {
       type: DataTypes.UUID,

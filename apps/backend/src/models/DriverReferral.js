@@ -7,19 +7,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     referrerId: {
       type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: 'Drivers',
-        key: 'id'
-      }
+      allowNull: false
     },
     referredDriverId: {
       type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: 'Drivers',
-        key: 'id'
-      }
+      allowNull: true
     },
     referredEmail: {
       type: DataTypes.STRING,
