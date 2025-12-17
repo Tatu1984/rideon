@@ -15,28 +15,8 @@ const allowedOrigins = [
   'http://localhost:3001'
 ];
 
-// Helper to collect raw body from stream
-function getRawBody(req) {
-  return new Promise((resolve, reject) => {
-    if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
-      // Body already parsed by Vercel
-      resolve(null);
-      return;
-    }
-
-    let data = '';
-    req.on('data', chunk => {
-      data += chunk.toString();
-    });
-    req.on('end', () => {
-      resolve(data);
-    });
-    req.on('error', reject);
-  });
-}
-
-// Wrapper to handle CORS and body parsing for Vercel serverless
-module.exports = async (req, res) => {
+// Wrapper to handle CORS for Vercel serverless
+module.exports = (req, res) => {
   // Get origin from request
   const origin = req.headers.origin;
 
@@ -59,41 +39,24 @@ module.exports = async (req, res) => {
   }
 
   // Handle body parsing for POST/PUT/PATCH requests
+  // Vercel provides body as already-parsed object or string
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
-    try {
-      // Check if Vercel already parsed the body
-      if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
-        // Body already parsed, nothing to do
-      } else if (req.body && typeof req.body === 'string' && req.body.length > 0) {
-        // Body is a string, parse it as JSON
+    // If body is a string, try to parse it as JSON
+    if (req.body && typeof req.body === 'string' && req.body.length > 0) {
+      const contentType = req.headers['content-type'] || '';
+      if (contentType.includes('application/json')) {
         try {
           req.body = JSON.parse(req.body);
         } catch (e) {
-          // Not valid JSON, leave as is for urlencoded
-        }
-      } else {
-        // Try to read raw body from stream
-        const rawBody = await getRawBody(req);
-        if (rawBody && rawBody.length > 0) {
-          const contentType = req.headers['content-type'] || '';
-          if (contentType.includes('application/json')) {
-            try {
-              req.body = JSON.parse(rawBody);
-            } catch (e) {
-              return res.status(400).json({
-                success: false,
-                error: {
-                  code: 'INVALID_JSON',
-                  message: 'Invalid JSON in request body'
-                }
-              });
+          return res.status(400).json({
+            success: false,
+            error: {
+              code: 'INVALID_JSON',
+              message: 'Invalid JSON in request body'
             }
-          }
+          });
         }
       }
-    } catch (e) {
-      // Body parsing failed, continue anyway
-      console.error('Body parsing error:', e);
     }
   }
 

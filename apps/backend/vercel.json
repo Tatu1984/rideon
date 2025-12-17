@@ -16,6 +16,10 @@
       "dest": "api/debug.js"
     },
     {
+      "src": "/body-debug",
+      "dest": "api/body-debug.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "api/index.js"
     }
