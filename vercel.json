@@ -1,38 +1,23 @@
 {
   "version": 2,
-  "installCommand": "cd apps/backend && npm install",
   "builds": [
     {
       "src": "apps/backend/api/**/*.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["apps/backend/**"]
-      }
+      "use": "@vercel/node"
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/test",
-      "destination": "/apps/backend/api/test.js"
+      "src": "/test",
+      "dest": "apps/backend/api/test.js"
     },
     {
-      "source": "/debug",
-      "destination": "/apps/backend/api/debug.js"
+      "src": "/debug",
+      "dest": "apps/backend/api/debug.js"
     },
     {
-      "source": "/(.*)",
-      "destination": "/apps/backend/api/index.js"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Credentials", "value": "true" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" }
-      ]
+      "src": "/(.*)",
+      "dest": "apps/backend/api/index.js"
     }
   ]
 }
