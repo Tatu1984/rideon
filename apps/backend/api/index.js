@@ -1,7 +1,12 @@
 // Force bundler to include pg for Sequelize postgres dialect
 require('pg');
 
-const app = require('../src/index');
+// Set up module paths for when running from repo root
+const path = require('path');
+const backendDir = path.join(__dirname, '..');
+
+// Modify require to use backend directory
+const app = require(path.join(backendDir, 'src/index'));
 
 // Wrapper to handle CORS for Vercel serverless
 module.exports = (req, res) => {
