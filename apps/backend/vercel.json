@@ -20,6 +20,10 @@
       "dest": "api/body-debug.js"
     },
     {
+      "src": "/login-test",
+      "dest": "api/login-test.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "api/index.js"
     }

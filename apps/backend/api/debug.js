@@ -4,7 +4,7 @@ require('pg');
 
 module.exports = async (req, res) => {
   const results = {
-    debugVersion: 'v7-skip-json-parse-in-vercel',
+    debugVersion: 'v8-login-test',
     timestamp: new Date().toISOString(),
     env: {
       NODE_ENV: process.env.NODE_ENV,
