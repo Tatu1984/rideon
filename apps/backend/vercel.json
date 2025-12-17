@@ -24,6 +24,10 @@
       "dest": "api/login-test.js"
     },
     {
+      "src": "/create-admin",
+      "dest": "api/create-admin.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "api/index.js"
     }
