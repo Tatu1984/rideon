@@ -1,4 +1,4 @@
-const { User, Rider, Driver, Trip, Payment, PromoCode, SupportTicket, DriverDocument, Vehicle } = require('../models');
+const { User, Rider, Driver, Trip, Payment, PromoCode, SupportTicket, DriverDocument, Vehicle, PricingRule } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 
@@ -263,6 +263,181 @@ exports.createPromoCode = async (req, res) => {
     res.status(500).json({
       success: false,
       error: { code: 'SERVER_ERROR', message: 'Failed to create promo code' }
+    });
+  }
+};
+
+/**
+ * Create new user (admin function)
+ */
+exports.createUser = async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, password, role } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'USER_EXISTS', message: 'User with this email already exists' }
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password || 'TempPass123!', 10);
+
+    // Create user
+    const { v4: uuidv4 } = require('uuid');
+    const user = await User.create({
+      id: uuidv4(),
+      firstName,
+      lastName,
+      email,
+      phone,
+      password: hashedPassword,
+      role: role || 'rider',
+      isVerified: true,
+      isActive: true
+    });
+
+    // Create rider/driver profile if needed
+    if (role === 'rider' || !role) {
+      await Rider.create({
+        id: uuidv4(),
+        userId: user.id
+      });
+    } else if (role === 'driver') {
+      await Driver.create({
+        id: uuidv4(),
+        userId: user.id,
+        status: 'pending',
+        isVerified: false
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      data: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role
+      },
+      message: 'User created successfully'
+    });
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to create user' }
+    });
+  }
+};
+
+/**
+ * Update user (admin function)
+ */
+exports.updateUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { firstName, lastName, email, phone, role, isActive } = req.body;
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'USER_NOT_FOUND', message: 'User not found' }
+      });
+    }
+
+    // Check if email is being changed to an existing email
+    if (email && email !== user.email) {
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          error: { code: 'EMAIL_EXISTS', message: 'Email already in use' }
+        });
+      }
+    }
+
+    const updateData = {};
+    if (firstName) updateData.firstName = firstName;
+    if (lastName) updateData.lastName = lastName;
+    if (email) updateData.email = email;
+    if (phone) updateData.phone = phone;
+    if (role) updateData.role = role;
+    if (typeof isActive === 'boolean') updateData.isActive = isActive;
+
+    await user.update(updateData);
+
+    res.json({
+      success: true,
+      data: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        isActive: user.isActive
+      },
+      message: 'User updated successfully'
+    });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to update user' }
+    });
+  }
+};
+
+/**
+ * Delete user (admin function)
+ */
+exports.deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'USER_NOT_FOUND', message: 'User not found' }
+      });
+    }
+
+    // Prevent deleting your own account
+    if (user.id === req.user.id) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'CANNOT_DELETE_SELF', message: 'Cannot delete your own account' }
+      });
+    }
+
+    // Delete associated rider/driver profiles
+    if (user.role === 'rider') {
+      await Rider.destroy({ where: { userId: user.id } });
+    } else if (user.role === 'driver') {
+      await Driver.destroy({ where: { userId: user.id } });
+    }
+
+    await user.destroy();
+
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to delete user' }
     });
   }
 };
@@ -819,6 +994,207 @@ exports.getTripAnalytics = async (req, res) => {
     res.status(500).json({
       success: false,
       error: { code: 'SERVER_ERROR', message: 'Failed to fetch trip analytics' }
+    });
+  }
+};
+
+/**
+ * Update trip status (admin)
+ */
+exports.updateTrip = async (req, res) => {
+  try {
+    const { tripId } = req.params;
+    const { status } = req.body;
+
+    const trip = await Trip.findByPk(tripId);
+
+    if (!trip) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'TRIP_NOT_FOUND', message: 'Trip not found' }
+      });
+    }
+
+    await trip.update({ status });
+
+    res.json({
+      success: true,
+      data: trip,
+      message: 'Trip updated successfully'
+    });
+  } catch (error) {
+    console.error('Update trip error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to update trip' }
+    });
+  }
+};
+
+/**
+ * Delete trip (admin)
+ */
+exports.deleteTrip = async (req, res) => {
+  try {
+    const { tripId } = req.params;
+
+    const trip = await Trip.findByPk(tripId);
+
+    if (!trip) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'TRIP_NOT_FOUND', message: 'Trip not found' }
+      });
+    }
+
+    await trip.destroy();
+
+    res.json({
+      success: true,
+      message: 'Trip deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete trip error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to delete trip' }
+    });
+  }
+};
+
+/**
+ * Get pricing rules
+ */
+exports.getPricingRules = async (req, res) => {
+  try {
+    const pricingRules = await PricingRule.findAll({
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({
+      success: true,
+      data: { pricingRules }
+    });
+  } catch (error) {
+    console.error('Get pricing rules error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch pricing rules' }
+    });
+  }
+};
+
+/**
+ * Create pricing rule
+ */
+exports.createPricingRule = async (req, res) => {
+  try {
+    const { v4: uuidv4 } = require('uuid');
+    const pricingRule = await PricingRule.create({
+      id: uuidv4(),
+      ...req.body
+    });
+
+    res.status(201).json({
+      success: true,
+      data: pricingRule,
+      message: 'Pricing rule created successfully'
+    });
+  } catch (error) {
+    console.error('Create pricing rule error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to create pricing rule' }
+    });
+  }
+};
+
+/**
+ * Update pricing rule
+ */
+exports.updatePricingRule = async (req, res) => {
+  try {
+    const { pricingId } = req.params;
+
+    const pricingRule = await PricingRule.findByPk(pricingId);
+
+    if (!pricingRule) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'PRICING_NOT_FOUND', message: 'Pricing rule not found' }
+      });
+    }
+
+    await pricingRule.update(req.body);
+
+    res.json({
+      success: true,
+      data: pricingRule,
+      message: 'Pricing rule updated successfully'
+    });
+  } catch (error) {
+    console.error('Update pricing rule error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to update pricing rule' }
+    });
+  }
+};
+
+/**
+ * Delete pricing rule
+ */
+exports.deletePricingRule = async (req, res) => {
+  try {
+    const { pricingId } = req.params;
+
+    const pricingRule = await PricingRule.findByPk(pricingId);
+
+    if (!pricingRule) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'PRICING_NOT_FOUND', message: 'Pricing rule not found' }
+      });
+    }
+
+    await pricingRule.destroy();
+
+    res.json({
+      success: true,
+      message: 'Pricing rule deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete pricing rule error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to delete pricing rule' }
+    });
+  }
+};
+
+/**
+ * Get vehicle types
+ */
+exports.getVehicleTypes = async (req, res) => {
+  try {
+    // Return predefined vehicle types
+    const vehicleTypes = [
+      { id: 1, name: 'Economy', description: 'Affordable everyday rides', baseFare: 5.00, perKmRate: 1.50, capacity: 4, features: ['AC', 'Music'] },
+      { id: 2, name: 'Comfort', description: 'Newer cars with extra legroom', baseFare: 8.00, perKmRate: 2.00, capacity: 4, features: ['AC', 'Music', 'Charger'] },
+      { id: 3, name: 'Premium', description: 'High-end vehicles', baseFare: 15.00, perKmRate: 3.50, capacity: 4, features: ['AC', 'Music', 'Charger', 'WiFi', 'Leather'] },
+      { id: 4, name: 'XL', description: 'SUVs for larger groups', baseFare: 12.00, perKmRate: 2.50, capacity: 6, features: ['AC', 'Music', 'Charger', 'Extra Space'] },
+      { id: 5, name: 'Black', description: 'Luxury sedans with professional drivers', baseFare: 25.00, perKmRate: 5.00, capacity: 4, features: ['AC', 'Music', 'Charger', 'WiFi', 'Leather', 'Pro Driver'] }
+    ];
+
+    res.json({
+      success: true,
+      data: { vehicleTypes }
+    });
+  } catch (error) {
+    console.error('Get vehicle types error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch vehicle types' }
     });
   }
 };

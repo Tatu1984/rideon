@@ -93,14 +93,20 @@ export default function PricingManagementPage() {
         ? `/api/admin/pricing/${editingRule.id}`
         : '/api/admin/pricing'
 
-      const {data} = await api[editingRule ? 'PUT' : 'POST'](url, {payload})
+      const result = editingRule
+        ? await api.put(url, payload)
+        : await api.post(url, payload)
 
-      if (data.success) {
+      if (result.success || result.data?.success) {
         fetchPricingRules()
         closeModal()
+        alert(editingRule ? 'Pricing rule updated!' : 'Pricing rule created!')
+      } else {
+        alert(result.error || 'Failed to save pricing rule')
       }
     } catch (error) {
       console.error('Error saving pricing rule:', error)
+      alert('Failed to save pricing rule')
     }
   }
 
@@ -126,13 +132,17 @@ export default function PricingManagementPage() {
     if (!confirm('Are you sure you want to delete this pricing rule?')) return
 
     try {
-      const {data} = await api.delete(`/api/admin/pricing/${id}`)
+      const result = await api.delete(`/api/admin/pricing/${id}`)
 
-      if (data.success) {
+      if (result.success || result.data?.success) {
         fetchPricingRules()
+        alert('Pricing rule deleted!')
+      } else {
+        alert(result.error || 'Failed to delete pricing rule')
       }
     } catch (error) {
       console.error('Error deleting pricing rule:', error)
+      alert('Failed to delete pricing rule')
     }
   }
 

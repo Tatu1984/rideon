@@ -26,9 +26,10 @@ export default function TripsManagementPage() {
 
   const fetchTrips = async () => {
     try {
-      const {data} = await api.get('/api/admin/trips')
-      if (data.success) {
-        setTrips(data.data.trips || data.data || [])
+      const result = await api.get('/api/admin/trips')
+      if (result.success || result.data?.success) {
+        const tripsData = result.data?.data?.trips || result.data?.trips || result.data?.data || []
+        setTrips(Array.isArray(tripsData) ? tripsData : [])
       }
     } catch (error) {
       console.error('Error fetching trips:', error)
@@ -39,12 +40,16 @@ export default function TripsManagementPage() {
 
   const handleUpdateStatus = async (tripId, newStatus) => {
     try {
-      const {data} = await api.put(`/api/admin/trips/${tripId}`, { status: newStatus })
-      if (data.success) {
+      const result = await api.put(`/api/admin/trips/${tripId}`, { status: newStatus })
+      if (result.success || result.data?.success) {
         fetchTrips()
+        alert('Trip status updated!')
+      } else {
+        alert(result.error || 'Failed to update trip status')
       }
     } catch (error) {
       console.error('Error updating trip:', error)
+      alert('Failed to update trip status')
     }
   }
 
@@ -52,12 +57,16 @@ export default function TripsManagementPage() {
     if (!confirm('Are you sure you want to delete this trip?')) return
 
     try {
-      const {data} = await api.delete(`/api/admin/trips/${id}`)
-      if (data.success) {
+      const result = await api.delete(`/api/admin/trips/${id}`)
+      if (result.success || result.data?.success) {
         fetchTrips()
+        alert('Trip deleted!')
+      } else {
+        alert(result.error || 'Failed to delete trip')
       }
     } catch (error) {
       console.error('Error deleting trip:', error)
+      alert('Failed to delete trip')
     }
   }
 

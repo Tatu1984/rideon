@@ -13,6 +13,9 @@ router.get('/dashboard', adminController.getDashboard);
 
 // User management
 router.get('/users', adminController.getUsers);
+router.post('/users', adminController.createUser);
+router.put('/users/:userId', adminController.updateUser);
+router.delete('/users/:userId', adminController.deleteUser);
 router.put('/users/:userId/toggle-status', adminController.toggleUserStatus);
 
 // Driver management
@@ -28,6 +31,17 @@ router.get('/riders/:riderId', adminController.getRider);
 
 // Trip management
 router.get('/trips', adminController.getAllTrips);
+router.put('/trips/:tripId', adminController.updateTrip);
+router.delete('/trips/:tripId', adminController.deleteTrip);
+
+// Pricing management
+router.get('/pricing', adminController.getPricingRules);
+router.post('/pricing', adminController.createPricingRule);
+router.put('/pricing/:pricingId', adminController.updatePricingRule);
+router.delete('/pricing/:pricingId', adminController.deletePricingRule);
+
+// Vehicle types
+router.get('/vehicle-types', adminController.getVehicleTypes);
 
 // Promo codes
 router.get('/promo-codes', adminController.getPromoCodes);

@@ -69,18 +69,20 @@ export default function UsersManagementPage() {
         ? `/api/admin/users/${editingUser.id}`
         : '/api/admin/users'
 
-      const method = editingUser ? 'PUT' : 'POST'
-
       const payload = editingUser
         ? formData
-        : { ...formData, phone: formData.email, registrationType: 'manual', approvalStatus: 'approved' }
+        : { ...formData, password: 'TempPass123!', registrationType: 'manual', approvalStatus: 'approved' }
 
-      const {data} = await api[method](url, payload)
+      const result = editingUser
+        ? await api.put(url, payload)
+        : await api.post(url, payload)
 
-      if (data.success) {
+      if (result.success || result.data?.success) {
         alert(editingUser ? 'User updated successfully!' : 'User added successfully!')
         fetchUsers()
         closeModal()
+      } else {
+        alert(result.error || 'Failed to save user')
       }
     } catch (error) {
       console.error('Error saving user:', error)
@@ -92,12 +94,16 @@ export default function UsersManagementPage() {
     if (!confirm('Are you sure you want to delete this user?')) return
 
     try {
-      const {data} = await api.delete(`/api/admin/users/${id}`)
-      if (data.success) {
+      const result = await api.delete(`/api/admin/users/${id}`)
+      if (result.success || result.data?.success) {
         fetchUsers()
+        alert('User deleted successfully')
+      } else {
+        alert(result.error || 'Failed to delete user')
       }
     } catch (error) {
       console.error('Error deleting user:', error)
+      alert('Failed to delete user')
     }
   }
 
