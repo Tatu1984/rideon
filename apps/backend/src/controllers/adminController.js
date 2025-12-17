@@ -376,3 +376,449 @@ exports.updateSupportTicket = async (req, res) => {
     });
   }
 };
+
+/**
+ * Get all drivers with pagination and filtering
+ */
+exports.getDrivers = async (req, res) => {
+  try {
+    const { page = 1, limit = 20, status, search, verified } = req.query;
+    const offset = (page - 1) * limit;
+
+    const whereClause = {};
+    if (status) whereClause.status = status;
+    if (verified !== undefined) whereClause.isVerified = verified === 'true';
+
+    const includeOptions = [
+      {
+        model: User,
+        as: 'user',
+        attributes: ['id', 'email', 'firstName', 'lastName', 'phone', 'profilePicture', 'isActive'],
+        where: search ? {
+          [Op.or]: [
+            { email: { [Op.iLike]: `%${search}%` } },
+            { firstName: { [Op.iLike]: `%${search}%` } },
+            { lastName: { [Op.iLike]: `%${search}%` } },
+            { phone: { [Op.iLike]: `%${search}%` } }
+          ]
+        } : undefined
+      },
+      { model: Vehicle, as: 'vehicles' },
+      { model: DriverDocument, as: 'documents' }
+    ];
+
+    const { count, rows: drivers } = await Driver.findAndCountAll({
+      where: whereClause,
+      include: includeOptions,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({
+      success: true,
+      data: drivers,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get drivers error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch drivers' }
+    });
+  }
+};
+
+/**
+ * Get single driver details
+ */
+exports.getDriver = async (req, res) => {
+  try {
+    const { driverId } = req.params;
+
+    const driver = await Driver.findByPk(driverId, {
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        { model: Vehicle, as: 'vehicles' },
+        { model: DriverDocument, as: 'documents' },
+        {
+          model: Trip,
+          as: 'trips',
+          limit: 10,
+          order: [['createdAt', 'DESC']],
+          include: [{ model: Rider, as: 'rider', include: [{ model: User, as: 'user' }] }]
+        }
+      ]
+    });
+
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'DRIVER_NOT_FOUND', message: 'Driver not found' }
+      });
+    }
+
+    res.json({
+      success: true,
+      data: driver
+    });
+  } catch (error) {
+    console.error('Get driver error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch driver' }
+    });
+  }
+};
+
+/**
+ * Update driver status
+ */
+exports.updateDriverStatus = async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    const { status, notes } = req.body;
+
+    const driver = await Driver.findByPk(driverId);
+
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'DRIVER_NOT_FOUND', message: 'Driver not found' }
+      });
+    }
+
+    await driver.update({
+      status,
+      verificationNotes: notes || driver.verificationNotes
+    });
+
+    res.json({
+      success: true,
+      data: driver,
+      message: 'Driver status updated successfully'
+    });
+  } catch (error) {
+    console.error('Update driver status error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to update driver status' }
+    });
+  }
+};
+
+/**
+ * Get all riders with pagination
+ */
+exports.getRiders = async (req, res) => {
+  try {
+    const { page = 1, limit = 20, search } = req.query;
+    const offset = (page - 1) * limit;
+
+    const includeOptions = [
+      {
+        model: User,
+        as: 'user',
+        attributes: ['id', 'email', 'firstName', 'lastName', 'phone', 'profilePicture', 'isActive'],
+        where: search ? {
+          [Op.or]: [
+            { email: { [Op.iLike]: `%${search}%` } },
+            { firstName: { [Op.iLike]: `%${search}%` } },
+            { lastName: { [Op.iLike]: `%${search}%` } },
+            { phone: { [Op.iLike]: `%${search}%` } }
+          ]
+        } : undefined
+      }
+    ];
+
+    const { count, rows: riders } = await Rider.findAndCountAll({
+      include: includeOptions,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({
+      success: true,
+      data: riders,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get riders error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch riders' }
+    });
+  }
+};
+
+/**
+ * Get single rider details
+ */
+exports.getRider = async (req, res) => {
+  try {
+    const { riderId } = req.params;
+
+    const rider = await Rider.findByPk(riderId, {
+      include: [
+        { model: User, as: 'user', attributes: { exclude: ['password'] } },
+        {
+          model: Trip,
+          as: 'trips',
+          limit: 10,
+          order: [['createdAt', 'DESC']],
+          include: [{ model: Driver, as: 'driver', include: [{ model: User, as: 'user' }] }]
+        }
+      ]
+    });
+
+    if (!rider) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'RIDER_NOT_FOUND', message: 'Rider not found' }
+      });
+    }
+
+    res.json({
+      success: true,
+      data: rider
+    });
+  } catch (error) {
+    console.error('Get rider error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch rider' }
+    });
+  }
+};
+
+/**
+ * Get all promo codes
+ */
+exports.getPromoCodes = async (req, res) => {
+  try {
+    const { page = 1, limit = 20, isActive } = req.query;
+    const offset = (page - 1) * limit;
+
+    const whereClause = {};
+    if (isActive !== undefined) whereClause.isActive = isActive === 'true';
+
+    const { count, rows: promoCodes } = await PromoCode.findAndCountAll({
+      where: whereClause,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json({
+      success: true,
+      data: promoCodes,
+      pagination: {
+        total: count,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(count / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get promo codes error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch promo codes' }
+    });
+  }
+};
+
+/**
+ * Update promo code
+ */
+exports.updatePromoCode = async (req, res) => {
+  try {
+    const { promoId } = req.params;
+    const updateData = req.body;
+
+    const promoCode = await PromoCode.findByPk(promoId);
+
+    if (!promoCode) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'PROMO_NOT_FOUND', message: 'Promo code not found' }
+      });
+    }
+
+    await promoCode.update(updateData);
+
+    res.json({
+      success: true,
+      data: promoCode,
+      message: 'Promo code updated successfully'
+    });
+  } catch (error) {
+    console.error('Update promo code error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to update promo code' }
+    });
+  }
+};
+
+/**
+ * Delete promo code
+ */
+exports.deletePromoCode = async (req, res) => {
+  try {
+    const { promoId } = req.params;
+
+    const promoCode = await PromoCode.findByPk(promoId);
+
+    if (!promoCode) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'PROMO_NOT_FOUND', message: 'Promo code not found' }
+      });
+    }
+
+    await promoCode.destroy();
+
+    res.json({
+      success: true,
+      message: 'Promo code deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete promo code error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to delete promo code' }
+    });
+  }
+};
+
+/**
+ * Get revenue analytics
+ */
+exports.getRevenueAnalytics = async (req, res) => {
+  try {
+    const { startDate, endDate, groupBy = 'day' } = req.query;
+
+    const whereClause = { status: 'completed' };
+    if (startDate && endDate) {
+      whereClause.createdAt = {
+        [Op.between]: [new Date(startDate), new Date(endDate)]
+      };
+    }
+
+    const payments = await Payment.findAll({
+      where: whereClause,
+      order: [['createdAt', 'ASC']]
+    });
+
+    // Group by day/week/month
+    const groupedData = {};
+    payments.forEach(payment => {
+      let key;
+      const date = new Date(payment.createdAt);
+
+      if (groupBy === 'day') {
+        key = date.toISOString().split('T')[0];
+      } else if (groupBy === 'week') {
+        const weekStart = new Date(date);
+        weekStart.setDate(date.getDate() - date.getDay());
+        key = weekStart.toISOString().split('T')[0];
+      } else {
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }
+
+      if (!groupedData[key]) {
+        groupedData[key] = { date: key, revenue: 0, count: 0 };
+      }
+      groupedData[key].revenue += parseFloat(payment.amount);
+      groupedData[key].count += 1;
+    });
+
+    const totalRevenue = payments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+    const totalTrips = payments.length;
+    const averagePerTrip = totalTrips > 0 ? totalRevenue / totalTrips : 0;
+
+    res.json({
+      success: true,
+      data: {
+        summary: {
+          totalRevenue,
+          totalTrips,
+          averagePerTrip
+        },
+        timeline: Object.values(groupedData)
+      }
+    });
+  } catch (error) {
+    console.error('Get revenue analytics error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch revenue analytics' }
+    });
+  }
+};
+
+/**
+ * Get trip analytics
+ */
+exports.getTripAnalytics = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    const whereClause = {};
+    if (startDate && endDate) {
+      whereClause.createdAt = {
+        [Op.between]: [new Date(startDate), new Date(endDate)]
+      };
+    }
+
+    const totalTrips = await Trip.count({ where: whereClause });
+    const completedTrips = await Trip.count({ where: { ...whereClause, status: 'completed' } });
+    const cancelledTrips = await Trip.count({
+      where: {
+        ...whereClause,
+        status: { [Op.in]: ['cancelled_by_rider', 'cancelled_by_driver', 'cancelled_by_admin'] }
+      }
+    });
+
+    const tripsByStatus = await Trip.findAll({
+      where: whereClause,
+      attributes: [
+        'status',
+        [require('sequelize').fn('COUNT', require('sequelize').col('id')), 'count']
+      ],
+      group: ['status']
+    });
+
+    res.json({
+      success: true,
+      data: {
+        total: totalTrips,
+        completed: completedTrips,
+        cancelled: cancelledTrips,
+        completionRate: totalTrips > 0 ? ((completedTrips / totalTrips) * 100).toFixed(2) : 0,
+        byStatus: tripsByStatus.map(s => ({
+          status: s.status,
+          count: parseInt(s.dataValues.count)
+        }))
+      }
+    });
+  } catch (error) {
+    console.error('Get trip analytics error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch trip analytics' }
+    });
+  }
+};

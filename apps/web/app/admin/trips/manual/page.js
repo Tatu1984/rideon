@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/components/ui/Toast'
 
 export default function ManualBooking() {
+  const toast = useToast()
   const [formData, setFormData] = useState({
     riderId: '',
     pickupAddress: '',
@@ -14,7 +16,7 @@ export default function ManualBooking() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    alert('Manual booking created successfully!')
+    toast.success('Manual booking created successfully!')
   }
 
   return (

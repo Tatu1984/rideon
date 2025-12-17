@@ -1,20 +1,40 @@
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from "expo-constants";
+import SecureStorageService from './secureStorage.service';
+
+// Production API URL - update this with your actual Vercel backend URL after deployment
+const PRODUCTION_API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://rideon-api.vercel.app';
 
 const inProduction = process.env.NODE_ENV === "production";
 const inExpo = Constants.expoConfig && Constants.expoConfig.hostUri;
 const inBrowser = typeof document !== "undefined";
-const apiDomain = inProduction
-  ? "rideon.example.com"
-  : inExpo
-  ? `${Constants.expoConfig.hostUri.split(`:`).shift()}:3001/api`
-  : inBrowser
-  ? `${document.location.hostname}:3001/api`
-  : "localhost:3001/api";
 
-const protocol = inProduction ? "https" : "http";
-const apiUrl = `${protocol}://${apiDomain}`;
+// Get API URL based on environment
+const getApiUrl = () => {
+  // Use environment variable if set
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+
+  // Production mode
+  if (inProduction) {
+    return PRODUCTION_API_URL;
+  }
+
+  // Development mode - connect to local backend
+  if (inExpo && Constants.expoConfig?.hostUri) {
+    const localIp = Constants.expoConfig.hostUri.split(':')[0];
+    return `http://${localIp}:3001/api`;
+  }
+
+  if (inBrowser) {
+    return `http://${document.location.hostname}:3001/api`;
+  }
+
+  return 'http://localhost:3001/api';
+};
+
+const apiUrl = getApiUrl();
 console.log(apiUrl)
 const api = axios.create({
   baseURL: apiUrl,
@@ -24,10 +44,10 @@ const api = axios.create({
   },
 });
 
-// Request interceptor - Add auth token
+// Request interceptor - Add auth token from secure storage
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem('token');
+    const token = await SecureStorageService.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -41,7 +61,8 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      await AsyncStorage.removeItem('token');
+      // Clear tokens on unauthorized response
+      await SecureStorageService.clearTokens();
     }
     return Promise.reject(error);
   }
@@ -94,6 +115,26 @@ export const supportAPI = {
 export const emergencyAPI = {
   triggerSOS: (tripId, location) => api.post('/rider/sos', { tripId, location }),
   shareTrip: (tripId, contacts) => api.post('/rider/share-trip', { tripId, contacts }),
+};
+
+// Payment APIs
+export const paymentAPI = {
+  // Payment intent for Stripe
+  createPaymentIntent: (tripId, amount, paymentMethod) =>
+    api.post('/payments/intent', { tripId, amount, paymentMethod }),
+  confirmPayment: (tripId, paymentIntentId, paymentMethod) =>
+    api.post('/payments/confirm', { tripId, paymentIntentId, paymentMethod }),
+  getPaymentHistory: (page = 1, limit = 20) =>
+    api.get(`/payments/history?page=${page}&limit=${limit}`),
+  requestRefund: (paymentId, reason) =>
+    api.post('/payments/refund', { paymentId, reason }),
+  // Payment methods (cards)
+  getSavedCards: () => api.get('/rider/payment-methods'),
+  addCard: (cardToken) => api.post('/rider/payment-methods', { cardToken }),
+  deleteCard: (cardId) => api.delete(`/rider/payment-methods/${cardId}`),
+  setDefaultCard: (cardId) => api.patch(`/rider/payment-methods/${cardId}/default`),
+  // Stripe setup for adding new cards
+  getSetupIntent: () => api.post('/rider/payment-methods/setup-intent'),
 };
 
 export default api;

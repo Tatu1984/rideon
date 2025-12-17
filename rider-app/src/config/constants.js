@@ -2,6 +2,9 @@
 export const API_URL = 'http://192.168.31.167:3001/api';
 export const SOCKET_URL = 'http://192.168.31.167:3001';
 
+// Stripe Configuration
+// NOTE: Replace with your actual Stripe publishable key in production
+export const STRIPE_PUBLISHABLE_KEY = 'pk_test_your_stripe_publishable_key';
 
 // Map Configuration
 export const INITIAL_REGION = {

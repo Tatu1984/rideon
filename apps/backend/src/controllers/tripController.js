@@ -1,6 +1,7 @@
 const { Trip, Rider, Driver, Vehicle, User, Rating, TripStatusHistory, PromoCode, PromoCodeUsage } = require('../models');
 const { Op } = require('sequelize');
 const { calculateDistance } = require('../utils/haversine');
+const driverMatchingService = require('../services/driverMatchingService');
 
 /**
  * Request a new trip
@@ -136,21 +137,34 @@ exports.requestTrip = async (req, res) => {
       });
     }
 
-    // Emit trip request via Socket.IO to nearby drivers
+    // Find and notify nearby drivers using matching service
     const io = req.app.get('io');
-    if (io) {
-      io.emit('trip:new-request', {
-        tripId: trip.id,
-        pickupLatitude,
-        pickupLongitude,
-        vehicleType
-      });
+    const matchedDrivers = await driverMatchingService.matchDriversForTrip({
+      pickupLatitude,
+      pickupLongitude,
+      vehicleType
+    });
+
+    // Notify matched drivers via Socket.IO
+    if (io && matchedDrivers.length > 0) {
+      await driverMatchingService.notifyDriversAboutTrip(io, matchedDrivers, trip);
     }
+
+    // Format matched drivers for client response
+    const nearbyDrivers = matchedDrivers.map(d =>
+      driverMatchingService.formatDriverForClient(d)
+    );
 
     res.status(201).json({
       success: true,
-      data: trip,
-      message: 'Trip requested successfully'
+      data: {
+        trip,
+        nearbyDrivers,
+        driversNotified: matchedDrivers.length
+      },
+      message: matchedDrivers.length > 0
+        ? 'Trip requested successfully. Finding drivers...'
+        : 'Trip requested. No drivers available nearby, expanding search...'
     });
   } catch (error) {
     console.error('Request trip error:', error);

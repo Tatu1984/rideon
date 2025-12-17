@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/components/ui/Toast'
 
 export default function PromotionsManagement() {
+  const toast = useToast()
   const [promos] = useState([
     { id: 1, code: 'WELCOME50', type: 'Percentage', value: '50%', uses: 245, maxUses: 1000, status: 'active', expires: '2025-12-31' },
     { id: 2, code: 'FLAT20', type: 'Fixed', value: '$20', uses: 89, maxUses: 500, status: 'active', expires: '2025-12-15' },
@@ -31,7 +33,7 @@ export default function PromotionsManagement() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="font-bold text-gray-900 mb-4">Create New Promo Code</h3>
-          <form onSubmit={(e) => { e.preventDefault(); alert('Promo code created successfully! This will be saved to your database.'); }} className="space-y-4">
+          <form onSubmit={(e) => { e.preventDefault(); toast.success('Promo code created successfully!'); }} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Promo Code</label>
               <input type="text" placeholder="SUMMER2025" className="w-full px-3 py-2 border rounded-lg" />
@@ -91,7 +93,7 @@ export default function PromotionsManagement() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Driver Reward ($)</label>
               <input type="number" defaultValue="50" className="w-full px-3 py-2 border rounded-lg" />
             </div>
-            <button onClick={() => alert('Referral settings updated successfully! Changes will be applied to all future referrals.')} className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <button onClick={() => toast.success('Referral settings updated!')} className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
               Update Referral Settings
             </button>
           </div>

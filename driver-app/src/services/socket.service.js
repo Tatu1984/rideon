@@ -20,27 +20,59 @@ const SOCKET_URL = `${protocol}://${apiDomain}`;
 class SocketService {
   constructor() {
     this.socket = null;
-    this.listeners = {};
+    this.connected = false;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 10;
   }
 
   async connect() {
+    if (this.socket && this.connected) {
+      return this.socket;
+    }
+
     const token = await AsyncStorage.getItem('token');
-    
+
     this.socket = io(SOCKET_URL, {
       auth: { token },
       transports: ['websocket'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: this.maxReconnectAttempts,
     });
 
     this.socket.on('connect', () => {
-      console.log('Socket connected:', this.socket.id);
+      console.log('✅ Driver socket connected:', this.socket.id);
+      this.connected = true;
+      this.reconnectAttempts = 0;
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('Socket disconnected');
+    this.socket.on('disconnect', (reason) => {
+      console.log('❌ Driver socket disconnected:', reason);
+      this.connected = false;
+    });
+
+    this.socket.on('reconnect', (attemptNumber) => {
+      console.log('🔄 Driver socket reconnected after', attemptNumber, 'attempts');
+      this.connected = true;
+    });
+
+    this.socket.on('reconnect_attempt', (attemptNumber) => {
+      console.log('🔄 Driver socket reconnecting... attempt:', attemptNumber);
+      this.reconnectAttempts = attemptNumber;
+    });
+
+    this.socket.on('reconnect_failed', () => {
+      console.error('❌ Driver socket reconnection failed');
+      this.connected = false;
     });
 
     this.socket.on('error', (error) => {
       console.error('Socket error:', error);
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error.message);
     });
 
     return this.socket;
@@ -50,7 +82,12 @@ class SocketService {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
+      this.connected = false;
     }
+  }
+
+  isConnected() {
+    return this.connected && this.socket?.connected;
   }
 
   on(event, callback) {
@@ -59,24 +96,71 @@ class SocketService {
     }
   }
 
-  off(event) {
+  off(event, callback) {
     if (this.socket) {
-      this.socket.off(event);
+      if (callback) {
+        this.socket.off(event, callback);
+      } else {
+        this.socket.off(event);
+      }
     }
   }
 
   emit(event, data) {
-    if (this.socket) {
+    if (this.socket && this.connected) {
       this.socket.emit(event, data);
+      return true;
     }
+    console.warn('Socket not connected, cannot emit:', event);
+    return false;
   }
 
-  updateLocation(location) {
-    this.emit('driver:location', location);
+  // Driver-specific events
+  updateLocation(location, tripId = null) {
+    this.emit('driver:location-update', {
+      latitude: location.latitude,
+      longitude: location.longitude,
+      heading: location.heading,
+      speed: location.speed,
+      tripId,
+    });
   }
 
   updateStatus(status) {
-    this.emit('driver:status', status);
+    this.emit('driver:status-change', { status });
+  }
+
+  // Trip-related events
+  joinTrip(tripId) {
+    this.emit('trip:join', { tripId });
+  }
+
+  leaveTrip(tripId) {
+    this.emit('trip:leave', { tripId });
+  }
+
+  acceptTrip(tripId) {
+    this.emit('trip:accept', { tripId });
+  }
+
+  updateTripStatus(tripId, status) {
+    this.emit('trip:status-update', { tripId, status });
+  }
+
+  sendMessage(tripId, message) {
+    this.emit('trip:message', {
+      tripId,
+      message,
+      senderRole: 'driver',
+    });
+  }
+
+  triggerEmergency(tripId, location, message = '') {
+    this.emit('trip:emergency', {
+      tripId,
+      location,
+      message,
+    });
   }
 }
 

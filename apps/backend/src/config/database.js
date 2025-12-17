@@ -5,6 +5,7 @@ const parseConnectionString = (url) => {
   if (!url) return null;
   try {
     const parsed = new URL(url);
+    const isProduction = process.env.NODE_ENV === 'production';
     return {
       username: parsed.username,
       password: parsed.password,
@@ -15,7 +16,8 @@ const parseConnectionString = (url) => {
       dialectOptions: {
         ssl: {
           require: true,
-          rejectUnauthorized: false
+          // Enable certificate verification in production to prevent MITM attacks
+          rejectUnauthorized: isProduction
         }
       }
     };
@@ -78,7 +80,8 @@ module.exports = {
       dialectOptions: {
         ssl: {
           require: true,
-          rejectUnauthorized: false
+          // Enable certificate verification in production to prevent MITM attacks
+          rejectUnauthorized: process.env.NODE_ENV === 'production'
         }
       }
     })
@@ -113,7 +116,8 @@ module.exports = {
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false
+        // Enable certificate verification in production to prevent MITM attacks
+        rejectUnauthorized: true
       }
     }
   }

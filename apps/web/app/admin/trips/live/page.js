@@ -1,19 +1,80 @@
 'use client'
 
-import { useEffect, useState, useMemo, useRef } from 'react'
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react'
+import { useToast } from '@/components/ui/Toast'
+import { useSocket } from '@/components/providers/SocketProvider'
 
 export default function LiveTripMonitor() {
+  const toast = useToast()
+  const { isConnected, joinAdminRoom, onNewTripRequest, onTripStatusUpdate, onDriverLocationUpdate, onEmergencyAlert, subscribe } = useSocket()
   const [activeTrips, setActiveTrips] = useState([])
   const [mapLoaded, setMapLoaded] = useState(false)
+  const [driverLocations, setDriverLocations] = useState({})
   const mapRef = useRef(null)
   const mapInstanceRef = useRef(null)
   const markersRef = useRef([])
+  const driverMarkersRef = useRef({})
 
+  // Initial load + socket setup
   useEffect(() => {
     loadLiveTrips()
-    const interval = setInterval(loadLiveTrips, 5000) // Refresh every 5s
+
+    // Also poll as fallback, but less frequently when socket is connected
+    const interval = setInterval(loadLiveTrips, isConnected ? 30000 : 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [isConnected])
+
+  // Socket event handlers
+  useEffect(() => {
+    if (!isConnected) return
+
+    // Join admin room for admin-specific events
+    joinAdminRoom()
+
+    // Listen for new trip requests
+    const unsubNewTrip = subscribe('trip:new-request', (data) => {
+      toast.info(`New trip request from ${data.riderName || 'a rider'}`)
+      loadLiveTrips() // Refresh trips list
+    })
+
+    // Listen for trip status updates
+    const unsubStatus = subscribe('trip:status-updated', (data) => {
+      setActiveTrips(prev => prev.map(trip =>
+        trip.id === data.tripId ? { ...trip, status: data.status } : trip
+      ))
+
+      if (data.status === 'completed') {
+        toast.success(`Trip #${data.tripId} completed`)
+      } else if (data.status === 'cancelled') {
+        toast.warning(`Trip #${data.tripId} was cancelled`)
+      }
+    })
+
+    // Listen for driver location updates
+    const unsubLocation = subscribe('driver:location-updated', (data) => {
+      setDriverLocations(prev => ({
+        ...prev,
+        [data.driverId]: {
+          lat: data.latitude,
+          lng: data.longitude,
+          heading: data.heading,
+          timestamp: data.timestamp
+        }
+      }))
+    })
+
+    // Listen for emergency alerts
+    const unsubEmergency = subscribe('trip:emergency-alert', (data) => {
+      toast.error(`EMERGENCY: Trip #${data.tripId} - ${data.message || 'Alert triggered'}`)
+    })
+
+    return () => {
+      unsubNewTrip()
+      unsubStatus()
+      unsubLocation()
+      unsubEmergency()
+    }
+  }, [isConnected, joinAdminRoom, subscribe, toast])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -153,9 +214,25 @@ export default function LiveTripMonitor() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Live Trip Monitor</h2>
-        <p className="text-gray-600 mt-1">Real-time monitoring of all active trips</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Live Trip Monitor</h2>
+          <p className="text-gray-600 mt-1">Real-time monitoring of all active trips</p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg ${isConnected ? 'bg-green-100' : 'bg-yellow-100'}`}>
+            <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></span>
+            <span className={`text-sm font-medium ${isConnected ? 'text-green-900' : 'text-yellow-900'}`}>
+              {isConnected ? 'Live Connected' : 'Polling Mode'}
+            </span>
+          </div>
+          <button
+            onClick={loadLiveTrips}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -275,7 +352,10 @@ function TripCard({ trip }) {
           <span className="text-sm text-gray-500 italic">{trip.vehicleType}</span>
         </div>
         <button
-          onClick={() => alert(`Track Trip #${trip.id}\nRider: ${trip.riderName}\nDriver: ${trip.driverName}`)}
+          onClick={() => {
+            // In production, this would open a tracking modal
+            console.log(`Tracking Trip #${trip.id}`)
+          }}
           className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Track →

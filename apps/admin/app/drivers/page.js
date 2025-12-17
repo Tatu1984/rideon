@@ -28,9 +28,22 @@ export default function DriversManagementPage() {
 
   const fetchDrivers = async () => {
     try {
-      const {data} = await api.get('/api/admin/drivers')
-      if (data.success) {
-        setDrivers(data.data.drivers || data.data || [])
+      const response = await api.admin.getDrivers()
+      if (response.success) {
+        const driversList = response.data?.data || response.data || []
+        // Format drivers for display
+        const formattedDrivers = (Array.isArray(driversList) ? driversList : []).map(driver => ({
+          id: driver.id,
+          firstName: driver.user?.firstName || '',
+          lastName: driver.user?.lastName || '',
+          email: driver.user?.email || '',
+          status: driver.status || 'pending',
+          vehicleType: driver.vehicles?.[0]?.type || driver.vehicleType || null,
+          rating: driver.rating || 0,
+          totalTrips: driver.totalTrips || 0,
+          isVerified: driver.isVerified
+        }))
+        setDrivers(formattedDrivers)
       }
     } catch (error) {
       console.error('Error fetching drivers:', error)
@@ -41,9 +54,9 @@ export default function DriversManagementPage() {
 
   const fetchVehicleTypes = async () => {
     try {
-      const {data} = await api.get('/api/admin/vehicle-types')
-      if (data.success) {
-        setVehicleTypes(data.data.vehicleTypes || [])
+      const response = await api.get('/api/admin/vehicle-types')
+      if (response.success) {
+        setVehicleTypes(response.data?.data?.vehicleTypes || response.data?.vehicleTypes || [])
       }
     } catch (error) {
       console.error('Error fetching vehicle types:', error)
@@ -52,13 +65,16 @@ export default function DriversManagementPage() {
 
   const handleApprove = async (driverId) => {
     try {
-      const {data} = await api.post(`/api/admin/drivers/${driverId}/approve`)
-      if (data.success) {
+      const response = await api.admin.verifyDriver(driverId, { action: 'approve' })
+      if (response.success) {
         alert('Driver approved successfully!')
         fetchDrivers()
+      } else {
+        alert(response.error || 'Failed to approve driver')
       }
     } catch (error) {
       console.error('Error approving driver:', error)
+      alert('Failed to approve driver')
     }
   }
 

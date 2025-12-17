@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { ToastProvider } from '@/components/ui/Toast'
+import { ConfirmProvider } from '@/components/ui/ConfirmModal'
+import { SocketProvider, useSocket } from '@/components/providers/SocketProvider'
 
 const navigation = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: '📊' },
@@ -73,6 +76,9 @@ export default function AdminLayout({ children }) {
   }
 
   return (
+    <SocketProvider>
+    <ToastProvider>
+    <ConfirmProvider>
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
       <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-blue-900 to-blue-800 text-white transition-all duration-300 flex flex-col`}>
@@ -199,5 +205,8 @@ export default function AdminLayout({ children }) {
         </main>
       </div>
     </div>
+    </ConfirmProvider>
+    </ToastProvider>
+    </SocketProvider>
   )
 }

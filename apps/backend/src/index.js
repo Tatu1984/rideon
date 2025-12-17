@@ -3,9 +3,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const cookieParser = require('cookie-parser');
 const { sequelize } = require('./models');
 const routes = require('./routes');
 const errorHandler = require('./middleware/errorHandler');
+const { apiLimiter, securityHeaders } = require('./middleware/security');
 const logger = require('./utils/logger');
 
 // Load environment variables
@@ -21,9 +23,14 @@ app.use(cors({
   origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : true,
   credentials: true
 }));
+app.use(cookieParser());
 app.use(morgan('combined', { stream: logger.stream }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Security middleware
+app.use(securityHeaders);
+app.use('/api', apiLimiter); // Apply rate limiting to all API routes
 
 // Health check
 app.get('/health', (req, res) => {

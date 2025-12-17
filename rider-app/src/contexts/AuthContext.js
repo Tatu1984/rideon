@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authAPI } from '../services/api.service';
+import SecureStorageService from '../services/secureStorage.service';
 
 const AuthContext = createContext({});
 
@@ -14,14 +14,17 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await SecureStorageService.getAccessToken();
       if (token) {
         const response = await authAPI.getProfile();
-        setUser(response.data.data || response.data);
+        const userData = response.data.data || response.data;
+        setUser(userData);
+        // Cache user data for offline access
+        await SecureStorageService.setUserData(userData);
       }
     } catch (error) {
-      //console.error('Auth check failed:', error);
-      await AsyncStorage.removeItem('token');
+      // Clear tokens on auth failure
+      await SecureStorageService.clearTokens();
     } finally {
       setLoading(false);
     }
@@ -35,10 +38,16 @@ export const AuthProvider = ({ children }) => {
 
       // Handle both response formats
       const data = response.data.data || response.data;
-      const token = data.accessToken || data.token;
+      const accessToken = data.accessToken || data.token;
+      const refreshToken = data.refreshToken;
       const userData = data.user || data.rider;
 
-      await AsyncStorage.setItem('token', token);
+      // Store tokens securely
+      await SecureStorageService.setTokens(accessToken, refreshToken);
+      if (userData?.id) {
+        await SecureStorageService.setUserId(userData.id);
+      }
+      await SecureStorageService.setUserData(userData);
       setUser(userData);
 
       console.log('✅ Login successful');
@@ -59,10 +68,16 @@ export const AuthProvider = ({ children }) => {
       console.log('🟢 Response:', response.data);
 
       const responseData = response.data.data || response.data;
-      const token = responseData.accessToken || responseData.token;
+      const accessToken = responseData.accessToken || responseData.token;
+      const refreshToken = responseData.refreshToken;
       const userData = responseData.user || responseData.rider;
 
-      await AsyncStorage.setItem('token', token);
+      // Store tokens securely
+      await SecureStorageService.setTokens(accessToken, refreshToken);
+      if (userData?.id) {
+        await SecureStorageService.setUserId(userData.id);
+      }
+      await SecureStorageService.setUserData(userData);
       setUser(userData);
 
       console.log('✅ Registration successful');
@@ -77,7 +92,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('token');
+    await SecureStorageService.clearAll();
     setUser(null);
   };
 

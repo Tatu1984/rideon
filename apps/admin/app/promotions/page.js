@@ -36,10 +36,10 @@ export default function PromotionsPage() {
 
   const fetchPromotions = async () => {
     try {
-      const response = await api.get('/api/admin/promotions')
-      const data = await response.json()
-      if (data.success) {
-        setPromotions(data.data.promotions || [])
+      const response = await api.admin.getPromoCodes()
+      if (response.success) {
+        const promos = response.data?.data || response.data || []
+        setPromotions(Array.isArray(promos) ? promos : [])
       }
     } catch (error) {
       console.error('Error:', error)
@@ -51,42 +51,54 @@ export default function PromotionsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const payload = {
-      ...formData,
+      code: formData.code,
+      description: formData.description,
+      discountType: formData.discountType,
       discountValue: parseFloat(formData.discountValue),
-      maxDiscount: formData.maxDiscount ? parseFloat(formData.maxDiscount) : null,
-      minOrderValue: formData.minOrderValue ? parseFloat(formData.minOrderValue) : null,
-      usageLimit: formData.usageLimit ? parseInt(formData.usageLimit) : null,
-      perUserLimit: formData.perUserLimit ? parseInt(formData.perUserLimit) : 1
+      maxDiscountAmount: formData.maxDiscount ? parseFloat(formData.maxDiscount) : null,
+      minTripAmount: formData.minOrderValue ? parseFloat(formData.minOrderValue) : null,
+      totalUsageLimit: formData.usageLimit ? parseInt(formData.usageLimit) : null,
+      maxUsagePerUser: formData.perUserLimit ? parseInt(formData.perUserLimit) : 1,
+      validFrom: formData.validFrom || null,
+      validTo: formData.validUntil || null
     }
 
     try {
-      const url = editingPromo ? `/api/admin/promotions/${editingPromo.id}` : '/api/admin/promotions'
-      const method = editingPromo ? 'PUT' : 'POST'
-      const {data} = await api[method](url, {
-        payload
-      })
-      if (data.success) {
+      let response
+      if (editingPromo) {
+        response = await api.admin.updatePromoCode(editingPromo.id, payload)
+      } else {
+        response = await api.admin.createPromoCode(payload)
+      }
+
+      if (response.success) {
         alert(editingPromo ? 'Promotion updated!' : 'Promotion created!')
         setShowModal(false)
         setEditingPromo(null)
         resetForm()
         fetchPromotions()
+      } else {
+        alert(response.error || 'Failed to save promotion')
       }
     } catch (error) {
       console.error('Error:', error)
+      alert('Failed to save promotion')
     }
   }
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this promotion?')) return
     try {
-      const {data} = await api.delete(`/api/admin/promotions/${id}`)
-      if (data.success) {
+      const response = await api.admin.deletePromoCode(id)
+      if (response.success) {
         alert('Promotion deleted!')
         fetchPromotions()
+      } else {
+        alert(response.error || 'Failed to delete promotion')
       }
     } catch (error) {
       console.error('Error:', error)
+      alert('Failed to delete promotion')
     }
   }
 

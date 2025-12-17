@@ -24,8 +24,8 @@ export default function ActiveTripScreen({ navigation, route }) {
   };
 
   const handleArrivedAtPickup = async () => {
-    setTripStatus('arrived');
-    await updateTripStatus(trip.id, 'arrived');
+    setTripStatus('driver_arrived');
+    await updateTripStatus(trip.id, 'driver_arrived');
     Alert.alert('Success', 'Marked as arrived at pickup location');
   };
 
@@ -60,7 +60,7 @@ export default function ActiveTripScreen({ navigation, route }) {
   };
 
   const handleNavigate = () => {
-    const destination = tripStatus === 'accepted' || tripStatus === 'arrived'
+    const destination = tripStatus === 'accepted' || tripStatus === 'driver_arrived'
       ? trip?.pickup
       : trip?.dropoff;
 
@@ -133,7 +133,7 @@ export default function ActiveTripScreen({ navigation, route }) {
         <View style={styles.headerCenter}>
           <Text style={styles.statusBadge}>
             {tripStatus === 'accepted' && 'Heading to Pickup'}
-            {tripStatus === 'arrived' && 'Arrived at Pickup'}
+            {tripStatus === 'driver_arrived' && 'Arrived at Pickup'}
             {tripStatus === 'in_progress' && 'In Progress'}
           </Text>
           <Text style={styles.timerText}>{formatTime(timer)}</Text>
@@ -193,7 +193,7 @@ export default function ActiveTripScreen({ navigation, route }) {
             </TouchableOpacity>
           )}
 
-          {tripStatus === 'arrived' && (
+          {tripStatus === 'driver_arrived' && (
             <TouchableOpacity onPress={handleStartTrip} style={styles.primaryButton}>
               <Text style={styles.primaryButtonText}>Start Trip</Text>
             </TouchableOpacity>

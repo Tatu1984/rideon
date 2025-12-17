@@ -22,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     category: {
       type: DataTypes.ENUM(
+        'general',
         'trip_issue',
         'payment_issue',
         'driver_behavior',
@@ -32,7 +33,8 @@ module.exports = (sequelize, DataTypes) => {
         'document_verification',
         'other'
       ),
-      allowNull: false
+      allowNull: false,
+      defaultValue: 'general'
     },
     subject: {
       type: DataTypes.STRING,
@@ -94,6 +96,10 @@ module.exports = (sequelize, DataTypes) => {
     SupportTicket.belongsTo(models.User, {
       foreignKey: 'assignedTo',
       as: 'assignee'
+    });
+    SupportTicket.hasMany(models.SupportMessage, {
+      foreignKey: 'ticketId',
+      as: 'messages'
     });
   };
 

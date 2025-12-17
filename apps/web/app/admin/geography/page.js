@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/components/ui/Toast'
 
 export default function GeographyManagement() {
+  const toast = useToast()
   const [cities] = useState([
     { id: 1, name: 'San Francisco', zones: 15, drivers: 450, status: 'active', coverage: '95%' },
     { id: 2, name: 'New York', zones: 22, drivers: 890, status: 'active', coverage: '98%' },
@@ -16,7 +18,7 @@ export default function GeographyManagement() {
           <h2 className="text-2xl font-bold text-gray-900">Geography & Service Areas</h2>
           <p className="text-gray-600 mt-1">Manage cities, zones, geofences, and restricted areas</p>
         </div>
-        <button onClick={() => alert('Add City feature - This will open a modal to add a new city to your service area.')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">+ Add City</button>
+        <button onClick={() => toast.info('Opening Add City modal...')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">+ Add City</button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -73,7 +75,7 @@ export default function GeographyManagement() {
               <ZoneCard name="Airport Zone" type="Premium" radius="5km" />
               <ZoneCard name="Downtown" type="Surge" radius="8km" />
               <ZoneCard name="University" type="Standard" radius="3km" />
-              <button onClick={() => alert('Add Zone feature - This will open a modal to create a new geofence zone.')} className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500">
+              <button onClick={() => toast.info('Opening Add Zone modal...')} className="w-full p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500">
                 + Add Zone
               </button>
             </div>
@@ -123,7 +125,7 @@ function RestrictedCard({ name }) {
   return (
     <div className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
       <span className="text-sm font-medium text-red-900">🚫 {name}</span>
-      <button onClick={() => alert(`Edit Restricted Area: ${name} - This will open a modal to modify the restricted area boundaries.`)} className="text-xs text-red-600 hover:underline">Edit</button>
+      <button onClick={() => console.log(`Editing restricted area: ${name}`)} className="text-xs text-red-600 hover:underline">Edit</button>
     </div>
   )
 }

@@ -55,7 +55,10 @@ db.Notification = require('./Notification')(sequelize, Sequelize.DataTypes);
 db.DriverLocation = require('./DriverLocation')(sequelize, Sequelize.DataTypes);
 db.RefreshToken = require('./RefreshToken')(sequelize, Sequelize.DataTypes);
 db.SupportTicket = require('./SupportTicket')(sequelize, Sequelize.DataTypes);
+db.SupportMessage = require('./SupportMessage')(sequelize, Sequelize.DataTypes);
 db.DriverPayout = require('./DriverPayout')(sequelize, Sequelize.DataTypes);
+db.DriverReferral = require('./DriverReferral')(sequelize, Sequelize.DataTypes);
+db.SystemSettings = require('./SystemSettings')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 Object.keys(db).forEach(modelName => {

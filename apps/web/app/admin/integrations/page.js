@@ -1,6 +1,9 @@
 'use client'
 
+import { useToast } from '@/components/ui/Toast'
+
 export default function IntegrationsManagement() {
+  const toast = useToast()
   return (
     <div className="space-y-6">
       <div>
@@ -195,7 +198,7 @@ function IntegrationCard({ name, description, status, icon }) {
           {status}
         </span>
       </div>
-      <button onClick={() => alert(`Configure ${name} - This will open the configuration panel for ${description}.`)} className="text-sm text-blue-600 hover:underline">
+      <button onClick={() => console.log(`Configuring ${name}`)} className="text-sm text-blue-600 hover:underline">
         Configure →
       </button>
     </div>
