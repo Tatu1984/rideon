@@ -11,7 +11,7 @@ trigger:
       - package.json
       - package-lock.json
 
-# 🔐 Attach Variable Group HERE (top-level)
+# 🔐 Attach Variable Group
 variables:
 - group: rideon-backend-prod
 
@@ -20,52 +20,55 @@ pool:
 
 jobs:
 - job: BuildAndTest
+  displayName: Build and Test Backend
+
   services:
-  postgres:
-    image: postgres:14
-    env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: rideon_test
-    ports:
-      - 5432:5432
+    postgres:
+      image: postgres:14
+      env:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: rideon_test
+      ports:
+        - 5432:5432
       options: >-
         --health-cmd pg_isready
         --health-interval 10s
         --health-timeout 5s
         --health-retries 5
-steps:
-  # Install Node.js (use LTS for stability)
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '18.x'
-    displayName: 'Install Node.js'
 
-  # Install dependencies for npm workspaces (ROOT ONLY)
-  - script: |
-      npm ci
-    displayName: 'Install dependencies (npm workspaces)'
+  steps:
+    # Install Node.js
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
 
-  # Optional: Lint backend
-  - script: |
-      npm run lint --workspace=apps/backend || echo "Lint skipped"
-    displayName: 'Lint backend'
+    # Install dependencies (npm workspaces)
+    - script: |
+        npm ci
+      displayName: 'Install dependencies (npm workspaces)'
 
-  # Dummy build (plain Node.js)
-  - script: |
-      npm run build --workspace=apps/backend
-    displayName: 'Build backend'
+    # Optional lint
+    - script: |
+        npm run lint --workspace=apps/backend || echo "Lint skipped"
+      displayName: 'Lint backend'
 
-  # Run backend tests
-  - script: |
-      npm test --workspace=apps/backend
-    displayName: 'Test backend'
-    env:
-      NODE_ENV: test
-      DB_HOST: 127.0.0.1
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      JWT_SECRET: $(JWT_SECRET)
-      DATABASE_URL: $(DATABASE_URL)
-      CORS_ORIGIN: $(CORS_ORIGIN)
+    # Dummy build (plain Node.js)
+    - script: |
+        npm run build --workspace=apps/backend
+      displayName: 'Build backend'
+
+    # Run tests
+    - script: |
+        npm test --workspace=apps/backend
+      displayName: 'Test backend'
+      env:
+        NODE_ENV: test
+        DB_HOST: 127.0.0.1
+        DB_PORT: 5432
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+        JWT_SECRET: $(JWT_SECRET)
+        DATABASE_URL: $(DATABASE_URL)
+        CORS_ORIGIN: $(CORS_ORIGIN)
