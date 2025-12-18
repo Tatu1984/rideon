@@ -1,8 +1,3 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 # Azure Pipeline for RideOn Backend (npm workspaces)
 
 trigger:
@@ -15,6 +10,10 @@ trigger:
       - apps/backend/**
       - package.json
       - package-lock.json
+
+# 🔐 Attach Variable Group HERE (top-level)
+variables:
+- group: rideon-backend-prod
 
 pool:
   vmImage: ubuntu-latest
@@ -36,7 +35,7 @@ steps:
       npm run lint --workspace=apps/backend || echo "Lint skipped"
     displayName: 'Lint backend'
 
-  # Build backend only
+  # Dummy build (plain Node.js)
   - script: |
       npm run build --workspace=apps/backend
     displayName: 'Build backend'
@@ -47,11 +46,11 @@ steps:
     displayName: 'Test backend'
     env:
       NODE_ENV: test
-      DB_HOST: localhost
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: rideon_test
-      JWT_SECRET: test-secret-key
-      REDIS_HOST: localhost
-      REDIS_PORT: 6379
+      DB_HOST: $(DB_HOST)
+      DB_PORT: $(DB_PORT)
+      DB_USER: $(DB_USER)
+      DB_PASSWORD: $(DB_PASSWORD)
+      DB_NAME: $(DB_NAME)
+      JWT_SECRET: $(JWT_SECRET)
+      DATABASE_URL: $(DATABASE_URL)
+      CORS_ORIGIN: $(CORS_ORIGIN)
