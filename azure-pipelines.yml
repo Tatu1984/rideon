@@ -18,6 +18,22 @@ variables:
 pool:
   vmImage: ubuntu-latest
 
+jobs:
+- job: BuildAndTest
+  services:
+  postgres:
+    image: postgres:14
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: rideon_test
+    ports:
+      - 5432:5432
+      options: >-
+        --health-cmd pg_isready
+        --health-interval 10s
+        --health-timeout 5s
+        --health-retries 5
 steps:
   # Install Node.js (use LTS for stability)
   - task: NodeTool@0
@@ -46,11 +62,10 @@ steps:
     displayName: 'Test backend'
     env:
       NODE_ENV: test
-      DB_HOST: $(DB_HOST)
-      DB_PORT: $(DB_PORT)
-      DB_USER: $(DB_USER)
-      DB_PASSWORD: $(DB_PASSWORD)
-      DB_NAME: $(DB_NAME)
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
       JWT_SECRET: $(JWT_SECRET)
       DATABASE_URL: $(DATABASE_URL)
       CORS_ORIGIN: $(CORS_ORIGIN)
