@@ -11,7 +11,7 @@
     "db:migrate:undo": "sequelize-cli db:migrate:undo",
     "db:seed": "sequelize-cli db:seed:all",
     "test": "jest --watchAll=false",
-    "build": "echo \"Running build script\"",
+        "build":"running build script",
     "test:watch": "jest --watch"
   },
   "dependencies": {
