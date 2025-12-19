@@ -45,8 +45,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "1a508aff-4a7a-4daf-8a97-2d954108d091"
+        "projectId": "445f1458-6d67-4a9d-bcdd-b049289babdd"
       }
-    }
+    },
+    "owner": "tatu1984"
   }
 }

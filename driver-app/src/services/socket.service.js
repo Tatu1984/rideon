@@ -6,7 +6,7 @@ const inProduction = process.env.NODE_ENV === "production";
 const inExpo = Constants.expoConfig && Constants.expoConfig.hostUri;
 const inBrowser = typeof document !== "undefined";
 const apiDomain = inProduction
-  ? "rideon.example.com"
+  ? "rideon-backend.vercel.app"
   : inExpo
   ? `${Constants.expoConfig.hostUri.split(`:`).shift()}:3001`
   : inBrowser

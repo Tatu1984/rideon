@@ -2,8 +2,8 @@ import axios from 'axios';
 import Constants from "expo-constants";
 import SecureStorageService from './secureStorage.service';
 
-// Production API URL - update this with your actual Vercel backend URL after deployment
-const PRODUCTION_API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://rideon-api.vercel.app';
+// Production API URL - your Vercel backend
+const PRODUCTION_API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://rideon-backend.vercel.app/api';
 
 const inProduction = process.env.NODE_ENV === "production";
 const inExpo = Constants.expoConfig && Constants.expoConfig.hostUri;
