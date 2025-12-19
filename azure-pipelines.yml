@@ -1,0 +1,74 @@
+# Azure Pipeline for RideOn Backend (npm workspaces)
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - apps/backend/**
+      - package.json
+      - package-lock.json
+
+# 🔐 Attach Variable Group
+variables:
+- group: rideon-backend-prod
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+- job: BuildAndTest
+  displayName: Build and Test Backend
+
+  services:
+    postgres:
+      image: postgres:14
+      env:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: rideon_test
+      ports:
+        - 5432:5432
+      options: >-
+        --health-cmd pg_isready
+        --health-interval 10s
+        --health-timeout 5s
+        --health-retries 5
+
+  steps:
+    # Install Node.js
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
+
+    # Install dependencies (npm workspaces)
+    - script: |
+        npm ci
+      displayName: 'Install dependencies (npm workspaces)'
+
+    # Optional lint
+    - script: |
+        npm run lint --workspace=apps/backend || echo "Lint skipped"
+      displayName: 'Lint backend'
+
+    # Dummy build (plain Node.js)
+    - script: |
+        npm run build --workspace=apps/backend
+      displayName: 'Build backend'
+
+    # Run tests
+    - script: |
+        npm test --workspace=apps/backend
+      displayName: 'Test backend'
+      env:
+        NODE_ENV: test
+        DB_HOST: 127.0.0.1
+        DB_PORT: 5432
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+        JWT_SECRET: $(JWT_SECRET)
+        DATABASE_URL: $(DATABASE_URL)
+        CORS_ORIGIN: $(CORS_ORIGIN)
