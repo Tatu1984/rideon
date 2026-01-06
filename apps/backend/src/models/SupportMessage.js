@@ -35,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     tableName: 'SupportMessages',
+    underscored: true,
     timestamps: true
   });
 

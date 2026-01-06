@@ -51,6 +51,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     tableName: 'DriverReferrals',
+    underscored: true,
     timestamps: true
   });
 

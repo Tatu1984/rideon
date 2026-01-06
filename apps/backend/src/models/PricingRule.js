@@ -69,6 +69,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'pricing_rules',
     timestamps: true,
+    underscored: true,
     indexes: [
       { fields: ['zone_id'] },
       { fields: ['vehicle_type'] },

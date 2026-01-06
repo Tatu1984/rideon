@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useAuth } from '../contexts/AuthContext';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, StatusBar, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 // Auth Screens
@@ -41,6 +41,7 @@ import FAQScreen from '../screens/support/FAQScreen';
 
 // Other Screens
 import ReferralScreen from '../screens/main/ReferralScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -53,8 +54,11 @@ const AuthStack = () => (
   </Stack.Navigator>
 );
 
-const MainTabs = () => (
-  <Tab.Navigator
+const MainTabs = () => {
+    useEffect(() => {
+    StatusBar.setBarStyle('light-content');
+  }, [])
+  return(<Tab.Navigator
     screenOptions={{
       tabBarActiveTintColor: '#7C3AED',
       tabBarInactiveTintColor: '#9CA3AF',
@@ -63,6 +67,10 @@ const MainTabs = () => (
         paddingBottom: 8,
         paddingTop: 8,
         height: 60,
+        marginBottom:12,
+        elevation: 0,          // Android
+        shadowColor: 'transparent', // iOS
+        borderTopWidth: 0,     // iOS thin line
       },
     }}
   >
@@ -116,11 +124,14 @@ const MainTabs = () => (
         ),
       }}
     />
-  </Tab.Navigator>
-);
+  </Tab.Navigator>)
+    };
 
-const MainStack = () => (
-  <Stack.Navigator>
+const MainStack = () => {
+      useEffect(() => {
+    StatusBar.setBarStyle('dark-content');
+  }, [])
+  return(<Stack.Navigator >
     <Stack.Screen
       name="MainTabs"
       component={MainTabs}
@@ -199,10 +210,11 @@ const MainStack = () => (
     <Stack.Screen
       name="Referral"
       component={ReferralScreen}
-      options={{ title: 'Referral Program' }}
+      options={{ title: 'Referral Program',}}
+
     />
-  </Stack.Navigator>
-);
+  </Stack.Navigator> 
+)};
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();

@@ -66,6 +66,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'ratings',
     timestamps: true,
+    underscored: true,
     indexes: [
       { fields: ['trip_id'] },
       { fields: ['rider_id'] },

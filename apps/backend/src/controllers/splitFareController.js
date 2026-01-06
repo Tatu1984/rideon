@@ -7,12 +7,9 @@ const { Trip, Rider, User, Payment } = require('../models');
 const { Op } = require('sequelize');
 const apiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
-<<<<<<< HEAD
-=======
 const emailService = require('../services/emailService');
 const smsService = require('../services/smsService');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
->>>>>>> origin/main
 
 // In-memory store for split fare invitations (in production, use Redis)
 const splitFareInvitations = new Map();
@@ -145,9 +142,6 @@ exports.initiateSplitFare = async (req, res) => {
           }
         });
       }
-<<<<<<< HEAD
-      // TODO: Send SMS/email to non-registered users
-=======
       // Send SMS/email to non-registered users
       if (!participant.userId) {
         const trip = await Trip.findByPk(tripId);
@@ -167,7 +161,6 @@ exports.initiateSplitFare = async (req, res) => {
           );
         }
       }
->>>>>>> origin/main
     }
 
     return apiResponse.created(res, {
@@ -380,11 +373,6 @@ exports.paySplitFareShare = async (req, res) => {
       return apiResponse.badRequest(res, 'ALREADY_PAID', 'You have already paid your share');
     }
 
-<<<<<<< HEAD
-    // Process payment (simplified - in production, use Stripe)
-    // TODO: Integrate with actual payment processor
-    const paymentSuccess = true; // Simulated payment
-=======
     // Process payment with Stripe
     let paymentSuccess = false;
     let stripePaymentId = null;
@@ -423,16 +411,12 @@ exports.paySplitFareShare = async (req, res) => {
       logger.error('Stripe payment error:', stripeError);
       return apiResponse.badRequest(res, 'PAYMENT_FAILED', stripeError.message || 'Payment processing failed');
     }
->>>>>>> origin/main
 
     if (paymentSuccess) {
       invitation.participants[participantIndex].paymentStatus = 'completed';
       invitation.participants[participantIndex].paidAt = new Date();
       invitation.participants[participantIndex].paymentMethod = paymentMethod;
-<<<<<<< HEAD
-=======
       invitation.participants[participantIndex].stripePaymentId = stripePaymentId;
->>>>>>> origin/main
 
       // Check if all payments are complete
       const allPaid = invitation.participants

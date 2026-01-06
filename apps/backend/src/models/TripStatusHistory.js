@@ -40,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'trip_status_history',
     timestamps: true,
     updatedAt: false,
+    underscored: true,
     indexes: [
       { fields: ['trip_id'] },
       { fields: ['status'] },

@@ -202,6 +202,9 @@ module.exports = {
       bank_account_name: {
         type: Sequelize.STRING
       },
+      stripe_account_id: {
+        type: Sequelize.STRING
+      },
       available_balance: {
         type: Sequelize.DECIMAL(10, 2),
         defaultValue: 0.00
@@ -523,6 +526,10 @@ module.exports = {
       dropoff_longitude: {
         type: Sequelize.DECIMAL(11, 8),
         allowNull: false
+      },
+      driver_earnings: {
+        type: Sequelize.DECIMAL(10, 2),
+        defaultValue: 0.00
       },
       status: {
         type: Sequelize.ENUM(

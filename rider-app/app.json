@@ -34,6 +34,7 @@
       ]
     },
     "plugins": [
+      "expo-splash-screen",
       [
         "expo-location",
         {
@@ -46,8 +47,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "1a508aff-4a7a-4daf-8a97-2d954108d091"
+        "projectId": "47a3095f-3120-4b60-ad2d-d30300aa5ab1"
       }
-    }
+    },
+    "owner": "banku89"
   }
 }

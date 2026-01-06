@@ -97,27 +97,27 @@ module.exports = (sequelize, DataTypes) => {
       as: 'user'
     });
     Driver.hasMany(models.Vehicle, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'vehicles'
     });
     Driver.hasMany(models.DriverDocument, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'documents'
     });
     Driver.hasMany(models.Trip, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'trips'
     });
     Driver.hasMany(models.Rating, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'ratingsReceived'
     });
     Driver.hasMany(models.DriverLocation, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'locationHistory'
     });
     Driver.hasMany(models.DriverPayout, {
-      foreignKey: 'driverId',
+      foreignKey: 'driver_id',
       as: 'payouts'
     });
   };

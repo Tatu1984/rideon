@@ -40,6 +40,7 @@ module.exports = (sequelize) => {
     }
   }, {
     tableName: 'system_settings',
+    underscored: true,
     timestamps: true
   });
 

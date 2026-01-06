@@ -60,6 +60,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'driver_documents',
     timestamps: true,
+    underscored: true,
     indexes: [
       { fields: ['driver_id'] },
       { fields: ['document_type'] },

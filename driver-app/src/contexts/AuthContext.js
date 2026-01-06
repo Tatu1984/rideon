@@ -15,15 +15,17 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       const token = await SecureStorageService.getAccessToken();
+      console.log('Token:', token);
       if (token) {
         const response = await authAPI.getProfile();
+        console.log('Profile response:', response.data);
         const userData = response.data.data || response.data;
         setUser(userData);
         await SecureStorageService.setUserData(userData);
       }
     } catch (error) {
       console.error('Auth check failed:', error);
-      await SecureStorageService.clearTokens();
+      //await SecureStorageService.clearTokens();
     } finally {
       setLoading(false);
     }
@@ -31,9 +33,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      console.log('🔵 LOGIN ATTEMPT:', email);
       const response = await authAPI.login(email, password);
-      console.log('🟢 LOGIN RESPONSE:', JSON.stringify(response.data, null, 2));
 
       const data = response.data.data || response.data;
       const accessToken = data.token || data.accessToken;

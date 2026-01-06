@@ -251,6 +251,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: 'absolute',
+    marginTop:46,
     top: 0,
     left: 0,
     right: 0,

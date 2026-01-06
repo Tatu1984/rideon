@@ -1,25 +1,6 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-<<<<<<< HEAD
-// Initialize Sequelize with the connection string
-const sequelize = new Sequelize(config.url, {
-  dialect: 'postgres',
-  protocol: 'postgres',
-  logging: config.logging,
-  dialectOptions: config.dialectOptions,
-  pool: config.pool,
-  define: {
-    timestamps: true,
-    underscored: true
-  }
-});
-
-const db = {
-  sequelize,
-  Sequelize
-};
-=======
 let sequelize;
 
 // Use DATABASE_URL if available (for Neon DB, Vercel, etc.)
@@ -53,8 +34,9 @@ if (process.env.DATABASE_URL) {
     dbConfig
   );
 }
->>>>>>> origin/main
-
+const db = {
+  sequelize,
+  Sequelize,}
 // Import all models
 db.User = require('./User')(sequelize, Sequelize.DataTypes);
 db.Rider = require('./Rider')(sequelize, Sequelize.DataTypes);

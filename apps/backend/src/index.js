@@ -78,8 +78,7 @@ app.use((req, res) => {
 // Error Handler
 app.use(errorHandler);
 
-// For local development
-if (process.env.NODE_ENV !== 'production') {
+// For local development  
   const http = require('http');
   const { initializeSocket } = require('./socket');
 
@@ -111,7 +110,6 @@ if (process.env.NODE_ENV !== 'production') {
       process.exit(0);
     });
   });
-}
 
 // Export for Vercel serverless
 module.exports = app;

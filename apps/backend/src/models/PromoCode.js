@@ -62,6 +62,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'promo_codes',
     timestamps: true,
+    underscored: true,
     indexes: [
       { fields: ['code'] },
       { fields: ['is_active'] },

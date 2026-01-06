@@ -89,9 +89,8 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#7C3AED',
-    padding: 24,
-    paddingTop: 60,
-    paddingBottom: 32,
+    padding: 16,
+    paddingTop:60
   },
   headerTitle: {
     fontSize: 32,
@@ -104,13 +103,17 @@ const styles = StyleSheet.create({
     color: '#E9D5FF',
   },
   cardsContainer: {
-    padding: 16,
+    width:"100%",
+    flexDirection:"row",
+    flexWrap:"wrap",
+    padding: 12,
     gap: 12,
   },
   card: {
+    width:"48%",
     backgroundColor: '#7C3AED',
     borderRadius: 16,
-    padding: 20,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -132,13 +135,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   cardAmount: {
-    fontSize: 36,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
   },
   statsContainer: {
     backgroundColor: '#FFFFFF',
-    margin: 16,
+    margin: 12,
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
@@ -171,7 +174,7 @@ const styles = StyleSheet.create({
   },
   withdrawButton: {
     backgroundColor: '#7C3AED',
-    margin: 16,
+    margin: 12,
     marginTop: 8,
     padding: 18,
     borderRadius: 12,

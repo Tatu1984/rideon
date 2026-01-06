@@ -10,6 +10,7 @@ export default function RegisterScreen({ navigation }) {
     phone: '',
     password: '',
     confirmPassword: '',
+    role: 'driver',
   });
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();

@@ -48,6 +48,7 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     const token = await SecureStorageService.getAccessToken();
+    console.log('Token:', token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -69,46 +70,46 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  login: (email, password) => api.post('/auth/driver/login', { email, password }),
-  register: (data) => api.post('/auth/driver/register', data),
-  getProfile: () => api.get('/driver/profile'),
+  login: (email, password) => api.post('/v1/auth/login', { email, password }),
+  register: (data) => api.post('/v1/auth/register', data),
+  getProfile: () => api.get('/v1/auth/profile'),
 };
 
 export const driverAPI = {
-  updateLocation: (location) => api.post('/driver/location', location),
-  updateStatus: (status) => api.patch('/driver/status', { status }),
-  updateProfile: (data) => api.patch('/driver/profile', data),
-  getEarnings: (period) => api.get(`/driver/earnings?period=${period}`),
-  getTripHistory: () => api.get('/driver/trips'),
+  updateLocation: (location) => api.post('/v1/driver/location', location),
+  updateStatus: (status) => api.put('/v1/driver/status', { status }),
+  updateProfile: (data) => api.patch('/v1/driver/profile', data),
+  getEarnings: (period) => api.get(`/v1/driver/earnings?period=${period}`),
+  getTripHistory: () => api.get('/v1/driver/trips'),
   // Documents
-  getDocuments: () => api.get('/driver/documents'),
-  uploadDocument: (formData) => api.post('/driver/documents', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
-  deleteDocument: (type) => api.delete(`/driver/documents/${type}`),
+  getDocuments: () => api.get('/v1/driver/documents'),
+  uploadDocument: (formData) => api.post('/v1/driver/documents', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  deleteDocument: (type) => api.delete(`/v1/driver/documents/${type}`),
   // Vehicle
-  getVehicle: () => api.get('/driver/vehicle'),
-  updateVehicle: (formData) => api.post('/driver/vehicle', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  getVehicle: () => api.get('/v1/driver/vehicle'),
+  updateVehicle: (formData) => api.post('/v1/driver/vehicle', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   // Bank Details
-  getBankDetails: () => api.get('/driver/bank-details'),
-  updateBankDetails: (data) => api.post('/driver/bank-details', data),
-  deleteBankDetails: () => api.delete('/driver/bank-details'),
+  getBankDetails: () => api.get('/v1/driver/bank-details'),
+  updateBankDetails: (data) => api.post('/v1/driver/bank-details', data),
+  deleteBankDetails: () => api.delete('/v1/driver/bank-details'),
   // Support
-  getSupportTickets: () => api.get('/driver/support/tickets'),
-  createSupportTicket: (data) => api.post('/driver/support/tickets', data),
-  getSupportTicket: (id) => api.get(`/driver/support/tickets/${id}`),
-  addTicketMessage: (id, message) => api.post(`/driver/support/tickets/${id}/messages`, { message }),
+  getSupportTickets: () => api.get('/v1/driver/support/tickets'),
+  createSupportTicket: (data) => api.post('/v1/driver/support/tickets', data),
+  getSupportTicket: (id) => api.get(`/v1/driver/support/tickets/${id}`),
+  addTicketMessage: (id, message) => api.post(`/v1/driver/support/tickets/${id}/messages`, { message }),
   // Referrals
-  getReferralInfo: () => api.get('/driver/referrals'),
-  getReferralHistory: () => api.get('/driver/referrals/history'),
-  sendReferralInvite: (data) => api.post('/driver/referrals/invite', data),
+  getReferralInfo: () => api.get('/v1/driver/referrals'),
+  getReferralHistory: () => api.get('/v1/driver/referrals/history'),
+  sendReferralInvite: (data) => api.post('/v1/driver/referrals/invite', data),
 };
 
 export const tripAPI = {
-  acceptTrip: (tripId) => api.post(`/trips/${tripId}/accept`),
-  rejectTrip: (tripId) => api.post(`/trips/${tripId}/reject`),
-  startTrip: (tripId) => api.post(`/trips/${tripId}/start`),
-  completeTrip: (tripId) => api.post(`/trips/${tripId}/complete`),
-  updateTripStatus: (tripId, status) => api.put(`/trips/${tripId}/status`, { status }),
-  getActiveTrip: () => api.get('/driver/active-trip'),
+  acceptTrip: (tripId) => api.post(`/v1/trips/${tripId}/accept`),
+  rejectTrip: (tripId) => api.post(`/v1/trips/${tripId}/reject`),
+  startTrip: (tripId) => api.post(`/v1/trips/${tripId}/start`),
+  completeTrip: (tripId) => api.post(`/v1/trips/${tripId}/complete`),
+  updateTripStatus: (tripId, status) => api.put(`/v1/trips/${tripId}/status`, { status }),
+  getActiveTrip: () => api.get('/v1/driver/active-trip'),
 };
 
 export default api;

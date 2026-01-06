@@ -21,11 +21,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM('pending', 'processing', 'completed', 'failed', 'cancelled'),
       defaultValue: 'pending'
     },
-    paymentMethod: {
+    method: {
       type: DataTypes.ENUM('bank_transfer', 'upi', 'wallet', 'cash', 'cheque'),
       allowNull: false
     },
-    transactionId: {
+    reference: {
       type: DataTypes.STRING,
       unique: true
     },
@@ -80,6 +80,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'driver_payouts',
     timestamps: true,
+    underscored: true,
     indexes: [
       { fields: ['driver_id'] },
       { fields: ['status'] },

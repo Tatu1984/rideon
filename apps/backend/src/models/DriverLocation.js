@@ -42,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'driver_locations',
     timestamps: true,
     updatedAt: false,
+    underscored: true,
     indexes: [
       { fields: ['driver_id'] },
       { fields: ['recorded_at'] }

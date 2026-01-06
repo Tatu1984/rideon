@@ -36,6 +36,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     tableName: 'zones',
     timestamps: true,
+    underscored: true,
     indexes: [
       { fields: ['city'] },
       { fields: ['is_active'] }
