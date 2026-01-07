@@ -34,7 +34,7 @@ export const TRIP_STATUS = {
 
 // Theme Colors
 export const COLORS = {
-  primary: '#7C3AED',
+  primary: '#160832', //'#7C3AED',
   secondary: '#EC4899',
   success: '#10B981',
   warning: '#F59E0B',

@@ -163,7 +163,7 @@ export default function SafetyToolkitScreen() {
                     <Ionicons
                       name={control.icon}
                       size={24}
-                      color={control.enabled ? '#7C3AED' : '#9CA3AF'}
+                      color={control.enabled ? '#160832' : '#9CA3AF'}
                     />
                   </View>
                   <View style={styles.recordingInfo}>
@@ -181,7 +181,7 @@ export default function SafetyToolkitScreen() {
                   <Ionicons
                     name={control.enabled ? 'stop-circle' : 'radio-button-on'}
                     size={28}
-                    color={control.enabled ? '#EF4444' : '#7C3AED'}
+                    color={control.enabled ? '#EF4444' : '#160832'}
                   />
                 </TouchableOpacity>
               </View>
@@ -202,7 +202,7 @@ export default function SafetyToolkitScreen() {
               onPress={() => Linking.openURL(`tel:${contact.number}`)}
             >
               <View style={styles.contactIcon}>
-                <Ionicons name="call" size={20} color="#7C3AED" />
+                <Ionicons name="call" size={20} color="#160832" />
               </View>
               <View style={styles.contactInfo}>
                 <Text style={styles.contactName}>{contact.name}</Text>
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
   },
   contactNumber: {
     fontSize: 14,
-    color: '#7C3AED',
+    color: '#160832',
     fontWeight: '500',
   },
   contactBadge: {

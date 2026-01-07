@@ -60,7 +60,7 @@ const MainTabs = () => {
   }, [])
   return(<Tab.Navigator
     screenOptions={{
-      tabBarActiveTintColor: '#7C3AED',
+      tabBarActiveTintColor: '#160832',
       tabBarInactiveTintColor: '#9CA3AF',
       headerShown: false,
       tabBarStyle: {
@@ -222,7 +222,7 @@ export default function AppNavigator() {
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#7C3AED" />
+        <ActivityIndicator size="large" color="#160832" />
       </View>
     );
   }

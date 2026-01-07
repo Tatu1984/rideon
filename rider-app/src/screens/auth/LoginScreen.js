@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS } from '../../config/constants';
 
@@ -30,9 +30,7 @@ export default function LoginScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.header}>
-        <Text style={styles.logo}>🚗</Text>
-        <Text style={styles.title}>RideOn</Text>
-        <Text style={styles.subtitle}>Your ride, your way</Text>
+        <Image source={require('../../../assets/full-logo.png')} style={{width:300, objectFit:"contain"}}/>
       </View>
 
       <View style={styles.form}>
@@ -47,7 +45,7 @@ export default function LoginScreen({ navigation }) {
         />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, {color:COLORS.black}]}
           placeholder="Password"
           placeholderTextColor={COLORS.gray}
           value={password}

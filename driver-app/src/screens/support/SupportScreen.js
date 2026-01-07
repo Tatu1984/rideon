@@ -85,7 +85,7 @@ export default function SupportScreen({ navigation }) {
     return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#7C3AED" /></View>;
+  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#160832" /></View>;
 
   return (
     <View style={styles.container}>
@@ -119,7 +119,7 @@ export default function SupportScreen({ navigation }) {
               <TouchableOpacity key={ticket.id} style={styles.ticketCard} onPress={() => setSelectedTicket(ticket)}>
                 <View style={styles.ticketHeader}>
                   <View style={styles.ticketIcon}>
-                    <Ionicons name={SUPPORT_CATEGORIES.find(c => c.id === ticket.category)?.icon || 'help-circle-outline'} size={20} color="#7C3AED" />
+                    <Ionicons name={SUPPORT_CATEGORIES.find(c => c.id === ticket.category)?.icon || 'help-circle-outline'} size={20} color="#160832" />
                   </View>
                   <View style={styles.ticketInfo}>
                     <Text style={styles.ticketSubject} numberOfLines={1}>{ticket.subject}</Text>
@@ -152,7 +152,7 @@ export default function SupportScreen({ navigation }) {
             <View style={styles.categoryGrid}>
               {SUPPORT_CATEGORIES.map((cat) => (
                 <TouchableOpacity key={cat.id} style={[styles.categoryCard, selectedCategory === cat.id && styles.categoryCardSelected]} onPress={() => setSelectedCategory(cat.id)}>
-                  <Ionicons name={cat.icon} size={24} color={selectedCategory === cat.id ? '#7C3AED' : '#6B7280'} />
+                  <Ionicons name={cat.icon} size={24} color={selectedCategory === cat.id ? '#160832' : '#6B7280'} />
                   <Text style={[styles.categoryName, selectedCategory === cat.id && styles.categoryNameSelected]}>{cat.name}</Text>
                 </TouchableOpacity>
               ))}
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   quickActionCard: { flex: 1, backgroundColor: '#fff', padding: 16, borderRadius: 12, alignItems: 'center' },
   quickActionIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   quickActionText: { fontSize: 12, fontWeight: '600', color: '#374151', textAlign: 'center' },
-  newTicketButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#7C3AED', margin: 16, marginTop: 0, padding: 16, borderRadius: 12, gap: 8 },
+  newTicketButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#160832', margin: 16, marginTop: 0, padding: 16, borderRadius: 12, gap: 8 },
   newTicketText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   section: { backgroundColor: '#fff', margin: 16, marginTop: 0, padding: 16, borderRadius: 12 },
   sectionTitle: { fontSize: 18, fontWeight: '600', color: '#1F2937', marginBottom: 16 },
@@ -243,24 +243,24 @@ const styles = StyleSheet.create({
   formLabel: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 12, marginTop: 16 },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   categoryCard: { width: '47%', padding: 16, borderRadius: 12, borderWidth: 2, borderColor: '#E5E7EB', alignItems: 'center' },
-  categoryCardSelected: { borderColor: '#7C3AED', backgroundColor: '#F3E8FF' },
+  categoryCardSelected: { borderColor: '#160832', backgroundColor: '#F3E8FF' },
   categoryName: { marginTop: 8, fontSize: 13, fontWeight: '500', color: '#6B7280', textAlign: 'center' },
-  categoryNameSelected: { color: '#7C3AED' },
+  categoryNameSelected: { color: '#160832' },
   input: { backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, padding: 12, fontSize: 16 },
   textArea: { height: 120 },
-  submitButton: { backgroundColor: '#7C3AED', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 24, marginBottom: 32 },
+  submitButton: { backgroundColor: '#160832', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 24, marginBottom: 32 },
   submitButtonDisabled: { opacity: 0.7 },
   submitButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   ticketDetailHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, backgroundColor: '#F9FAFB', borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
   ticketDetailSubject: { fontSize: 16, fontWeight: '600', color: '#1F2937', flex: 1, marginRight: 12 },
   messagesList: { flex: 1, padding: 16 },
   messageBubble: { maxWidth: '80%', padding: 12, borderRadius: 16, marginBottom: 12 },
-  driverMessage: { alignSelf: 'flex-end', backgroundColor: '#7C3AED' },
+  driverMessage: { alignSelf: 'flex-end', backgroundColor: '#160832' },
   supportMessage: { alignSelf: 'flex-start', backgroundColor: '#E5E7EB' },
   messageLabel: { fontSize: 11, fontWeight: '600', color: 'rgba(255,255,255,0.8)', marginBottom: 4 },
   messageText: { fontSize: 14, color: '#fff' },
   messageTime: { fontSize: 10, color: 'rgba(255,255,255,0.7)', marginTop: 4, textAlign: 'right' },
   messageInputContainer: { flexDirection: 'row', padding: 16, borderTopWidth: 1, borderTopColor: '#E5E7EB', gap: 12 },
   messageInput: { flex: 1, backgroundColor: '#F3F4F6', borderRadius: 24, paddingHorizontal: 16, paddingVertical: 12, fontSize: 14 },
-  sendButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#7C3AED', justifyContent: 'center', alignItems: 'center' },
+  sendButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#160832', justifyContent: 'center', alignItems: 'center' },
 });

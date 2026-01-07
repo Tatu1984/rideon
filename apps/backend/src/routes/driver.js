@@ -85,11 +85,11 @@ router.delete('/documents/:documentId',
 router.get('/vehicles', driverController.getVehicles);
 router.post('/vehicles',
   [
-    body('make').isString().isLength({ min: 1, max: 100 }).withMessage('Vehicle make is required'),
-    body('model').isString().isLength({ min: 1, max: 100 }).withMessage('Vehicle model is required'),
-    body('year').isInt({ min: 2000, max: 2030 }).withMessage('Year must be between 2000 and 2030'),
-    body('licensePlate').isString().isLength({ min: 2, max: 20 }).withMessage('License plate is required'),
-    body('color').isString().isLength({ min: 2, max: 50 }).withMessage('Vehicle color is required'),
+    body('make').isString().trim().isLength({ min: 1, max: 100 }).withMessage('Vehicle make is required'),
+    body('model').isString().trim().isLength({ min: 1, max: 100 }).withMessage('Vehicle model is required'),
+    body('year').isString().trim().matches(/^\d{4}$/).withMessage('Year must be 4 digits'),
+    body('licensePlate').isString().trim().isLength({ min: 2, max: 20 }).withMessage('License plate is required'),
+    body('color').isString().trim().isLength({ min: 2, max: 50 }).withMessage('Vehicle color is required'),
     body('vehicleType').optional().isIn(['economy', 'comfort', 'premium', 'xl']).withMessage('Invalid vehicle type')
   ],
   validate,

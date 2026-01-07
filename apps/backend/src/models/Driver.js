@@ -73,6 +73,9 @@ module.exports = (sequelize, DataTypes) => {
     bankAccountName: {
       type: DataTypes.STRING
     },
+    bankRoutingNumber: {
+      type: DataTypes.STRING
+    },
     availableBalance: {
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0.00

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const multer = require('multer');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const { sequelize } = require('./models');
@@ -34,6 +35,7 @@ app.use(cookieParser());
 app.use(morgan('combined', { stream: logger.stream }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(multer().any());
 
 // Security middleware
 app.use(securityHeaders);

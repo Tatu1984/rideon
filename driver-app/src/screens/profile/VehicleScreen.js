@@ -23,7 +23,7 @@ export default function VehicleScreen({ navigation }) {
     try {
       const response = await driverAPI.getVehicle();
       if (response.data?.success && response.data.data) {
-        const v = response.data.data;
+        const v = response.data.data[0];
         setVehicle({ make: v.make || '', model: v.model || '', year: v.year?.toString() || '', color: v.color || '', licensePlate: v.licensePlate || '', vehicleType: v.vehicleType || 'standard', vin: v.vin || '', seats: v.seats?.toString() || '4' });
         setPhotos({ front: v.frontPhoto || null, back: v.backPhoto || null, interior: v.interiorPhoto || null, side: v.sidePhoto || null });
       }
@@ -52,7 +52,7 @@ export default function VehicleScreen({ navigation }) {
     setSaving(true);
     try {
       const formData = new FormData();
-      Object.keys(vehicle).forEach(key => { formData.append(key, vehicle[key]); });
+      Object.keys(vehicle).forEach(key => { formData.append(key, vehicle[key].trim()); });
       Object.keys(photos).forEach(key => {
         if (photos[key] && photos[key].startsWith('file://')) {
           formData.append(`${key}Photo`, { uri: photos[key], type: 'image/jpeg', name: `${key}_${Date.now()}.jpg` });
@@ -65,8 +65,7 @@ export default function VehicleScreen({ navigation }) {
     finally { setSaving(false); }
   };
 
-  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#7C3AED" /></View>;
-
+  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#160832" /></View>;
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
@@ -74,7 +73,7 @@ export default function VehicleScreen({ navigation }) {
         <View style={styles.typeGrid}>
           {VEHICLE_TYPES.map((type) => (
             <TouchableOpacity key={type.id} style={[styles.typeCard, vehicle.vehicleType === type.id && styles.typeCardSelected]} onPress={() => handleInputChange('vehicleType', type.id)}>
-              <Ionicons name={type.icon} size={28} color={vehicle.vehicleType === type.id ? '#7C3AED' : '#6B7280'} />
+              <Ionicons name={type.icon} size={28} color={vehicle.vehicleType === type.id ? '#160832' : '#6B7280'} />
               <Text style={[styles.typeName, vehicle.vehicleType === type.id && styles.typeNameSelected]}>{type.name}</Text>
             </TouchableOpacity>
           ))}
@@ -131,7 +130,7 @@ export default function VehicleScreen({ navigation }) {
                   <Text style={styles.photoLabel}>{type.charAt(0).toUpperCase() + type.slice(1)}</Text>
                 </View>
               )}
-              <View style={styles.photoOverlay}><Ionicons name="add-circle" size={24} color="#7C3AED" /></View>
+              <View style={styles.photoOverlay}><Ionicons name="add-circle" size={24} color="#160832" /></View>
             </TouchableOpacity>
           ))}
         </View>
@@ -153,9 +152,9 @@ const styles = StyleSheet.create({
   sectionSubtitle: { fontSize: 13, color: '#6B7280', marginBottom: 16 },
   typeGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 12, gap: 12 },
   typeCard: { width: '47%', padding: 16, borderRadius: 12, borderWidth: 2, borderColor: '#E5E7EB', alignItems: 'center' },
-  typeCardSelected: { borderColor: '#7C3AED', backgroundColor: '#F3E8FF' },
+  typeCardSelected: { borderColor: '#160832', backgroundColor: '#F3E8FF' },
   typeName: { marginTop: 8, fontSize: 14, fontWeight: '500', color: '#6B7280' },
-  typeNameSelected: { color: '#7C3AED' },
+  typeNameSelected: { color: '#160832' },
   row: { flexDirection: 'row', gap: 12 },
   inputGroup: { marginBottom: 16 },
   inputHalf: { flex: 1, marginBottom: 16 },
@@ -167,7 +166,7 @@ const styles = StyleSheet.create({
   photoPlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   photoLabel: { marginTop: 8, fontSize: 12, color: '#6B7280' },
   photoOverlay: { position: 'absolute', bottom: 8, right: 8, backgroundColor: '#fff', borderRadius: 12 },
-  saveButton: { backgroundColor: '#7C3AED', margin: 16, padding: 16, borderRadius: 12, alignItems: 'center' },
+  saveButton: { backgroundColor: '#160832', margin: 16, padding: 16, borderRadius: 12, alignItems: 'center' },
   saveButtonDisabled: { opacity: 0.7 },
   saveButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   bottomPadding: { height: 32 },

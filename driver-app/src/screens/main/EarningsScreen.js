@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   header: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     padding: 16,
     paddingTop:60
   },
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width:"48%",
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
@@ -173,13 +173,13 @@ const styles = StyleSheet.create({
     color: '#1F2937',
   },
   withdrawButton: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     margin: 12,
     marginTop: 8,
     padding: 18,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#7C3AED',
+    shadowColor: '#160832',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

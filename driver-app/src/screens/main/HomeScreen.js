@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useDriver } from '../../contexts/DriverContext';
 import { useLocation } from '../../contexts/LocationContext';
 import { useNavigation } from '@react-navigation/native';
+import FreeMap from '../../components/MapViewPlaceholder';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -86,37 +87,9 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <MapView
-        provider={PROVIDER_GOOGLE}
-        style={styles.map}
-        initialRegion={initialRegion}
-        showsUserLocation
-        showsMyLocationButton
-      >
-        {location && (
-          <Marker
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-            title="You"
-            description="Your current location"
-          />
-        )}
-        
-        {/* Service area geofence example */}
-        {location && (
-          <Circle
-            center={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-            radius={5000}
-            strokeColor="rgba(124, 58, 237, 0.5)"
-            fillColor="rgba(124, 58, 237, 0.1)"
-          />
-        )}
-      </MapView>
+      <View style={styles.container}>
+        <FreeMap style={styles.map} />
+      </View>
 
       <View style={styles.overlay}>
         <View style={styles.statusCard}>
@@ -131,7 +104,7 @@ export default function HomeScreen() {
               value={isOnline}
               onValueChange={handleToggleOnline}
               trackColor={{ false: '#D1D5DB', true: '#A78BFA' }}
-              thumbColor={isOnline ? '#7C3AED' : '#F3F4F6'}
+              thumbColor={isOnline ? '#160832' : '#F3F4F6'}
             />
           </View>
         </View>
@@ -159,13 +132,13 @@ export default function HomeScreen() {
             {/* Quick Stats */}
             <View style={styles.quickStats}>
               <View style={styles.quickStat}>
-                <Ionicons name="location" size={20} color="#7C3AED" />
+                <Ionicons name="location" size={20} color="#160832" />
                 <Text style={styles.quickStatValue}>{tripRequest?.distanceToRider || '2.3'} km</Text>
                 <Text style={styles.quickStatLabel}>To Pickup</Text>
               </View>
               <View style={styles.quickStatDivider} />
               <View style={styles.quickStat}>
-                <Ionicons name="time" size={20} color="#7C3AED" />
+                <Ionicons name="time" size={20} color="#160832" />
                 <Text style={styles.quickStatValue}>{tripRequest?.estimatedDuration || '12'} min</Text>
                 <Text style={styles.quickStatLabel}>Trip Time</Text>
               </View>
@@ -180,7 +153,7 @@ export default function HomeScreen() {
             <View style={styles.tripInfo}>
               <View style={styles.tripRow}>
                 <View style={styles.tripIconContainer}>
-                  <Ionicons name="person-circle" size={24} color="#7C3AED" />
+                  <Ionicons name="person-circle" size={24} color="#160832" />
                 </View>
                 <View style={styles.tripRowContent}>
                   <Text style={styles.tripLabel}>Passenger</Text>
@@ -213,10 +186,10 @@ export default function HomeScreen() {
             {/* Action Buttons */}
             <View style={styles.actionButtons}>
               <TouchableOpacity style={styles.actionButton} onPress={handleCall}>
-                <Ionicons name="call" size={20} color="#7C3AED" />
+                <Ionicons name="call" size={20} color="#160832" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionButton} onPress={handleNavigate}>
-                <Ionicons name="navigate" size={20} color="#7C3AED" />
+                <Ionicons name="navigate" size={20} color="#160832" />
               </TouchableOpacity>
             </View>
 
@@ -283,7 +256,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   earningsCard: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     borderRadius: 12,
     padding: 16,
   },
@@ -418,7 +391,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   acceptButton: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
   },
   acceptButtonText: {
     color: '#FFFFFF',

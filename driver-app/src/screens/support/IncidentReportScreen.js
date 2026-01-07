@@ -58,7 +58,7 @@ export default function IncidentReportScreen({ navigation }) {
     <ScrollView style={styles.container}>
       {/* Header Info */}
       <View style={styles.headerCard}>
-        <Ionicons name="shield-checkmark" size={48} color="#7C3AED" />
+        <Ionicons name="shield-checkmark" size={48} color="#160832" />
         <Text style={styles.headerTitle}>Safety First</Text>
         <Text style={styles.headerSubtitle}>
           Your safety is our priority. Report any incidents and our team will respond promptly.
@@ -145,7 +145,7 @@ export default function IncidentReportScreen({ navigation }) {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Photos (Optional)</Text>
         <TouchableOpacity style={styles.addPhotoButton} onPress={handleAddPhoto}>
-          <Ionicons name="camera" size={32} color="#7C3AED" />
+          <Ionicons name="camera" size={32} color="#160832" />
           <Text style={styles.addPhotoText}>Add Photos</Text>
           <Text style={styles.addPhotoSubtext}>Upload evidence or damage photos</Text>
         </TouchableOpacity>
@@ -154,7 +154,7 @@ export default function IncidentReportScreen({ navigation }) {
           <View style={styles.photosList}>
             {photos.map((photo, index) => (
               <View key={index} style={styles.photoItem}>
-                <Ionicons name="image" size={24} color="#7C3AED" />
+                <Ionicons name="image" size={24} color="#160832" />
                 <Text style={styles.photoName}>Photo {index + 1}</Text>
               </View>
             ))}
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   typeCardActive: {
-    borderColor: '#7C3AED',
+    borderColor: '#160832',
     backgroundColor: '#F3F4F6',
   },
   typeIcon: {
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   addPhotoText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#7C3AED',
+    color: '#160832',
     marginTop: 12,
   },
   addPhotoSubtext: {
@@ -361,12 +361,12 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   submitButton: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     marginHorizontal: 16,
     padding: 18,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#7C3AED',
+    shadowColor: '#160832',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

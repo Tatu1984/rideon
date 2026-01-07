@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   header: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     padding: 24,
     paddingTop: 60,
     paddingBottom: 32,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 40,
     fontWeight: 'bold',
-    color: '#7C3AED',
+    color: '#160832',
   },
   userName: {
     fontSize: 28,
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#7C3AED',
+    color: '#160832',
     marginBottom: 4,
   },
   statLabel: {

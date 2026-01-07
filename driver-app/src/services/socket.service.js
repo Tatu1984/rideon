@@ -12,9 +12,9 @@ const inBrowser = typeof document !== "undefined";
 // Get API URL based on environment
 const getApiUrl = () => {
   // Use environment variable if set
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
-  }
+  // if (process.env.EXPO_PUBLIC_API_URL) {
+  //   return process.env.EXPO_PUBLIC_API_URL;
+  // }
 
   // Production mode
   if (inProduction) {
@@ -35,7 +35,7 @@ const getApiUrl = () => {
 };
 
 const SOCKET_URL = getApiUrl();
-
+console.log(SOCKET_URL)
 class SocketService {
   constructor() {
     this.socket = null;

@@ -192,8 +192,8 @@ export default function SettingsScreen({ navigation }) {
           <Switch
             value={item.value}
             onValueChange={item.onValueChange}
-            trackColor={{ false: '#D1D5DB', true: '#A78BFA' }}
-            thumbColor={item.value ? '#7C3AED' : '#F3F4F6'}
+            trackColor={{ false: '#D1D5DB', true: 'rgba(22, 8, 50, 0.5)' }}
+            thumbColor={item.value ? '#160832' : '#F3F4F6'}
           />
         </View>
       );

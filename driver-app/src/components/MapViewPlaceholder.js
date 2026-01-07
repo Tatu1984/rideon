@@ -69,7 +69,7 @@ export default function FreeMap() {
       icon: L.divIcon({
         html: \`
           <div class="marker-wrapper">
-            <div class="marker-label">${address}</div>
+            <div class="marker-label">${address.toUpperCase()}</div>
             <div class="marker-pin">📍</div>
           </div>
         \`,

@@ -101,7 +101,7 @@ export default function RegisterScreen({ navigation }) {
           />
 
           <TextInput
-            style={styles.input}
+          style={[styles.input, {color:COLORS.black}]}
             placeholder="Password *"
             placeholderTextColor={COLORS.gray}
             value={formData.password}
@@ -110,7 +110,7 @@ export default function RegisterScreen({ navigation }) {
           />
 
           <TextInput
-            style={styles.input}
+          style={[styles.input, {color:COLORS.black}]}
             placeholder="Confirm Password *"
             placeholderTextColor={COLORS.gray}
             value={formData.confirmPassword}

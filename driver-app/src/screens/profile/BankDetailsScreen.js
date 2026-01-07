@@ -41,9 +41,13 @@ export default function BankDetailsScreen({ navigation }) {
     setSaving(true);
     try {
       const response = await driverAPI.updateBankDetails(bankDetails);
-      if (response.data?.success) { Alert.alert('Success', 'Bank details saved successfully'); setSavedAccount(response.data.data); setShowForm(false); }
+      if (response.data?.success) 
+        { Alert.alert('Success', 'Bank details saved successfully'); setSavedAccount(response.data.data); setShowForm(false); }
       else { Alert.alert('Error', response.data?.message || 'Failed to save bank details'); }
-    } catch (error) { Alert.alert('Error', 'Failed to save bank details'); }
+    } catch (error) { 
+      console.error('Error updating bank details:', error); 
+      Alert.alert('Error', 'Failed to save bank details'); 
+    }
     finally { setSaving(false); }
   };
 
@@ -57,7 +61,7 @@ export default function BankDetailsScreen({ navigation }) {
     ]);
   };
 
-  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#7C3AED" /></View>;
+  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#160832" /></View>;
 
   return (
     <ScrollView style={styles.container}>
@@ -72,7 +76,7 @@ export default function BankDetailsScreen({ navigation }) {
       {savedAccount && !showForm && (
         <View style={styles.savedAccountCard}>
           <View style={styles.savedAccountHeader}>
-            <View style={styles.bankIcon}><Ionicons name="business" size={24} color="#7C3AED" /></View>
+            <View style={styles.bankIcon}><Ionicons name="business" size={24} color="#160832" /></View>
             <View style={styles.savedAccountInfo}>
               <Text style={styles.bankName}>{savedAccount.bankName}</Text>
               <Text style={styles.accountNumber}>****{savedAccount.accountNumber?.slice(-4)}</Text>
@@ -89,7 +93,7 @@ export default function BankDetailsScreen({ navigation }) {
           </View>
           <View style={styles.savedAccountActions}>
             <TouchableOpacity style={styles.editButton} onPress={() => { setBankDetails({ ...savedAccount, accountNumber: '', routingNumber: '' }); setShowForm(true); }}>
-              <Ionicons name="pencil" size={18} color="#7C3AED" /><Text style={styles.editButtonText}>Edit</Text>
+              <Ionicons name="pencil" size={18} color="#160832" /><Text style={styles.editButtonText}>Edit</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
               <Ionicons name="trash-outline" size={18} color="#EF4444" /><Text style={styles.deleteButtonText}>Remove</Text>
@@ -122,7 +126,7 @@ export default function BankDetailsScreen({ navigation }) {
             <View style={styles.optionRow}>
               {ACCOUNT_TYPES.map((type) => (
                 <TouchableOpacity key={type.id} style={[styles.optionButton, bankDetails.accountType === type.id && styles.optionButtonSelected]} onPress={() => handleInputChange('accountType', type.id)}>
-                  <Ionicons name={type.icon} size={20} color={bankDetails.accountType === type.id ? '#7C3AED' : '#6B7280'} />
+                  <Ionicons name={type.icon} size={20} color={bankDetails.accountType === type.id ? '#160832' : '#6B7280'} />
                   <Text style={[styles.optionText, bankDetails.accountType === type.id && styles.optionTextSelected]}>{type.name}</Text>
                 </TouchableOpacity>
               ))}
@@ -132,7 +136,7 @@ export default function BankDetailsScreen({ navigation }) {
             <Text style={styles.label}>Payout Method</Text>
             {PAYOUT_METHODS.map((method) => (
               <TouchableOpacity key={method.id} style={[styles.payoutOption, bankDetails.payoutMethod === method.id && styles.payoutOptionSelected]} onPress={() => handleInputChange('payoutMethod', method.id)}>
-                <View style={styles.payoutIcon}><Ionicons name={method.icon} size={24} color={bankDetails.payoutMethod === method.id ? '#7C3AED' : '#6B7280'} /></View>
+                <View style={styles.payoutIcon}><Ionicons name={method.icon} size={24} color={bankDetails.payoutMethod === method.id ? '#160832' : '#6B7280'} /></View>
                 <View style={styles.payoutInfo}>
                   <Text style={[styles.payoutName, bankDetails.payoutMethod === method.id && styles.payoutNameSelected]}>{method.name}</Text>
                   <Text style={styles.payoutDescription}>{method.description}</Text>
@@ -152,7 +156,7 @@ export default function BankDetailsScreen({ navigation }) {
 
       {savedAccount && !showForm && (
         <TouchableOpacity style={styles.addNewButton} onPress={() => { setBankDetails({ accountHolderName: '', bankName: '', accountNumber: '', routingNumber: '', accountType: 'checking', payoutMethod: 'bank' }); setShowForm(true); }}>
-          <Ionicons name="add-circle-outline" size={20} color="#7C3AED" /><Text style={styles.addNewText}>Add New Bank Account</Text>
+          <Ionicons name="add-circle-outline" size={20} color="#160832" /><Text style={styles.addNewText}>Add New Bank Account</Text>
         </TouchableOpacity>
       )}
       <View style={styles.bottomPadding} />
@@ -181,7 +185,7 @@ const styles = StyleSheet.create({
   detailValue: { fontSize: 14, fontWeight: '500', color: '#1F2937' },
   savedAccountActions: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: '#E5E7EB' },
   editButton: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 14, borderRightWidth: 1, borderRightColor: '#E5E7EB' },
-  editButtonText: { marginLeft: 6, fontSize: 14, fontWeight: '600', color: '#7C3AED' },
+  editButtonText: { marginLeft: 6, fontSize: 14, fontWeight: '600', color: '#160832' },
   deleteButton: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', padding: 14 },
   deleteButtonText: { marginLeft: 6, fontSize: 14, fontWeight: '600', color: '#EF4444' },
   formContainer: { backgroundColor: '#fff', margin: 16, marginTop: 0, padding: 16, borderRadius: 12 },
@@ -191,25 +195,25 @@ const styles = StyleSheet.create({
   input: { backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, padding: 12, fontSize: 16 },
   optionRow: { flexDirection: 'row', gap: 12 },
   optionButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 12, borderWidth: 2, borderColor: '#E5E7EB', borderRadius: 8 },
-  optionButtonSelected: { borderColor: '#7C3AED', backgroundColor: '#F3E8FF' },
+  optionButtonSelected: { borderColor: '#160832', backgroundColor: '#F3E8FF' },
   optionText: { marginLeft: 8, fontSize: 14, fontWeight: '500', color: '#6B7280' },
-  optionTextSelected: { color: '#7C3AED' },
+  optionTextSelected: { color: '#160832' },
   payoutOption: { flexDirection: 'row', alignItems: 'center', padding: 16, borderWidth: 2, borderColor: '#E5E7EB', borderRadius: 12, marginBottom: 12 },
-  payoutOptionSelected: { borderColor: '#7C3AED', backgroundColor: '#F3E8FF' },
+  payoutOptionSelected: { borderColor: '#160832', backgroundColor: '#F3E8FF' },
   payoutIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#F3F4F6', justifyContent: 'center', alignItems: 'center' },
   payoutInfo: { flex: 1, marginLeft: 12 },
   payoutName: { fontSize: 15, fontWeight: '600', color: '#1F2937' },
-  payoutNameSelected: { color: '#7C3AED' },
+  payoutNameSelected: { color: '#160832' },
   payoutDescription: { fontSize: 12, color: '#6B7280', marginTop: 2 },
   radioButton: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: '#D1D5DB', justifyContent: 'center', alignItems: 'center' },
-  radioButtonInner: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#7C3AED' },
+  radioButtonInner: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#160832' },
   buttonRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
   cancelButton: { flex: 1, padding: 14, borderRadius: 8, borderWidth: 1, borderColor: '#E5E7EB', alignItems: 'center' },
   cancelButtonText: { fontSize: 16, fontWeight: '600', color: '#6B7280' },
-  saveButton: { flex: 2, backgroundColor: '#7C3AED', padding: 14, borderRadius: 8, alignItems: 'center' },
+  saveButton: { flex: 2, backgroundColor: '#160832', padding: 14, borderRadius: 8, alignItems: 'center' },
   saveButtonDisabled: { opacity: 0.7 },
   saveButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  addNewButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', margin: 16, marginTop: 0, padding: 14, backgroundColor: '#fff', borderRadius: 12, borderWidth: 2, borderColor: '#7C3AED', borderStyle: 'dashed' },
-  addNewText: { marginLeft: 8, fontSize: 14, fontWeight: '600', color: '#7C3AED' },
+  addNewButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', margin: 16, marginTop: 0, padding: 14, backgroundColor: '#fff', borderRadius: 12, borderWidth: 2, borderColor: '#160832', borderStyle: 'dashed' },
+  addNewText: { marginLeft: 8, fontSize: 14, fontWeight: '600', color: '#160832' },
   bottomPadding: { height: 32 },
 });

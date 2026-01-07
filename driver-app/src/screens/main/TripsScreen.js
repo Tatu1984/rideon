@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
-import { tripAPI } from '../../services/api.service';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl, Image } from 'react-native';
+import { driverAPI, tripAPI } from '../../services/api.service';
 
 export default function TripsScreen({ navigation }) {
   const [trips, setTrips] = useState([]);
@@ -13,7 +13,7 @@ export default function TripsScreen({ navigation }) {
 
   const fetchTrips = async () => {
     try {
-      const response = await tripAPI.getTripHistory();
+      const response = await driverAPI.getTripHistory();
       setTrips(response.data || []);
     } catch (error) {
       console.error('Failed to fetch trips:', error);
@@ -131,7 +131,8 @@ export default function TripsScreen({ navigation }) {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyStateIcon}>🚗</Text>
+     {/* <Text style={styles.emptyStateIcon}>🚗</Text>*/}
+     <Image source={require('../../../assets/cab.png')} style={{width:"100%",height:300,  objectFit:"contain"}}/>
       <Text style={styles.emptyStateTitle}>No trips yet</Text>
       <Text style={styles.emptyStateText}>Your completed trips will appear here</Text>
     </View>
@@ -140,7 +141,7 @@ export default function TripsScreen({ navigation }) {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#7C3AED" />
+        <ActivityIndicator size="large" color="#160832" />
       </View>
     );
   }
@@ -178,7 +179,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   header: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     padding: 24,
     paddingTop: 60,
     paddingBottom: 24,
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
   },
   routeLine: {
     width: 2,
@@ -256,7 +257,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 2,
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
   },
   routeDetails: {
     flex: 1,
@@ -299,17 +300,17 @@ const styles = StyleSheet.create({
   earningsAmount: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#7C3AED',
+    color: '#160832',
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 80,
+    paddingVertical: 0,
   },
   emptyStateIcon: {
     fontSize: 64,
-    marginBottom: 16,
+    marginBottom: 0,
   },
   emptyStateTitle: {
     fontSize: 24,

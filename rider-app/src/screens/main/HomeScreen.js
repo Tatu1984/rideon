@@ -1,47 +1,67 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Modal, ScrollView } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from '../../components/MapViewPlaceholder';
-import { useLocation } from '../../contexts/LocationContext';
-import { useTrip } from '../../contexts/TripContext';
-import { COLORS, VEHICLE_TYPES, INITIAL_REGION } from '../../config/constants';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Modal,
+  ScrollView,
+  Image,
+} from "react-native";
+import { useLocation } from "../../contexts/LocationContext";
+import { useTrip } from "../../contexts/TripContext";
+import { Ionicons,FontAwesome6 } from '@expo/vector-icons';
+import { COLORS, VEHICLE_TYPES } from "../../config/constants";
+import FreeMap from "../../components/MapViewPlaceholder";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
-export default function HomeScreen({ navigation }) {
+const HomeScreen = ({ navigation }) => {
   const { location } = useLocation();
   const { getEstimate, requestTrip, activeTrip } = useTrip();
-
-  const [pickupAddress, setPickupAddress] = useState('');
-  const [dropoffAddress, setDropoffAddress] = useState('');
+  const [pickupAddress, setPickupAddress] = useState("");
+  const [dropoffAddress, setDropoffAddress] = useState("");
   const [showVehicles, setShowVehicles] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [fareEstimate, setFareEstimate] = useState(null);
   const [pickupCoords, setPickupCoords] = useState(null);
   const [dropoffCoords, setDropoffCoords] = useState(null);
 
-  const mapRef = useRef(null);
-
   useEffect(() => {
     if (activeTrip) {
-      navigation.navigate('TripTracking');
+      navigation.navigate("TripTracking");
     }
   }, [activeTrip]);
 
-  const handleSearch = async () => {
-    if (!pickupAddress || !dropoffAddress) {
-      Alert.alert('Error', 'Please enter both pickup and drop-off locations');
-      return;
-    }
+const handleSearch = async () => {
+  if (!pickupAddress || !dropoffAddress) {
+    Alert.alert("Error", "Please enter both pickup and drop-off locations");
+    return;
+  }
 
-    // Mock coordinates for demo (in production, use geocoding)
-    const pickup = location || { latitude: 37.7749, longitude: -122.4194 };
-    const dropoff = {
-      latitude: pickup.latitude + 0.01,
-      longitude: pickup.longitude + 0.01
-    };
+  // ✅ SAFELY extract coordinates
+  const pickup = location?.coords
+    ? {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      }
+    : {
+        latitude: 37.7749,
+        longitude: -122.4194,
+      };
 
-    setPickupCoords(pickup);
-    setDropoffCoords(dropoff);
-    setShowVehicles(true);
+  const dropoff = {
+    latitude: pickup.latitude + 0.01,
+    longitude: pickup.longitude + 0.01,
   };
+
+  setPickupCoords(pickup);
+  setDropoffCoords(dropoff);
+  setShowVehicles(true);
+};
+
 
   const handleVehicleSelect = async (vehicle) => {
     setSelectedVehicle(vehicle);
@@ -54,7 +74,7 @@ export default function HomeScreen({ navigation }) {
 
   const handleConfirmRide = async () => {
     if (!selectedVehicle || !fareEstimate) {
-      Alert.alert('Error', 'Please select a vehicle type');
+      Alert.alert("Error", "Please select a vehicle type");
       return;
     }
 
@@ -70,71 +90,66 @@ export default function HomeScreen({ navigation }) {
     const result = await requestTrip(tripData);
     if (result.success) {
       setShowVehicles(false);
-      Alert.alert('Success', 'Finding a driver for you...', [
-        { text: 'OK', onPress: () => navigation.navigate('TripTracking') }
+      Alert.alert("Success", "Finding a driver for you...", [
+        { text: "OK", onPress: () => navigation.navigate("TripTracking") },
       ]);
     } else {
-      Alert.alert('Error', result.error);
+      Alert.alert("Error", result.error);
     }
   };
-
   return (
-    <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        provider={PROVIDER_GOOGLE}
-        initialRegion={location ? {
-          ...location,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        } : INITIAL_REGION}
-        showsUserLocation
-        showsMyLocationButton
-      >
-        {pickupCoords && (
-          <Marker
-            coordinate={pickupCoords}
-            title="Pickup"
-            pinColor={COLORS.primary}
-          />
-        )}
-        {dropoffCoords && (
-          <Marker
-            coordinate={dropoffCoords}
-            title="Drop-off"
-            pinColor={COLORS.success}
-          />
-        )}
-      </MapView>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar 
+  style="light"
+  backgroundColor={COLORS.primary}
+  translucent={false}
+      />
+<View style={{
+  width: "100%",
+  backgroundColor: COLORS.primary,
+  paddingTop: 10,
+  paddingBottom: 10,
+}}>
+  <Image
+    source={require('../../../assets/full-logo.png')}
+    style={{ width: 120, height: 40, resizeMode: "contain" }}
+  />
+</View>
+      <View style={{paddingHorizontal:10,paddingVertical:10}}>
+             <View style={styles.searchBox}>
+       <View style={{backgroundColor:"#fff", height:'100%', justifyContent:"center",alignItems:"center", borderRightWidth:0.6, borderRightColor:COLORS.primary,paddingHorizontal:8}}>
+       <Ionicons name="location" size={20} color={COLORS.primary}/>
+       </View>
+         <TextInput
+           style={styles.input}
+           placeholder="Pickup location"
+           placeholderTextColor={COLORS.gray}
+           value={pickupAddress}
+           onChangeText={setPickupAddress}
+         />
+       </View>
 
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBox}>
-          <Text style={styles.icon}>📍</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Pickup location"
-            value={pickupAddress}
-            onChangeText={setPickupAddress}
-          />
-        </View>
+       <View style={styles.searchBox}>
+       <View style={{backgroundColor:"#fff", height:'100%', justifyContent:"center",alignItems:"center", borderRightWidth:0.6, borderRightColor:COLORS.primary,paddingHorizontal:8}}>
+       <FontAwesome6 name="location-crosshairs" size={20} color={COLORS.primary}/>
+       </View>
+         <TextInput
+           style={styles.input}
+           placeholder="Where to?"
+           placeholderTextColor={COLORS.gray}
+           value={dropoffAddress}
+           onChangeText={setDropoffAddress}
+         />
+       </View>
 
-        <View style={styles.searchBox}>
-          <Text style={styles.icon}>🎯</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Where to?"
-            value={dropoffAddress}
-            onChangeText={setDropoffAddress}
-          />
-        </View>
-
-        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Text style={styles.searchButtonText}>Search Rides</Text>
-        </TouchableOpacity>
+       <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+         <Text style={styles.searchButtonText}>Search Rides</Text>
+       </TouchableOpacity>
+     </View>
+      <View style={styles.container}>
+        <FreeMap style={styles.map} />
       </View>
-
-      <Modal visible={showVehicles} animationType="slide" transparent>
+            <Modal visible={showVehicles} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
@@ -150,7 +165,8 @@ export default function HomeScreen({ navigation }) {
                   key={vehicle.id}
                   style={[
                     styles.vehicleCard,
-                    selectedVehicle?.id === vehicle.id && styles.selectedVehicle
+                    selectedVehicle?.id === vehicle.id &&
+                      styles.selectedVehicle,
                   ]}
                   onPress={() => handleVehicleSelect(vehicle)}
                 >
@@ -161,8 +177,13 @@ export default function HomeScreen({ navigation }) {
                   </View>
                   <View style={styles.fareInfo}>
                     <Text style={styles.fareAmount}>
-                      ${fareEstimate && selectedVehicle?.id === vehicle.id
-                        ? (fareEstimate.total || fareEstimate.fare || vehicle.basePrice * 5).toFixed(2)
+                      $
+                      {fareEstimate && selectedVehicle?.id === vehicle.id
+                        ? (
+                            fareEstimate.total ||
+                            fareEstimate.fare ||
+                            vehicle.basePrice * 5
+                          ).toFixed(2)
                         : (vehicle.basePrice * 5).toFixed(2)}
                     </Text>
                   </View>
@@ -175,27 +196,41 @@ export default function HomeScreen({ navigation }) {
                 <Text style={styles.breakdownTitle}>Fare Breakdown</Text>
                 <View style={styles.breakdownRow}>
                   <Text style={styles.breakdownLabel}>Base Fare</Text>
-                  <Text style={styles.breakdownValue}>${selectedVehicle.basePrice.toFixed(2)}</Text>
+                  <Text style={styles.breakdownValue}>
+                    ${selectedVehicle.basePrice.toFixed(2)}
+                  </Text>
                 </View>
                 <View style={styles.breakdownRow}>
                   <Text style={styles.breakdownLabel}>Distance (5 km)</Text>
-                  <Text style={styles.breakdownValue}>${(selectedVehicle.basePrice * 2).toFixed(2)}</Text>
+                  <Text style={styles.breakdownValue}>
+                    ${(selectedVehicle.basePrice * 2).toFixed(2)}
+                  </Text>
                 </View>
                 <View style={styles.breakdownRow}>
                   <Text style={styles.breakdownLabel}>Time (10 mins)</Text>
-                  <Text style={styles.breakdownValue}>${(selectedVehicle.basePrice * 1.5).toFixed(2)}</Text>
+                  <Text style={styles.breakdownValue}>
+                    ${(selectedVehicle.basePrice * 1.5).toFixed(2)}
+                  </Text>
                 </View>
                 <View style={[styles.breakdownRow, styles.totalRow]}>
                   <Text style={styles.totalLabel}>Total</Text>
                   <Text style={styles.totalValue}>
-                    ${(fareEstimate?.total || fareEstimate?.fare || selectedVehicle.basePrice * 5).toFixed(2)}
+                    $
+                    {(
+                      fareEstimate?.total ||
+                      fareEstimate?.fare ||
+                      selectedVehicle.basePrice * 5
+                    ).toFixed(2)}
                   </Text>
                 </View>
               </View>
             )}
 
             <TouchableOpacity
-              style={[styles.confirmButton, !selectedVehicle && styles.disabledButton]}
+              style={[
+                styles.confirmButton,
+                !selectedVehicle && styles.disabledButton,
+              ]}
               onPress={handleConfirmRide}
               disabled={!selectedVehicle}
             >
@@ -204,36 +239,38 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   container: {
     flex: 1,
   },
   map: {
     flex: 1,
   },
-  searchContainer: {
-    position: 'absolute',
-    top: 60,
-    left: 20,
-    right: 20,
-  },
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    searchBox: {
+    height:44,
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.white,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    borderRadius: 8,
+    // paddingHorizontal: 16,
+    // paddingVertical: 12,
     marginBottom: 12,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    overflow:"hidden",
+    borderWidth: 0.5,
+    borderColor: COLORS.primary,
   },
   icon: {
     fontSize: 20,
@@ -242,40 +279,42 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
+    border:1,
+    borderColor:COLORS.primary
   },
   searchButton: {
     backgroundColor: COLORS.primary,
     borderRadius: 12,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   searchButtonText: {
     color: COLORS.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
     backgroundColor: COLORS.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 20,
-    maxHeight: '80%',
+    maxHeight: "80%",
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 16,
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.dark,
   },
   closeButton: {
@@ -286,18 +325,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   vehicleCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.light,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: "transparent",
   },
   selectedVehicle: {
     borderColor: COLORS.primary,
-    backgroundColor: '#F3E8FF',
+    backgroundColor: "#F3E8FF",
   },
   vehicleIcon: {
     fontSize: 32,
@@ -308,7 +347,7 @@ const styles = StyleSheet.create({
   },
   vehicleName: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.dark,
     marginBottom: 4,
   },
@@ -317,28 +356,28 @@ const styles = StyleSheet.create({
     color: COLORS.gray,
   },
   fareInfo: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   fareAmount: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.primary,
   },
   fareBreakdown: {
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: "#E5E7EB",
   },
   breakdownTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 12,
     color: COLORS.dark,
   },
   breakdownRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
   breakdownLabel: {
@@ -351,18 +390,18 @@ const styles = StyleSheet.create({
   },
   totalRow: {
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: "#E5E7EB",
     paddingTop: 8,
     marginTop: 8,
   },
   totalLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.dark,
   },
   totalValue: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: COLORS.primary,
   },
   confirmButton: {
@@ -371,7 +410,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     borderRadius: 12,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   disabledButton: {
     backgroundColor: COLORS.gray,
@@ -379,6 +418,8 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: COLORS.white,
     fontSize: 16,
-    fontWeight: '600',
-  },
+    fontWeight: "600",
+  }
 });
+
+export default HomeScreen;

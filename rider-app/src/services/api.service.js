@@ -1,9 +1,10 @@
 import axios from 'axios';
 import Constants from "expo-constants";
 import SecureStorageService from './secureStorage.service';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Production API URL - update this with your actual Vercel backend URL after deployment
-const PRODUCTION_API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://rideon-api.vercel.app';
+// Production API URL - your Vercel backend
+const PRODUCTION_API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://rideon-backend.vercel.app/api';
 
 const inProduction = process.env.NODE_ENV === "production";
 const inExpo = Constants.expoConfig && Constants.expoConfig.hostUri;
@@ -35,9 +36,8 @@ const getApiUrl = () => {
 };
 
 const apiUrl = getApiUrl();
-console.log(apiUrl)
 const api = axios.create({
-  baseURL: apiUrl,
+  baseURL: `https://rideon-backend-green.vercel.app/api`,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -45,17 +45,20 @@ const api = axios.create({
 });
 
 // Request interceptor - Add auth token from secure storage
-api.interceptors.request.use(
-  async (config) => {
-    const token = await SecureStorageService.getAccessToken();
+api.interceptors.request.use(async (config) => {
+  const isAuthRoute =
+    config.url?.includes('/auth/login') ||
+    config.url?.includes('/auth/register');
+
+  if (!isAuthRoute) {
+    const token = await AsyncStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  }
 
+  return config;
+});
 // Response interceptor - Handle errors
 api.interceptors.response.use(
   (response) => response,

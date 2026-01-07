@@ -90,7 +90,7 @@ export default function PayoutHistoryScreen() {
       </View>
 
       {/* Filter Chips */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterContainer}>
+      <View style={styles.filterContainer}>
         {['all', 'completed', 'pending', 'failed'].map((status) => (
           <TouchableOpacity
             key={status}
@@ -102,7 +102,7 @@ export default function PayoutHistoryScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-      </ScrollView>
+      </View>
 
       {/* Payouts List */}
       <ScrollView style={styles.payoutsList}>
@@ -170,13 +170,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   summaryCard: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     margin: 16,
     marginTop: 20,
     borderRadius: 20,
     padding: 24,
     alignItems: 'center',
-    shadowColor: '#7C3AED',
+    shadowColor: '#160832',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -199,6 +199,7 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     paddingHorizontal: 16,
+    flexDirection: 'row',
     marginBottom: 12,
   },
   filterChip: {
@@ -209,10 +210,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
     borderWidth: 1,
     borderColor: '#E5E7EB',
+    height: 40,
   },
   filterChipActive: {
-    backgroundColor: '#7C3AED',
-    borderColor: '#7C3AED',
+    backgroundColor: '#160832',
+    borderColor: '#160832',
   },
   filterChipText: {
     fontSize: 14,

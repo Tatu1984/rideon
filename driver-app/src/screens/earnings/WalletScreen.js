@@ -90,7 +90,7 @@ export default function WalletScreen({ navigation }) {
           </TouchableOpacity>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate('BankDetails')} style={styles.linkButton}>
-          <Ionicons name="card" size={16} color="#7C3AED" />
+          <Ionicons name="card" size={16} color="#160832" />
           <Text style={styles.linkButtonText}>Manage Bank Details</Text>
         </TouchableOpacity>
       </View>
@@ -133,12 +133,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   balanceCard: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     margin: 16,
     marginTop: 20,
     borderRadius: 20,
     padding: 24,
-    shadowColor: '#7C3AED',
+    shadowColor: '#160832',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   withdrawButton: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     paddingHorizontal: 24,
     borderRadius: 12,
     justifyContent: 'center',
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   linkButtonText: {
-    color: '#7C3AED',
+    color: '#160832',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   viewAllText: {
-    color: '#7C3AED',
+    color: '#160832',
     fontSize: 14,
     fontWeight: '600',
   },

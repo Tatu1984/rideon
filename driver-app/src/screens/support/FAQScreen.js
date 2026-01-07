@@ -10,7 +10,7 @@ export default function FAQScreen() {
     {
       category: 'Getting Started',
       icon: 'rocket',
-      color: '#7C3AED',
+      color: '#160832',
       faqs: [
         {
           id: 1,
@@ -205,7 +205,7 @@ export default function FAQScreen() {
 
         {/* Still Need Help */}
         <View style={styles.helpCard}>
-          <Ionicons name="chatbubbles" size={48} color="#7C3AED" />
+          <Ionicons name="chatbubbles" size={48} color="#160832" />
           <Text style={styles.helpTitle}>Still need help?</Text>
           <Text style={styles.helpSubtitle}>Our support team is here 24/7</Text>
           <TouchableOpacity style={styles.contactButton}>
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   answerIconText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#7C3AED',
+    color: '#160832',
   },
   answerText: {
     flex: 1,
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   contactButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,

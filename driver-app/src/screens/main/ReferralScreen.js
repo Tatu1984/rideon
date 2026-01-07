@@ -68,7 +68,7 @@ export default function ReferralScreen({ navigation }) {
 
   const formatDate = (date) => new Date(date).toLocaleDateString();
 
-  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#7C3AED" /></View>;
+  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#160832" /></View>;
 
   const currentTier = getCurrentTier();
   const nextTier = getNextTier();
@@ -104,7 +104,7 @@ export default function ReferralScreen({ navigation }) {
         <View style={styles.codeContainer}>
           <Text style={styles.codeText}>{referralInfo?.code || '------'}</Text>
           <TouchableOpacity style={styles.copyButton} onPress={handleCopyCode}>
-            <Ionicons name="copy-outline" size={20} color="#7C3AED" />
+            <Ionicons name="copy-outline" size={20} color="#160832" />
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
@@ -216,7 +216,7 @@ export default function ReferralScreen({ navigation }) {
         ].map((step, idx) => (
           <View key={idx} style={styles.stepItem}>
             <View style={styles.stepIconContainer}>
-              <Ionicons name={step.icon} size={24} color="#7C3AED" />
+              <Ionicons name={step.icon} size={24} color="#160832" />
               {idx < 3 && <View style={styles.stepLine} />}
             </View>
             <View style={styles.stepContent}>
@@ -234,7 +234,7 @@ export default function ReferralScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F4F6' },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  heroCard: { backgroundColor: '#7C3AED', margin: 16, borderRadius: 16, overflow: 'hidden' },
+  heroCard: { backgroundColor: '#160832', margin: 16, borderRadius: 16, overflow: 'hidden' },
   heroContent: { padding: 20 },
   heroTitle: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
   heroSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 8 },
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   codeContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12 },
   codeText: { fontSize: 28, fontWeight: 'bold', color: '#1F2937', letterSpacing: 4 },
   copyButton: { marginLeft: 12, padding: 8 },
-  shareButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#7C3AED', padding: 14, borderRadius: 12, marginTop: 16, gap: 8 },
+  shareButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#160832', padding: 14, borderRadius: 12, marginTop: 16, gap: 8 },
   shareButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   tierCard: { backgroundColor: '#fff', margin: 16, marginTop: 0, padding: 16, borderRadius: 12 },
   tierHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   tierBonusValue: { fontSize: 20, fontWeight: 'bold', color: '#10B981' },
   tierProgress: { marginTop: 16 },
   progressBar: { height: 8, backgroundColor: '#E5E7EB', borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: '#7C3AED', borderRadius: 4 },
+  progressFill: { height: '100%', backgroundColor: '#160832', borderRadius: 4 },
   progressText: { fontSize: 12, color: '#6B7280', marginTop: 8, textAlign: 'center' },
   tiersList: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#E5E7EB' },
   tierItem: { alignItems: 'center', opacity: 0.5 },
@@ -272,13 +272,13 @@ const styles = StyleSheet.create({
   tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 10 },
   tabActive: { backgroundColor: '#fff' },
   tabText: { fontSize: 14, fontWeight: '600', color: '#6B7280' },
-  tabTextActive: { color: '#7C3AED' },
+  tabTextActive: { color: '#160832' },
   inviteSection: { padding: 16 },
   inviteCard: { backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 12 },
   inviteLabel: { fontSize: 14, fontWeight: '500', color: '#374151', marginBottom: 12 },
   inviteRow: { flexDirection: 'row', gap: 12 },
   inviteInput: { flex: 1, backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, padding: 12, fontSize: 16 },
-  inviteSendButton: { width: 48, height: 48, backgroundColor: '#7C3AED', borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  inviteSendButton: { width: 48, height: 48, backgroundColor: '#160832', borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   inviteSendButtonDisabled: { opacity: 0.7 },
   historySection: { padding: 16 },
   emptyState: { alignItems: 'center', padding: 32, backgroundColor: '#fff', borderRadius: 12 },
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   emptySubtext: { fontSize: 14, color: '#9CA3AF', marginTop: 4 },
   historyCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 16, borderRadius: 12, marginBottom: 12 },
   historyAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#F3E8FF', justifyContent: 'center', alignItems: 'center' },
-  historyAvatarText: { fontSize: 18, fontWeight: '600', color: '#7C3AED' },
+  historyAvatarText: { fontSize: 18, fontWeight: '600', color: '#160832' },
   historyInfo: { flex: 1, marginLeft: 12 },
   historyName: { fontSize: 15, fontWeight: '600', color: '#1F2937' },
   historyDate: { fontSize: 12, color: '#6B7280', marginTop: 2 },

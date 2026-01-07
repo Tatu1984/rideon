@@ -132,7 +132,7 @@ export default function IncentivesScreen({ navigation }) {
                   </View>
                   <ProgressBar
                     progress={incentive.progress / incentive.target}
-                    color="#7C3AED"
+                    color="#160832"
                     style={styles.progressBar}
                   />
                 </View>
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   activeTab: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
   },
   tabText: {
     fontSize: 14,
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
   progressPercentage: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#7C3AED',
+    color: '#160832',
   },
   progressBar: {
     height: 8,
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     marginLeft: 60,
   },
   referralCard: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     borderRadius: 20,
     padding: 24,
     marginBottom: 16,
@@ -382,14 +382,14 @@ const styles = StyleSheet.create({
   referralCode: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#7C3AED',
+    color: '#160832',
     letterSpacing: 2,
     marginBottom: 16,
   },
   shareButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

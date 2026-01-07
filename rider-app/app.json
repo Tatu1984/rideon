@@ -4,7 +4,7 @@
     "slug": "rideon-rider",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -34,7 +34,6 @@
       ]
     },
     "plugins": [
-      "expo-splash-screen",
       [
         "expo-location",
         {
@@ -42,14 +41,13 @@
           "isAndroidBackgroundLocationEnabled": false,
           "isIosBackgroundLocationEnabled": false
         }
-      ],
-      "expo-font"
+      ]
     ],
     "extra": {
       "eas": {
-        "projectId": "47a3095f-3120-4b60-ad2d-d30300aa5ab1"
+        "projectId": "445f1458-6d67-4a9d-bcdd-b049289babdd"
       }
     },
-    "owner": "banku89"
+    "owner": "tatu1984"
   }
 }

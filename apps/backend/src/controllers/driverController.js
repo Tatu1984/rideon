@@ -730,7 +730,8 @@ exports.getVehicles = async (req, res) => {
  */
 exports.addVehicle = async (req, res) => {
   try {
-    const { make, model, year, color, licensePlate, vehicleType, seats, photoUrl } = req.body;
+    console.log(req.body);
+    const { make, model, year, color, licensePlate, vehicleType, seats, photoUrl, vin } = req.body;
 
     const driver = await Driver.findOne({
       where: { userId: req.user.id }
@@ -743,34 +744,57 @@ exports.addVehicle = async (req, res) => {
       });
     }
 
-    // Check if this is the first vehicle
-    const existingVehicles = await Vehicle.count({ where: { driverId: driver.id } });
-    const isActive = existingVehicles === 0;
-
-    const vehicle = await Vehicle.create({
-      driverId: driver.id,
-      make,
-      model,
-      year,
-      color,
-      licensePlate,
-      vehicleType: vehicleType || 'Economy',
-      seats: seats || 4,
-      photoUrl,
-      isActive,
-      isVerified: false
+    // Check if vehicle with this license plate already exists for this driver
+    const existingVehicle = await Vehicle.findOne({
+      where: { 
+        driverId: driver.id,
+        licensePlate: licensePlate.trim()
+      }
     });
 
-    res.json({
+    let vehicle;
+    const vehicleData = {
+      make: make?.trim(),
+      model: model?.trim(),
+      year: parseInt(year),
+      color: color?.trim(),
+      licensePlate: licensePlate.trim(),
+      vehicleType: vehicleType?.toLowerCase() || 'economy',
+      seats: parseInt(seats) || 4,
+      photoUrl: photoUrl?.trim()
+    };
+
+    // Only add VIN if it's not empty
+    if (vin && vin.trim()) {
+      vehicleData.vin = vin.trim();
+    }
+
+    if (existingVehicle) {
+      // Update existing vehicle
+      vehicle = await existingVehicle.update(vehicleData);
+      console.log('Vehicle updated:', vehicle.id);
+    } else {
+      // Create new vehicle
+      vehicle = await Vehicle.create({
+        driverId: driver.id,
+        ...vehicleData
+      });
+      console.log('Vehicle created:', vehicle.id);
+    }
+
+    res.status(201).json({
       success: true,
       data: vehicle,
-      message: 'Vehicle added successfully'
+      message: existingVehicle ? 'Vehicle updated successfully' : 'Vehicle added successfully'
     });
   } catch (error) {
-    console.error('Add vehicle error:', error);
+    console.error('Add/Update vehicle error:', error);
     res.status(500).json({
       success: false,
-      error: { code: 'SERVER_ERROR', message: 'Failed to add vehicle' }
+      error: {
+        code: 'SERVER_ERROR',
+        message: 'Failed to save vehicle'
+      }
     });
   }
 };
@@ -973,7 +997,7 @@ exports.updateBankDetails = async (req, res) => {
     const driver = await Driver.findOne({
       where: { userId: req.user.id }
     });
-
+    console.log(driver);
     if (!driver) {
       return res.status(404).json({
         success: false,

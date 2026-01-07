@@ -242,7 +242,6 @@ export const TripProvider = ({ children }) => {
       }}
     >
       {children}
-      {error && <ErrorModal visible={!!error} message={error} onClose={() => setError(null)} />}
     </TripContext.Provider>
   );
 };

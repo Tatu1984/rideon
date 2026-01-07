@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function RegisterScreen({ navigation }) {
@@ -40,6 +40,10 @@ export default function RegisterScreen({ navigation }) {
   };
 
   return (
+  <KeyboardAvoidingView
+    style={styles.container}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  >
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Create Account</Text>
@@ -111,6 +115,7 @@ export default function RegisterScreen({ navigation }) {
         </TouchableOpacity>
       </View>
     </ScrollView>
+  </KeyboardAvoidingView>
   );
 }
 
@@ -123,7 +128,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 24,
     paddingBottom: 30,
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
   },
   title: {
     fontSize: 28,
@@ -149,7 +154,7 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     height: 50,
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
@@ -167,7 +172,7 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
   loginLink: {
-    color: '#7C3AED',
+    color: '#160832',
     fontWeight: '600',
   },
 });

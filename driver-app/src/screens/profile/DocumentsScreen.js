@@ -85,7 +85,7 @@ export default function DocumentsScreen({ navigation }) {
     return { status: doc.status, label: doc.status.charAt(0).toUpperCase() + doc.status.slice(1) };
   };
 
-  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#7C3AED" /></View>;
+  if (loading) return <View style={styles.loadingContainer}><ActivityIndicator size="large" color="#160832" /></View>;
 
   const approvedCount = DOCUMENT_TYPES.filter(dt => documents[dt.id]?.status === 'approved').length;
 
@@ -112,7 +112,7 @@ export default function DocumentsScreen({ navigation }) {
         return (
           <View key={docType.id} style={styles.documentCard}>
             <View style={styles.documentHeader}>
-              <View style={styles.documentIcon}><Ionicons name={docType.icon} size={24} color="#7C3AED" /></View>
+              <View style={styles.documentIcon}><Ionicons name={docType.icon} size={24} color="#160832" /></View>
               <View style={styles.documentInfo}>
                 <View style={styles.titleRow}>
                   <Text style={styles.documentTitle}>{docType.title}</Text>
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   statsCard: { backgroundColor: '#fff', margin: 16, padding: 20, borderRadius: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
   statItem: { alignItems: 'center', marginBottom: 12 },
-  statValue: { fontSize: 28, fontWeight: 'bold', color: '#7C3AED' },
+  statValue: { fontSize: 28, fontWeight: 'bold', color: '#160832' },
   statLabel: { fontSize: 14, color: '#6B7280', marginTop: 4 },
   progressBar: { height: 8, backgroundColor: '#E5E7EB', borderRadius: 4, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: '#10B981', borderRadius: 4 },
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20 },
   statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
   statusText: { fontSize: 12, fontWeight: '600' },
-  uploadButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#7C3AED', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+  uploadButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#160832', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
   uploadingButton: { opacity: 0.7 },
   uploadButtonText: { color: '#fff', fontSize: 14, fontWeight: '600', marginLeft: 6 },
   bottomPadding: { height: 32 },

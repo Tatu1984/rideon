@@ -86,11 +86,18 @@ export const driverAPI = {
   uploadDocument: (formData) => api.post('/v1/driver/documents', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   deleteDocument: (type) => api.delete(`/v1/driver/documents/${type}`),
   // Vehicle
-  getVehicle: () => api.get('/v1/driver/vehicle'),
-  updateVehicle: (formData) => api.post('/v1/driver/vehicle', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  getVehicle: () => api.get('/v1/driver/vehicles'),
+  updateVehicle: (formData) => {
+  console.log('Sending FormData:', formData);
+  return api.post('/v1/driver/vehicles', formData, { 
+    headers: { 
+      'Content-Type': 'multipart/form-data' 
+    } 
+  });
+  },
   // Bank Details
   getBankDetails: () => api.get('/v1/driver/bank-details'),
-  updateBankDetails: (data) => api.post('/v1/driver/bank-details', data),
+  updateBankDetails: (data) => api.put('/v1/driver/bank-details', data),
   deleteBankDetails: () => api.delete('/v1/driver/bank-details'),
   // Support
   getSupportTickets: () => api.get('/v1/driver/support/tickets'),

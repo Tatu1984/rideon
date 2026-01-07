@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 42,
     fontWeight: 'bold',
-    color: '#7C3AED',
+    color: '#160832',
     marginBottom: 20,
   },
   title: {
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   button: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginButtonText: {
-    color: '#7C3AED',
+    color: '#160832',
     fontSize: 14,
   },
 });

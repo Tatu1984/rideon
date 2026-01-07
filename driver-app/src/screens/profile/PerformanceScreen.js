@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   ratingStatValue: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#7C3AED',
+    color: '#160832',
     marginBottom: 4,
   },
   ratingStatLabel: {
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
   renewButton: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#160832',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
