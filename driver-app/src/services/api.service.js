@@ -45,17 +45,20 @@ const api = axios.create({
 });
 
 // Add token to requests from secure storage
-api.interceptors.request.use(
-  async (config) => {
+api.interceptors.request.use(async (config) => {
+  const isAuthRoute =
+    config.url?.includes('/auth/login') ||
+    config.url?.includes('/auth/register');
+
+  if (!isAuthRoute) {
     const token = await SecureStorageService.getAccessToken();
-    console.log('Token:', token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  }
+
+  return config;
+});
 
 // Response interceptor - Handle errors
 api.interceptors.response.use(
@@ -70,8 +73,8 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  login: (email, password) => api.post('/v1/auth/login', { email, password }),
-  register: (data) => api.post('/v1/auth/register', data),
+  login: (email, password) => api.post('/auth/login', { email, password }),
+  register: (data) => api.post('/auth/register', data),
   getProfile: () => api.get('/v1/auth/profile'),
 };
 
@@ -87,9 +90,10 @@ export const driverAPI = {
   deleteDocument: (type) => api.delete(`/v1/driver/documents/${type}`),
   // Vehicle
   getVehicle: () => api.get('/v1/driver/vehicles'),
+  getRatings: () => api.get('/v1/driver/ratings'),
+  getBadges: () => api.get('/v1/driver/badges'),
   updateVehicle: (formData) => {
-  console.log('Sending FormData:', formData);
-  return api.post('/v1/driver/vehicles', formData, { 
+    return api.post('/v1/driver/vehicles', formData, { 
     headers: { 
       'Content-Type': 'multipart/form-data' 
     } 

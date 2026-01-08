@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDriver } from '../../contexts/DriverContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ProfileScreen({ navigation }) {
   const { user, logout } = useAuth();
@@ -31,44 +32,82 @@ export default function ProfileScreen({ navigation }) {
     );
   };
 
-  const profileSections = [
-    {
-      title: 'Account',
-      items: [
-        { label: 'Documents', icon: '📄', onPress: () => navigation.navigate('Documents') },
-        { label: 'Vehicle Information', icon: '🚗', onPress: () => navigation.navigate('Vehicle') },
-        { label: 'Bank Details', icon: '💳', onPress: () => navigation.navigate('BankDetails') },
-        { label: 'Performance & Compliance', icon: '📊', onPress: () => navigation.navigate('Performance') },
-      ],
-    },
-    {
-      title: 'Earnings',
-      items: [
-        { label: 'Wallet', icon: '💰', onPress: () => navigation.navigate('Wallet') },
-        { label: 'Incentives & Offers', icon: '🎁', onPress: () => navigation.navigate('Incentives') },
-        { label: 'Payout History', icon: '📜', onPress: () => navigation.navigate('PayoutHistory') },
-        { label: 'Referral Program', icon: '👥', onPress: () => navigation.navigate('Referral') },
-      ],
-    },
-    {
-      title: 'Safety & Support',
-      items: [
-        { label: 'Safety Toolkit', icon: '🛡️', onPress: () => navigation.navigate('SafetyToolkit') },
-        { label: 'Report Incident', icon: '⚠️', onPress: () => navigation.navigate('IncidentReport') },
-        { label: 'Support Center', icon: '💬', onPress: () => navigation.navigate('Support') },
-        { label: 'FAQs', icon: '❓', onPress: () => navigation.navigate('FAQ') },
-      ],
-    },
-    {
-      title: 'Settings',
-      items: [
-        { label: 'App Settings', icon: '⚙️', onPress: () => navigation.navigate('Settings') },
-        { label: 'Privacy', icon: '🔒', onPress: () => navigation.navigate('Settings') },
-        { label: 'Language', icon: '🌐', onPress: () => navigation.navigate('Settings') },
-      ],
-    },
-  ];
-
+  // const profileSections = [
+  //   {
+  //     title: 'Account',
+  //     items: [
+  //       { label: 'Documents', icon: '📄', onPress: () => navigation.navigate('Documents') },
+  //       { label: 'Vehicle Information', icon: '🚗', onPress: () => navigation.navigate('Vehicle') },
+  //       { label: 'Bank Details', icon: '💳', onPress: () => navigation.navigate('BankDetails') },
+  //       { label: 'Performance & Compliance', icon: '📊', onPress: () => navigation.navigate('Performance') },
+  //     ],
+  //   },
+  //   {
+  //     title: 'Earnings',
+  //     items: [
+  //       { label: 'Wallet', icon: '💰', onPress: () => navigation.navigate('Wallet') },
+  //       { label: 'Incentives & Offers', icon: '🎁', onPress: () => navigation.navigate('Incentives') },
+  //       { label: 'Payout History', icon: '📜', onPress: () => navigation.navigate('PayoutHistory') },
+  //       { label: 'Referral Program', icon: '👥', onPress: () => navigation.navigate('Referral') },
+  //     ],
+  //   },
+  //   {
+  //     title: 'Safety & Support',
+  //     items: [
+  //       { label: 'Safety Toolkit', icon: '🛡️', onPress: () => navigation.navigate('SafetyToolkit') },
+  //       { label: 'Report Incident', icon: '⚠️', onPress: () => navigation.navigate('IncidentReport') },
+  //       { label: 'Support Center', icon: '💬', onPress: () => navigation.navigate('Support') },
+  //       { label: 'FAQs', icon: '❓', onPress: () => navigation.navigate('FAQ') },
+  //     ],
+  //   },
+  //   {
+  //     title: 'Settings',
+  //     items: [
+  //       { label: 'App Settings', icon: '⚙️', onPress: () => navigation.navigate('Settings') },
+  //       { label: 'Privacy', icon: '🔒', onPress: () => navigation.navigate('Settings') },
+  //       { label: 'Language', icon: '🌐', onPress: () => navigation.navigate('Settings') },
+  //     ],
+  //   },
+  // ];
+const profileSections = [
+  {
+    title: 'Account',
+    items: [
+      { label: 'Documents', icon: 'document-text', onPress: () => navigation.navigate('Documents') },
+      { label: 'Vehicle Information', icon: 'car', onPress: () => navigation.navigate('Vehicle') },
+      { label: 'Bank Details', icon: 'card', onPress: () => navigation.navigate('BankDetails') },
+      { label: 'Performance & Compliance', icon: 'analytics', onPress: () => navigation.navigate('Performance') },
+    ],
+  },
+  {
+    title: 'Earnings',
+    items: [
+      { label: 'Earnings Summary', icon: 'wallet', onPress: () => navigation.navigate('Earnings') },
+      { label: 'Payout History', icon: 'receipt', onPress: () => navigation.navigate('PayoutHistory') },
+      { label: 'Ratings & Feedback', icon: 'star', onPress: () => navigation.navigate('Ratings') },
+    ],
+  },
+  {
+    title: 'Safety & Support',
+    items: [
+      // { label: 'Help Center', icon: 'help-circle', onPress: () => navigation.navigate('Help') },
+      // { label: 'Contact Support', icon: 'chatbubble', onPress: () => navigation.navigate('Support') },
+      // { label: 'Emergency', icon: 'alert', onPress: () => navigation.navigate('Emergency') },
+     { label: 'Safety Toolkit', icon: 'shield-checkmark', onPress: () => navigation.navigate('SafetyToolkit') },
+     { label: 'Report Incident', icon: 'report', onPress: () => navigation.navigate('SafetyToolkit') },
+     { label: 'Support Center', icon: 'chatbubble-outline', onPress: () => navigation.navigate('SafetyToolkit') },
+     { label: 'FAQs', icon: 'help-circle', onPress: () => navigation.navigate('SafetyToolkit') },
+    ],
+  },
+  {
+    title: 'Settings',
+    items: [
+      { label: 'Notifications', icon: 'notifications', onPress: () => navigation.navigate('Notifications') },
+      { label: 'Privacy & Security', icon: 'lock-closed', onPress: () => navigation.navigate('Privacy') },
+      { label: 'About', icon: 'information-circle', onPress: () => navigation.navigate('About') },
+    ],
+  },
+];
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -109,26 +148,34 @@ export default function ProfileScreen({ navigation }) {
         </View>
       </View>
 
-      {profileSections.map((section, sectionIndex) => (
-        <View key={sectionIndex} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          <View style={styles.sectionContent}>
-            {section.items.map((item, itemIndex) => (
-              <TouchableOpacity
-                key={itemIndex}
-                style={styles.menuItem}
-                onPress={item.onPress}
-              >
-                <View style={styles.menuItemLeft}>
-                  <Text style={styles.menuItemIcon}>{item.icon}</Text>
-                  <Text style={styles.menuItemLabel}>{item.label}</Text>
-                </View>
-                <Text style={styles.menuItemArrow}>›</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+{profileSections.map((section, sectionIndex) => (
+  <View key={sectionIndex} style={styles.section}>
+    <Text style={styles.sectionTitle}>{section.title}</Text>
+    {section.items.map((item, itemIndex) => (
+      <TouchableOpacity
+        key={itemIndex}
+        style={styles.menuItem}
+        onPress={item.onPress}
+      >
+        <View style={styles.menuItemLeft}>
+          <Ionicons
+            name={item.icon}
+            size={24}
+            color="#160832"
+            style={styles.menuIcon}
+          />
+          <Text style={styles.menuLabel}>{item.label}</Text>
         </View>
-      ))}
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color="#9CA3AF"
+          style={styles.menuIcon}
+        />
+      </TouchableOpacity>
+    ))}
+  </View>
+))}
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Vehicle Details</Text>
@@ -245,6 +292,14 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  menuIcon: {
+  marginRight: 12,
+},
+menuItemLeft: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: 1,
+},
   statBox: {
     flex: 1,
     alignItems: 'center',

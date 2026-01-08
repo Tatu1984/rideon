@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useDriver } from '../../contexts/DriverContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function EarningsScreen() {
   const { earnings, fetchEarnings } = useDriver();
@@ -17,10 +18,10 @@ export default function EarningsScreen() {
   };
 
   const earningsData = [
-    { label: 'Today', amount: earnings.today || 0, icon: '📅' },
-    { label: 'This Week', amount: earnings.week || 0, icon: '📊' },
-    { label: 'This Month', amount: earnings.month || 0, icon: '📈' },
-    { label: 'Total Earnings', amount: earnings.total || 0, icon: '💰' },
+    { label: 'Today', amount: earnings.today || 0, icon: 'calendar' },
+    { label: 'This Week', amount: earnings.week || 0, icon: 'bar-chart' },
+    { label: 'This Month', amount: earnings.month || 0, icon: 'trending-up' },
+    { label: 'Total Earnings', amount: earnings.total || 0, icon: 'cash' },
   ];
 
   return (
@@ -39,7 +40,13 @@ export default function EarningsScreen() {
         {earningsData.map((item, index) => (
           <View key={index} style={styles.card}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardIcon}>{item.icon}</Text>
+                  <Ionicons
+                   name={item.icon}
+                   size={24}
+                   color="#fff"
+                   style={styles.earningsIcon}
+                 />
+              {/*<Text style={styles.cardIcon}>{item.icon}</Text>*/}
               <Text style={styles.cardLabel}>{item.label}</Text>
             </View>
             <Text style={styles.cardAmount}>${item.amount.toFixed(2)}</Text>
@@ -125,6 +132,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  earningsIcon: {
+  marginRight: 12,
+},
+earningsCardLeft: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  flex: 1,
+},
   cardIcon: {
     fontSize: 24,
     marginRight: 8,

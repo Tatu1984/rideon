@@ -1797,3 +1797,206 @@ exports.cancelTrip = async (req, res) => {
     });
   }
 };
+
+exports.getRatings = async (req, res) => {
+  try {
+    const driver = await Driver.findOne({
+      where: { userId: req.user.id }
+    });
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'DRIVER_NOT_FOUND', message: 'Driver profile not found' }
+      });
+    }
+    // Get all ratings for this driver
+    const ratings = await Rating.findAll({
+      where: { driverId: driver.id, driverRating: { [Op.not]: null } },
+      include: [
+        {
+          model: Trip,
+          as: 'trip',
+          include: [
+            {
+              model: Rider,
+              as: 'rider',
+              include: [{ model: User, as: 'user', attributes: ['firstName', 'lastName'] }]
+            }
+          ]
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+    // Calculate rating statistics
+    const totalRatings = ratings.length;
+    const overallRating = driver.averageRating || 0;
+    
+    // Rating breakdown
+    const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    ratings.forEach(rating => {
+      breakdown[rating.driverRating] = (breakdown[rating.driverRating] || 0) + 1;
+    });
+    // Calculate trend (compare with last month)
+    const lastMonth = new Date();
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    
+    const recentRatings = ratings.filter(r => new Date(r.createdAt) >= lastMonth);
+    const recentAvg = recentRatings.length > 0 
+      ? recentRatings.reduce((sum, r) => sum + r.driverRating, 0) / recentRatings.length 
+      : 0;
+    
+    const olderRatings = ratings.filter(r => new Date(r.createdAt) < lastMonth);
+    const olderAvg = olderRatings.length > 0 
+      ? olderRatings.reduce((sum, r) => sum + r.driverRating, 0) / olderRatings.length 
+      : 0;
+    
+    const trend = recentAvg > olderAvg ? 'up' : recentAvg < olderAvg ? 'down' : 'neutral';
+    const change = Math.abs(recentAvg - olderAvg);
+    // Format recent reviews for display
+    const recentReviews = ratings.slice(0, 10).map(rating => ({
+      id: rating.id,
+      rider: `${rating.trip.rider.user.firstName} ${rating.trip.rider.user.lastName}`,
+      rating: rating.driverRating,
+      comment: rating.driverComment,
+      date: rating.createdAt.toISOString().split('T')[0],
+      tripType: rating.trip.vehicleType
+    }));
+    res.json({
+      success: true,
+      data: {
+        overall: overallRating,
+        totalRatings,
+        breakdown,
+        trend,
+        change,
+        recentReviews
+      }
+    });
+  } catch (error) {
+    console.error('Get driver ratings error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch ratings' }
+    });
+  }
+};
+
+/**
+ * Get driver badges based on driver tags from ratings
+ */
+exports.getBadges = async (req, res) => {
+  try {
+    const driver = await Driver.findOne({
+      where: { userId: req.user.id }
+    });
+
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'DRIVER_NOT_FOUND', message: 'Driver profile not found' }
+      });
+    }
+
+    // Get all ratings with driver tags
+    const ratings = await Rating.findAll({
+      where: { 
+        driverId: driver.id, 
+        driverTags: { [Op.not]: null } 
+      },
+      attributes: ['driverTags']
+    });
+
+    // Count all tags
+    const tagCounts = {};
+    ratings.forEach(rating => {
+      if (rating.driverTags && Array.isArray(rating.driverTags)) {
+        rating.driverTags.forEach(tag => {
+          tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+      }
+    });
+
+    // Define badge configurations
+    const badgeConfigs = [
+      {
+        name: 'Clean Car Champion',
+        icon: 'sparkles',
+        color: '#10B981',
+        tags: ['clean-car', 'spotless', 'tidy', 'clean-vehicle'],
+        target: 10,
+        description: 'Received compliments for car cleanliness'
+      },
+      {
+        name: 'Smooth Rider',
+        icon: 'speedometer',
+        color: '#3B82F6',
+        tags: ['smooth-drive', 'comfortable', 'smooth-ride'],
+        target: 15,
+        description: 'Praised for smooth driving'
+      },
+      {
+        name: 'Conversation Master',
+        icon: 'chatbubbles',
+        color: '#F59E0B',
+        tags: ['friendly', 'talkative', 'good-conversation', 'chatty'],
+        target: 8,
+        description: 'Great conversation skills'
+      },
+      {
+        name: 'Punctuality Pro',
+        icon: 'time',
+        color: '#8B5CF6',
+        tags: ['on-time', 'punctual', 'early', 'prompt'],
+        target: 20,
+        description: 'Always on time for pickups'
+      },
+      {
+        name: 'Route Expert',
+        icon: 'map',
+        color: '#EF4444',
+        tags: ['good-route', 'fast-route', 'navigation', 'efficient'],
+        target: 12,
+        description: 'Knows the best routes'
+      },
+      {
+        name: 'Safety First',
+        icon: 'shield-checkmark',
+        color: '#06B6D4',
+        tags: ['safe', 'careful', 'defensive', 'safety-conscious'],
+        target: 25,
+        description: 'Prioritizes passenger safety'
+      }
+    ];
+
+    // Calculate badge progress
+    const badges = badgeConfigs.map(config => {
+      const count = config.tags.reduce((sum, tag) => sum + (tagCounts[tag] || 0), 0);
+      const earned = count >= config.target;
+      
+      return {
+        id: config.name.toLowerCase().replace(/\s+/g, '-'),
+        name: config.name,
+        icon: config.icon,
+        color: config.color,
+        count,
+        description: earned 
+          ? `Earned with ${count} mentions` 
+          : `Need ${config.target - count} more mentions`,
+        earned,
+        progress: Math.min(count, config.target),
+        target: config.target
+      };
+    });
+
+    res.json({
+      success: true,
+      data: badges
+    });
+  } catch (error) {
+    console.error('Get driver badges error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Failed to fetch badges' }
+    });
+  }
+};

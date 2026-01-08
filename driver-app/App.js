@@ -20,7 +20,6 @@ export default function App() {
           <LocationProvider>
             <NavigationContainer>
               <AppNavigator />
-              <StatusBar style="auto" />
             </NavigationContainer>
           </LocationProvider>
         </DriverProvider>

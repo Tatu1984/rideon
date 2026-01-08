@@ -29,7 +29,7 @@ export default function LoginScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.header}>
-        <Image source={require('../../../assets/full-logo.png')} style={{width:300, objectFit:"contain"}}/>
+        <Image source={require('../../../assets/full-icon.png')} style={{width:300, height:150, objectFit:"contain"}}/>
       </View>
 
       <View style={styles.form}>

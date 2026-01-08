@@ -196,5 +196,15 @@ router.post('/trips/:tripId/cancel',
   validate,
   driverController.cancelTrip
 );
+// Get driver ratings
+router.get('/ratings',
+  validate,
+  driverController.getRatings
+);
+// Get driver badges
+router.get('/badges',
+  validate,
+  driverController.getBadges
+);
 
 module.exports = router;

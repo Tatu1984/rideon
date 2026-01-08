@@ -15,10 +15,8 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       const token = await SecureStorageService.getAccessToken();
-      console.log('Token:', token);
       if (token) {
         const response = await authAPI.getProfile();
-        console.log('Profile response:', response.data);
         const userData = response.data.data || response.data;
         setUser(userData);
         await SecureStorageService.setUserData(userData);

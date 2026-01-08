@@ -132,7 +132,7 @@ export default function TripsScreen({ navigation }) {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
      {/* <Text style={styles.emptyStateIcon}>🚗</Text>*/}
-     <Image source={require('../../../assets/cab.png')} style={{width:"100%",height:300,  objectFit:"contain"}}/>
+     <Image source={require('../../../assets/cab.png')} style={{width:"100%",height:400,  objectFit:"contain"}}/>
       <Text style={styles.emptyStateTitle}>No trips yet</Text>
       <Text style={styles.emptyStateText}>Your completed trips will appear here</Text>
     </View>

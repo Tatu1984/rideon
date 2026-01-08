@@ -122,7 +122,7 @@ export const startLocationTracking = async (callback, options = {}) => {
       foregroundService: {
         notificationTitle: options.notificationTitle || 'RideOn Driver',
         notificationBody: options.notificationBody || 'Tracking your location for nearby ride requests',
-        notificationColor: '#7C3AED',
+        notificationColor: '#160832',
       },
       pausesUpdatesAutomatically: false,
       activityType: Location.ActivityType.AutomotiveNavigation,

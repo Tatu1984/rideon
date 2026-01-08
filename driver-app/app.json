@@ -4,12 +4,12 @@
     "slug": "rideon-driver",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#7C3AED"
+      "backgroundColor": "#160832"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -22,8 +22,8 @@
       "package": "com.rideon.driver",
       "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#7C3AED"
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#160832"
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
@@ -48,7 +48,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#7C3AED"
+          "color": "#160832"
         }
       ]
     ]

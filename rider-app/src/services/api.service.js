@@ -51,7 +51,7 @@ api.interceptors.request.use(async (config) => {
     config.url?.includes('/auth/register');
 
   if (!isAuthRoute) {
-    const token = await AsyncStorage.getItem("token");
+    const token = await SecureStorageService.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

@@ -25,7 +25,7 @@ export default function RegisterScreen({ navigation }) {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
-
+    console.log(formData)
     setLoading(true);
     const result = await register(formData);
     setLoading(false);

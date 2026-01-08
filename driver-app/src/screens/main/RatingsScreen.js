@@ -1,127 +1,196 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ProgressBar } from 'react-native-paper';
+import { driverAPI } from '../../services/api.service';
 
 export default function RatingsScreen() {
   const [selectedTab, setSelectedTab] = useState('overview'); // overview, reviews, badges
+  const [loading, setLoading] = useState(true);
+  const [ratingStats, setRatingStats] = useState({
+    overall: 0,
+    totalRatings: 0,
+    breakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+    trend: 'neutral',
+    change: 0,
+  });
+  const [recentReviews, setRecentReviews] = useState([]);
+  // const ratingStats = {
+  //   overall: 4.8,
+  //   totalRatings: 487,
+  //   breakdown: {
+  //     5: 387,
+  //     4: 75,
+  //     3: 18,
+  //     2: 5,
+  //     1: 2,
+  //   },
+  //   trend: 'up', // up, down, neutral
+  //   change: 0.2, // Change from last month
+  // };
 
-  const ratingStats = {
-    overall: 4.8,
-    totalRatings: 487,
-    breakdown: {
-      5: 387,
-      4: 75,
-      3: 18,
-      2: 5,
-      1: 2,
-    },
-    trend: 'up', // up, down, neutral
-    change: 0.2, // Change from last month
+  // const recentReviews = [
+  //   {
+  //     id: 1,
+  //     rider: 'Sarah Johnson',
+  //     rating: 5,
+  //     comment: 'Excellent driver! Very professional and friendly. Car was clean and comfortable.',
+  //     date: '2025-12-06',
+  //     tripType: 'Standard',
+  //   },
+  //   {
+  //     id: 2,
+  //     rider: 'Michael Chen',
+  //     rating: 5,
+  //     comment: 'Great service, arrived on time and took the best route.',
+  //     date: '2025-12-05',
+  //     tripType: 'Premium',
+  //   },
+  //   {
+  //     id: 3,
+  //     rider: 'Emma Wilson',
+  //     rating: 4,
+  //     comment: 'Good ride, driver was quiet which I appreciated.',
+  //     date: '2025-12-04',
+  //     tripType: 'Standard',
+  //   },
+  //   {
+  //     id: 4,
+  //     rider: 'David Brown',
+  //     rating: 5,
+  //     comment: 'Very safe driver, followed all traffic rules. Highly recommend!',
+  //     date: '2025-12-03',
+  //     tripType: 'XL',
+  //   },
+  //   {
+  //     id: 5,
+  //     rider: 'Lisa Martinez',
+  //     rating: 3,
+  //     comment: 'Ride was okay, but took a longer route than expected.',
+  //     date: '2025-12-02',
+  //     tripType: 'Standard',
+  //   },
+  // ];
+
+const [badges, setBadges] = useState([
+  {
+    id: 1,
+    name: 'Clean Car Champion',
+    icon: 'sparkles',
+    color: '#10B981',
+    count: 150,
+    description: 'Received 150 compliments for car cleanliness',
+    earned: true,
+    target: 10,
+  },
+  {
+    id: 2,
+    name: 'Smooth Rider',
+    icon: 'speedometer',
+    color: '#3B82F6',
+    count: 200,
+    description: 'Praised for smooth driving 200 times',
+    earned: true,
+    target: 15,
+  },
+  {
+    id: 3,
+    name: 'Conversation Master',
+    icon: 'chatbubbles',
+    color: '#F59E0B',
+    count: 75,
+    description: 'Great conversation skills mentioned 75 times',
+    earned: true,
+    target: 8,
+  },
+  {
+    id: 4,
+    name: 'Punctuality Pro',
+    icon: 'time',
+    color: '#8B5CF6',
+    count: 300,
+    description: 'Always on time - 300 mentions',
+    earned: true,
+    target: 20,
+  },
+  {
+    id: 5,
+    name: 'Route Expert',
+    icon: 'map',
+    color: '#EF4444',
+    count: 120,
+    description: 'Knows the best routes - 120 compliments',
+    earned: true,
+    target: 12,
+  },
+  {
+    id: 6,
+    name: 'Safety First',
+    icon: 'shield-checkmark',
+    color: '#06B6D4',
+    count: 45,
+    description: 'Need 5 more mentions for safety',
+    earned: false,
+    progress: 45,
+    target: 50,
+  },
+]);
+
+  useEffect(() => {
+    fetchRatings();
+    fetchBadges();
+  }, []);
+  const fetchRatings = async () => {
+    try {
+      const response = await driverAPI.getRatings();
+      if (response.success) {
+        setRatingStats(response.data);
+        setRecentReviews(response.data.recentReviews || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch ratings:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+    const fetchBadges = async () => {
+    try {
+      const response = await driverAPI.getBadges(); // your route
+      console.log(response.data);
+      const data = response.data;
 
-  const recentReviews = [
-    {
-      id: 1,
-      rider: 'Sarah Johnson',
-      rating: 5,
-      comment: 'Excellent driver! Very professional and friendly. Car was clean and comfortable.',
-      date: '2025-12-06',
-      tripType: 'Standard',
-    },
-    {
-      id: 2,
-      rider: 'Michael Chen',
-      rating: 5,
-      comment: 'Great service, arrived on time and took the best route.',
-      date: '2025-12-05',
-      tripType: 'Premium',
-    },
-    {
-      id: 3,
-      rider: 'Emma Wilson',
-      rating: 4,
-      comment: 'Good ride, driver was quiet which I appreciated.',
-      date: '2025-12-04',
-      tripType: 'Standard',
-    },
-    {
-      id: 4,
-      rider: 'David Brown',
-      rating: 5,
-      comment: 'Very safe driver, followed all traffic rules. Highly recommend!',
-      date: '2025-12-03',
-      tripType: 'XL',
-    },
-    {
-      id: 5,
-      rider: 'Lisa Martinez',
-      rating: 3,
-      comment: 'Ride was okay, but took a longer route than expected.',
-      date: '2025-12-02',
-      tripType: 'Standard',
-    },
-  ];
-
-  const badges = [
-    {
-      id: 1,
-      name: 'Clean Car Champion',
-      icon: 'sparkles',
-      color: '#10B981',
-      count: 150,
-      description: 'Received 150 compliments for car cleanliness',
-      earned: true,
-    },
-    {
-      id: 2,
-      name: 'Smooth Rider',
-      icon: 'speedometer',
-      color: '#3B82F6',
-      count: 200,
-      description: 'Praised for smooth driving 200 times',
-      earned: true,
-    },
-    {
-      id: 3,
-      name: 'Conversation Master',
-      icon: 'chatbubbles',
-      color: '#F59E0B',
-      count: 75,
-      description: 'Great conversation skills mentioned 75 times',
-      earned: true,
-    },
-    {
-      id: 4,
-      name: 'Punctuality Pro',
-      icon: 'time',
-      color: '#8B5CF6',
-      count: 300,
-      description: 'Always on time - 300 mentions',
-      earned: true,
-    },
-    {
-      id: 5,
-      name: 'Route Expert',
-      icon: 'map',
-      color: '#EF4444',
-      count: 120,
-      description: 'Knows the best routes - 120 compliments',
-      earned: true,
-    },
-    {
-      id: 6,
-      name: 'Safety First',
-      icon: 'shield-checkmark',
-      color: '#06B6D4',
-      count: 45,
-      description: 'Need 5 more mentions for safety',
+      if (data.success && Array.isArray(data.data)) {
+        if (data.data.length === 0) {
+          // API returned []
+          resetBadgesToZero();
+        } else {
+          setBadges(data.data);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching badges:", error);
+      resetBadgesToZero();
+    }
+  };
+  const resetBadgesToZero = () => {
+  setBadges(prev =>
+    prev.map(badge => ({
+      ...badge,
+      count: 0,
+      progress: 0,
       earned: false,
-      progress: 45,
-      target: 50,
-    },
-  ];
+      description: `Need ${badge.target} more mentions`
+    }))
+  );
+};
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#160832" />
+      </View>
+    );
+  }
   const getTotalRatings = () => {
     return Object.values(ratingStats.breakdown).reduce((a, b) => a + b, 0);
   };
@@ -211,12 +280,12 @@ export default function RatingsScreen() {
                 <View key={rating} style={styles.breakdownRow}>
                   <Text style={styles.breakdownLabel}>{rating} ⭐</Text>
                   <ProgressBar
-                    progress={ratingStats.breakdown[rating] / getTotalRatings()}
+                    progress={ratingStats?.breakdown[rating] / getTotalRatings()}
                     color="#F59E0B"
                     style={styles.breakdownBar}
                   />
                   <Text style={styles.breakdownCount}>
-                    {getRatingPercentage(ratingStats.breakdown[rating])}%
+                    { ratingStats?.breakdown[rating] && getRatingPercentage(ratingStats?.breakdown[rating])}%
                   </Text>
                 </View>
               ))}
@@ -248,41 +317,53 @@ export default function RatingsScreen() {
           </>
         )}
 
-        {selectedTab === 'reviews' && (
-          <>
-            {recentReviews.map((review) => (
-              <View key={review.id} style={styles.reviewCard}>
-                <View style={styles.reviewHeader}>
-                  <View style={styles.reviewerAvatar}>
-                    <Text style={styles.reviewerInitial}>{review.rider.charAt(0)}</Text>
-                  </View>
-                  <View style={styles.reviewerInfo}>
-                    <Text style={styles.reviewerName}>{review.rider}</Text>
-                    <View style={styles.reviewStars}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Ionicons
-                          key={star}
-                          name={star <= review.rating ? 'star' : 'star-outline'}
-                          size={16}
-                          color="#F59E0B"
-                        />
-                      ))}
-                    </View>
-                  </View>
-                  <View style={styles.reviewMeta}>
-                    <Text style={styles.reviewDate}>{review.date}</Text>
-                    <View style={styles.tripTypeBadge}>
-                      <Text style={styles.tripTypeText}>{review.tripType}</Text>
-                    </View>
-                  </View>
-                </View>
-                {review.comment && (
-                  <Text style={styles.reviewComment}>{review.comment}</Text>
-                )}
+{selectedTab === 'reviews' && (
+  <>
+    {recentReviews.length > 0 ? (
+      recentReviews.map((review) => (
+        <View key={review.id} style={styles.reviewCard}>
+          <View style={styles.reviewHeader}>
+            <View style={styles.reviewerAvatar}>
+              <Text style={styles.reviewerInitial}>{review.rider.charAt(0)}</Text>
+            </View>
+            <View style={styles.reviewerInfo}>
+              <Text style={styles.reviewerName}>{review.rider}</Text>
+              <View style={styles.reviewStars}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Ionicons
+                    key={star}
+                    name={star <= review.rating ? 'star' : 'star-outline'}
+                    size={16}
+                    color="#F59E0B"
+                  />
+                ))}
               </View>
-            ))}
-          </>
-        )}
+            </View>
+            <View style={styles.reviewMeta}>
+              <Text style={styles.reviewDate}>{review.date}</Text>
+              <View style={styles.tripTypeBadge}>
+                <Text style={styles.tripTypeText}>{review.tripType}</Text>
+              </View>
+            </View>
+          </View>
+          {review.comment && (
+            <Text style={styles.reviewComment}>{review.comment}</Text>
+          )}
+        </View>
+      ))
+    ) : (
+      <View style={styles.noReviewsContainer}>
+        <Image 
+          source={require('../../../assets/no-reviews.png')} 
+          style={styles.noReviewsImage}
+          resizeMode="contain"
+        />
+        <Text style={styles.noReviewsText}>No reviews yet</Text>
+        <Text style={styles.noReviewsSubtext}>Your rider reviews will appear here</Text>
+      </View>
+    )}
+  </>
+)}
 
         {selectedTab === 'badges' && (
           <>
@@ -315,7 +396,9 @@ export default function RatingsScreen() {
                   >
                     {badge.name}
                   </Text>
-                  <Text style={styles.badgeDescription}>{badge.description}</Text>
+                  <Text style={styles.badgeDescription}>
+                    {badge.description || 'No description available'}
+                  </Text>
                   {!badge.earned && badge.progress && (
                     <View style={styles.badgeProgress}>
                       <ProgressBar
@@ -372,6 +455,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
   },
+  noReviewsContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingVertical: 60,
+},
+noReviewsImage: {
+  width: 300,
+  height: 300,
+  marginBottom: 24,
+  opacity: 0.7,
+},
+noReviewsText: {
+  fontSize: 20,
+  fontWeight: 'bold',
+  color: '#6B7280',
+  marginBottom: 8,
+},
+noReviewsSubtext: {
+  fontSize: 14,
+  color: '#9CA3AF',
+  textAlign: 'center',
+},
   activeTab: {
     backgroundColor: '#160832',
   },
